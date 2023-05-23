@@ -10,12 +10,8 @@ use DbManager\CoreBundle\Interfaces\TempDatabaseInterface;
 
 class EngineProcessor implements EngineInterface
 {
-
-    public string $test = '123';
-
     public function execute(RuleManagerInteface $rules, TempDatabaseInterface $tempDatabase)
     {
-        exit('qwe');
         // TODO: Implement execute() method.
     }
 }

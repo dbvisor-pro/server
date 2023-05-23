@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
     name: 'app:db:process',
     description: 'Start processing database by database id and temporary database name',
 )]
-class CreateBackupCommand extends Command
+class AppProcessCommand extends Command
 {
     private DatabaseProcessor $databaseProcessor;
 
@@ -39,8 +39,6 @@ class CreateBackupCommand extends Command
             $input->getArgument('database_uid'),
             $input->getArgument('db_name')
         );
-
-        $output->write('project1');
 
         return Command::SUCCESS;
     }

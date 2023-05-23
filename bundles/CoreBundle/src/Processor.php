@@ -8,7 +8,6 @@ use DbManager\CoreBundle\Interfaces\EngineInterface;
 use DbManager\CoreBundle\Interfaces\RuleManagerInteface;
 use DbManager\CoreBundle\Interfaces\TempDatabaseInterface;
 use DbManager\CoreBundle\Exception\NoSuchEngineException;
-use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class Processor
