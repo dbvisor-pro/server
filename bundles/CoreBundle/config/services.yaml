@@ -4,3 +4,5 @@ services:
       $container: '@service_container'
   DbManager\CoreBundle\Service\TempDatabase:
   DbManager\CoreBundle\Service\RuleManager:
+  DbManager\CoreBundle\DataProcessor\DataProcessorFactory:
+  DbManager\CoreBundle\DataProcessor\DataProcessorFactoryInterface: '@DbManager\CoreBundle\DataProcessor\DataProcessorFactory'
