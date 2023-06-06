@@ -6,7 +6,6 @@ namespace DbManager\CoreBundle\DataProcessor;
 
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\DB;
 
 final class TableService implements DataProcessorInterface
 {

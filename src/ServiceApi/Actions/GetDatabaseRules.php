@@ -40,13 +40,25 @@ class GetDatabaseRules extends AppService
                 'adminnotification_inbox' => [
                     'method' => 'truncate',
                 ],
+                'admin_user' => [
+                    'method' => 'truncate|fake',
+                    'fake_data' => [
+                        'email' => 'admin@gmail.com',
+                        'username' => 'admin',
+                        'password' => 'admin'
+                    ]
+                ],
                 'customer_entity' => [
                     'columns' => [
+//                        'email' => [
+//                            'method' => 'update',
+//                            'value'  => "CONCAT ('test_', email)",
+//                            'where'  => "email NOT LIKE ('%@overdose.digital')",
+//                        ],
                         'email' => [
-                            'method' => 'update',
-                            'value'  => "CONCAT ('test_', email)",
+                            'method' => 'fake',
                             'where'  => "email NOT LIKE ('%@overdose.digital')",
-                        ],
+                        ],g
                         'firstname' => [
                             'method' => 'update',
                             'value'  => 'null',

@@ -8,6 +8,8 @@ use DbManager\CoreBundle\DataProcessor\DataProcessorFactoryInterface;
 use DbManager\CoreBundle\DataProcessor\DataProcessorInterface;
 use DbManager\CoreBundle\Interfaces\EngineInterface;
 use Exception;
+use Faker\Factory;
+use Faker\Generator;
 use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Connection;
 
@@ -16,6 +18,16 @@ use Illuminate\Database\Connection;
  */
 abstract class AbstractEngineProcessor implements EngineInterface
 {
+    /**
+     * @var array
+     */
+    protected array $generated = [];
+
+    /**
+     * @var null|Generator
+     */
+    protected ?Generator $faker = null;
+
     /**
      * @var Connection
      */
@@ -46,6 +58,7 @@ abstract class AbstractEngineProcessor implements EngineInterface
         $capsule->addConnection([
             'driver'    => static::DRIVER_ENGINE,
             'host'      => env('DATABASE_HOST'),
+            'port'      => env('DATABASE_PORT'),
             'database'  => $dbName,
             'username'  => env('DATABASE_USER'),
             'password'  => env('DATABASE_PASSWD'),
@@ -57,12 +70,13 @@ abstract class AbstractEngineProcessor implements EngineInterface
     /**
      * Processing method
      *
+     * @param string      $table
      * @param array       $rule
      * @param string|null $column
      *
      * @return void
      */
-    protected function processMethod(array $rule, string $column = null): void
+    protected function processMethod(string $table, array $rule, string $column = null): void
     {
         try {
             $this->validateRule($rule, $column);
@@ -75,7 +89,7 @@ abstract class AbstractEngineProcessor implements EngineInterface
                     $this->update($rule, $column);
                     break;
                 case 'fake':
-                    $this->fake($rule);
+                    $this->fake($table, $rule, $column);
                     break;
             }
         } catch (Exception $e) {
@@ -83,29 +97,40 @@ abstract class AbstractEngineProcessor implements EngineInterface
         }
     }
 
-    protected function truncate(array $rule): void
+    /**
+     * Generate fake data
+     *
+     * @param string $column
+     * @param array  $options
+     *
+     * @return string
+     */
+    protected function generateFake(string $column, array $options): string
     {
-        if (isset($rule['where'])) {
-            $this->dataProcessor->delete($rule['where']);
-
-            return;
+        $value = $this->getFakerInstance()->{$column}(...$options);
+        if (isset($this->generated[$column]) && in_array($value, $this->generated[$column])) {
+            return $this->generateFake($column, $options);
         }
-        $this->dataProcessor->truncate();
+
+        $this->generated[$column][] = $value;
+
+        return $value;
     }
 
-    protected function update(array $rule, string $column): void
+    /**
+     * Get Faker generator
+     *
+     * @return Generator
+     */
+    protected function getFakerInstance(): Generator
     {
-        if (isset($rule['where'])) {
-            $this->dataProcessor->update($column, $rule['value'], $rule['where']);
-
-            return;
+        if ($this->faker) {
+            return $this->faker;
         }
-        $this->dataProcessor->update($column, $rule['value']);
-    }
 
-    protected function fake(array $rule): void
-    {
+        $this->faker = Factory::create();
 
+        return $this->faker;
     }
 
     /**
