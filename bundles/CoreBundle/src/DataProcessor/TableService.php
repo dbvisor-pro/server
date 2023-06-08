@@ -98,5 +98,4 @@ final class TableService implements DataProcessorInterface
 
         return $query;
     }
-
 }

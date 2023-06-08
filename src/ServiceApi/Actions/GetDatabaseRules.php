@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\ServiceApi\Actions;
 
 use App\ServiceApi\AppService;
-use DbManager\CoreBundle\Service\RuleManager;
+use Exception;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -15,9 +15,9 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 final class GetDatabaseRules extends AppService
 {
     /**
-     * @param string $databaseUid
+     * Get array with rules data
      *
-     * @return RuleManager ([
+     * Expected return value is: [
      *      'engine' => 'mysql',
      *      'tables' => array[
      *          '<table>' => [
@@ -26,64 +26,56 @@ final class GetDatabaseRules extends AppService
      *              ]
      *          ]
      *      ];
-     * ])
+     * ]
+     *
+     * @param string $databaseUid
+     *
+     * @return array
+     *
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws Exception
      */
-    public function get(string $databaseUid): RuleManager
+    public function get(string $databaseUid): array
     {
         $result = $this->getRules($databaseUid);
+        return [
+            'engine' => $this->formEngineData($result),
+            'rules'  => $this->formRulesData($result),
+        ];
+    }
 
-        return new RuleManager([
-            'engine' => $result['engine'],
-            'rules'  => $result['databaseRules']['rule']
-        ]);
+    /**
+     * @param array $data
+     *
+     * @return string
+     *
+     * @throws Exception
+     */
+    protected function formEngineData(array $data): string
+    {
+        if (!isset($data['engine'])) {
+            throw new Exception('An information about DB engine was not found...');
+        }
+        return (string)$data['engine']['code'];
+    }
 
-        return new RuleManager([
-            'engine' => 'mysql',
-            'rules'  => [
-                'sales_order' => [
-                    'method' => 'truncate',
-                    'where' => 'entity_id != 67',
-                ],
-                'adminnotification_inbox' => [
-                    'method' => 'truncate',
-                ],
-                'admin_user' => [
-                    'method' => 'truncate|fake',
-                    'fake_data' => [
-                        'email' => 'admin@gmail.com',
-                        'username' => 'admin',
-                        'password' => 'admin'
-                    ]
-                ],
-                'customer_entity' => [
-                    'columns' => [
-//                        'email' => [
-//                            'method' => 'update',
-//                            'value'  => "CONCAT ('test_', email)",
-//                            'where'  => "email NOT LIKE ('%@overdose.digital')",
-//                        ],
-                        'email' => [
-                            'method' => 'fake',
-                            'where'  => "email NOT LIKE ('%@overdose.digital')",
-                        ],
-                        'firstname' => [
-                            'method' => 'update',
-                            'value'  => 'null',
-                            'where'  => "created_in LIKE '%NZ Store%' OR lastname = 'Miles'",
-                        ],
-                    ],
-                ],
-                'customer_entity_varchar' => [
-                    'columns' => [
-                        'value' => [
-                            'method' => 'update',
-                            'value'  => "md5('Admin123')",
-                            'where'  => "attribute_id IN (SELECT attribute_id FROM eav_attribute WHERE attribute_code = 'password_hash' AND entity_type_id = 1)"
-                        ],
-                    ],
-                ],
-            ],
-        ]);
+    /**
+     * @param array $data
+     *
+     * @return array
+     *
+     * @throws Exception
+     */
+    protected function formRulesData(array $data): array
+    {
+        if (!isset($data['databaseRules'])) {
+            throw new Exception('An information about DB processing rules was not found...');
+        }
+        return $data['databaseRules']['rule'];
     }
 
     /**

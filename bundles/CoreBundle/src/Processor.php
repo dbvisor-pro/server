@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace DbManager\CoreBundle;
 
+use DbManager\CoreBundle\Enums\DatabaseEngineEnum;
+use DbManager\CoreBundle\Exception\EngineNotSupportedException;
+use DbManager\CoreBundle\Interfaces\DbDataManagerInterface;
 use DbManager\CoreBundle\Interfaces\EngineInterface;
-use DbManager\CoreBundle\Interfaces\RuleManagerInterface;
-use DbManager\CoreBundle\Interfaces\TempDatabaseInterface;
 use DbManager\CoreBundle\Exception\NoSuchEngineException;
+use Exception;
 use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -21,17 +23,19 @@ class Processor
     }
 
     /**
-     * @param RuleManagerInterface  $ruleManagerInterface
-     * @param TempDatabaseInterface $tempDatabase
+     * @param DbDataManagerInterface $dbDataManager
      *
      * @return void
      *
      * @throws NoSuchEngineException
+     * @throws Exception
      */
-    public function execute(RuleManagerInterface $ruleManagerInterface, TempDatabaseInterface $tempDatabase): void
+    public function execute(DbDataManagerInterface $dbDataManager): void
     {
-        $processor = $this->getEngine($ruleManagerInterface->getEngine());
-        $processor->execute($ruleManagerInterface, $tempDatabase);
+        $this->validate($dbDataManager);
+
+        $processor = $this->getEngine($dbDataManager->getEngine());
+        $processor->execute($dbDataManager);
     }
 
     /**
@@ -69,5 +73,29 @@ class Processor
     private function getServiceName(string $engine): string
     {
         return sprintf("db_manager_core.engines.%s", $engine);
+    }
+
+    /**
+     * Validate passed data
+     *
+     * @param DbDataManagerInterface $dbDataManager
+     *
+     * @return void
+     * @throws EngineNotSupportedException
+     */
+    private function validate(DbDataManagerInterface $dbDataManager): void
+    {
+        if (
+            !in_array(
+                $dbDataManager->getEngine(),
+                [
+                    DatabaseEngineEnum::MYSQL->value,
+                    DatabaseEngineEnum::POSTGRES->value,
+                    DatabaseEngineEnum::SQL_LITE->value
+                ]
+            )
+        ) {
+            throw new EngineNotSupportedException('The DB engine is not supported...');
+        }
     }
 }

@@ -6,14 +6,32 @@ namespace DbManager\CoreBundle\Service;
 
 use ArrayIterator;
 use ArrayObject;
-use DbManager\CoreBundle\Interfaces\RuleManagerInterface;
+use DbManager\CoreBundle\Interfaces\DbDataManagerInterface;
 
-class RuleManager extends ArrayObject implements RuleManagerInterface
+class DbDataManager extends ArrayObject implements DbDataManagerInterface
 {
     /**
      * @inheritdoc
      */
-    public function setEngine(string $engine): RuleManagerInterface
+    public function getName(): string
+    {
+        return $this->offsetGet('name');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setName(string $name): DbDataManagerInterface
+    {
+        $this->offsetSet('name', $name);
+
+        return $this;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setEngine(string $engine): DbDataManagerInterface
     {
         $this->offsetSet('engine', $engine);
 
@@ -31,7 +49,7 @@ class RuleManager extends ArrayObject implements RuleManagerInterface
     /**
      * @inheritdoc
      */
-    public function setRules(array $rules): RuleManagerInterface
+    public function setRules(array $rules): DbDataManagerInterface
     {
         $this->offsetSet('rules', $rules);
 

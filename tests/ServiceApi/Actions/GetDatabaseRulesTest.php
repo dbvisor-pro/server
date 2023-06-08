@@ -32,7 +32,9 @@ class GetDatabaseRulesTest extends TestCase
         )->willReturn(
             [
                 'id' => 1,
-                'engine' => 1,
+                'engine_id' => [
+                    'code' => 'mysql'
+                ],
                 'databaseRules' => [
                     'rule' => [
                         'sales_order' => [

@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace DbManager\MysqlBundle;
 
+use DbManager\CoreBundle\Interfaces\DbDataManagerInterface;
 use DbManager\CoreBundle\Interfaces\EngineInterface;
-use DbManager\CoreBundle\Interfaces\RuleManagerInterface;
-use DbManager\CoreBundle\Interfaces\TempDatabaseInterface;
 use DbManager\CoreBundle\Service\AbstractEngineProcessor;
 
 /**
@@ -22,12 +21,12 @@ final class Processor extends AbstractEngineProcessor implements EngineInterface
     /**
      * @inheritdoc
      */
-    public function execute(RuleManagerInterface $rules, TempDatabaseInterface $tempDatabase): void
+    public function execute(DbDataManagerInterface $dbDataManager): void
     {
-        $this->connection = $this->getDbConnection($tempDatabase->getName());
+        $this->connection = $this->getDbConnection($dbDataManager->getName());
         $this->connection->statement('SET FOREIGN_KEY_CHECKS = 0');
 
-        foreach ($rules->getIterableRules() as $table => $rule) {
+        foreach ($dbDataManager->getIterableRules() as $table => $rule) {
             $this->processTable($table, $rule);
         }
 
