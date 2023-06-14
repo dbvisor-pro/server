@@ -31,13 +31,13 @@ final class FinishDump extends AppService
      * @throws TransportExceptionInterface
      * @throws Exception
      */
-    public function execute(string $dumpUuid, string $filename): void
+    public function execute(string $dumpUuid, string $status, ?string $filename = ''): void
     {
         $this->action  .= '/' . $dumpUuid;
         $this->sendRequest([
             'json' => [
                 'filename' => $filename,
-                'status' => 'ready'
+                'status' => $status
             ]
         ], 'PATCH');
     }

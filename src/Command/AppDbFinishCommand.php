@@ -48,9 +48,14 @@ final class AppDbFinishCommand extends Command
             InputOption::VALUE_REQUIRED,
             'Dump UUID data'
         )->addOption(
+            'status',
+            's',
+            InputOption::VALUE_REQUIRED,
+            'Status'
+        )->addOption(
             'filename',
             'f',
-            InputOption::VALUE_REQUIRED,
+            InputOption::VALUE_OPTIONAL,
             'Filename'
         );
     }
@@ -67,6 +72,7 @@ final class AppDbFinishCommand extends Command
         try {
             $this->finishDump->execute(
                 $input->getOption('uuid'),
+                $input->getOption('status'),
                 $input->getOption('filename')
             );
         } catch (
