@@ -22,7 +22,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
     name: 'app:db:log',
     description: 'Send logs to service',
 )]
-final class AddDbLogCommand extends Command
+final class AppDbLogCommand extends Command
 {
     /**
      * @param SendDumpLogs      $sendDumpLogs
