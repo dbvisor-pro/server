@@ -7,6 +7,8 @@ parameters:
     app.service_workspace: '%env(APP_SERVICE_WORKSPACE)%'
     app.service_token: '%env(APP_SERVICE_TOKEN)%'
     app.service_url: '%env(APP_SERVICE_URL)%'
+    app.private_keys_path: '%env(APP_KEY_PATH)%'
+    app.dump_path: '%env(APP_DUMP_PATH)%'
 
 services:
     # default configuration for services in *this* file
@@ -28,6 +30,14 @@ services:
             $workspace: '%app.service_workspace%'
             $apiToken: '%app.service_token%'
             $serviceUrl: '%app.service_url%'
+
+    App\Service\Encryption:
+        arguments:
+            $keyFile: '%app.private_keys_path%'
+
+    App\Service\DumpManagement:
+        arguments:
+            $dumpPath: '%app.dump_path%'
 
 
 
