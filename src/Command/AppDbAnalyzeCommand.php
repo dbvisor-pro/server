@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Service\Database\Processor;
+use App\Service\Database\Analyzer;
 use DbManager\CoreBundle\Exception\EngineNotSupportedException;
 use DbManager\CoreBundle\Exception\NoSuchEngineException;
 use Psr\Log\LoggerInterface;
@@ -20,18 +20,18 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 #[AsCommand(
-    name: 'app:db:process',
-    description: 'Start processing database by database id and temporary database name',
+    name: 'app:db:analyze',
+    description: 'Start analyzing db structure',
 )]
-final class AppProcessCommand extends Command
+final class AppDbAnalyzeCommand extends Command
 {
     /**
-     * @param Processor $databaseProcessor
-     * @param LoggerInterface $logger
-     * @param string|null $name
+     * @param Analyzer $databaseAnalyzer
+     * @param LoggerInterface   $logger
+     * @param string|null       $name
      */
     public function __construct(
-        protected readonly Processor $databaseProcessor,
+        protected readonly Analyzer $databaseAnalyzer,
         protected readonly LoggerInterface $logger,
         string $name = null
     ) {
@@ -65,7 +65,7 @@ final class AppProcessCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->databaseProcessor->process(
+            $this->databaseAnalyzer->process(
                 $input->getOption('uid'),
                 $input->getOption('db')
             );
@@ -73,10 +73,10 @@ final class AppProcessCommand extends Command
             ClientExceptionInterface
             | RedirectionExceptionInterface
             | ServerExceptionInterface
-            | NoSuchEngineException
-            | DecodingExceptionInterface
             | EngineNotSupportedException
-            | TransportExceptionInterface $e
+            | DecodingExceptionInterface
+            | TransportExceptionInterface
+            | NoSuchEngineException $e
         ) {
             $this->logger->error($e->getMessage());
 
