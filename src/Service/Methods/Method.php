@@ -9,12 +9,14 @@ use App\Exception\NoSuchMethodException;
 
 class Method
 {
-
+    /**
+     * @param Manual $manual
+     * @param Dump $dump
+     */
     public function __construct(
         private readonly Manual $manual,
         private readonly Dump $dump
-    )
-    {
+    ) {
     }
 
     /**

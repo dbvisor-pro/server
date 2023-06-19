@@ -34,3 +34,13 @@ DATABASE_URL=
 
 # Backup Configurations
 BACKUP_PATH='.'
+
+WORK_DB_USER=root
+WORK_DB_PASSWORD=12345
+WORK_DB_HOST=localhost
+WORK_DB_PORT=3361
+
+
+DBM_TOKEN=
+APP_KEY_PATH=/app/config/keys
+APP_DUMP_PATH=/app/dumps/processed
