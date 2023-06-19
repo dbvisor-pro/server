@@ -43,11 +43,29 @@ class AppConfig
      */
     public function getConfig(string $config): null | string
     {
-//        if ($this->defaultConfig === null) {
-////            $this->defaultConfig = array_change_key_case($this->getConfigFile($this->getConfigDirectory(), 'default'));
-//        }
-
         return $this->defaultConfig[strtolower($config)] ?? null;
+    }
+
+    /**
+     * @param array $databaseConfig
+     * @return void
+     * @throws Exception
+     */
+    public function saveDatabaseConfig(array $databaseConfig): void
+    {
+        if (empty($databaseConfig['db_uid'])) {
+            throw new Exception("Can't allocate database. Please ensure token is valid");
+        }
+
+        $databaseConfigDirectory = $this->getConfigDirectory() . '/' . $databaseConfig['db_uid'];
+        $databaseConfigFile = $this->getConfigDirectory() . '/' . $databaseConfig['db_uid'] . '/config';
+        if (!is_dir($databaseConfigDirectory)) {
+            mkdir($databaseConfigDirectory);
+        }
+
+        foreach ($databaseConfig as $key => $value) {
+            file_put_contents($databaseConfigFile, sprintf("%s=%s\n", strtoupper($key), $value), FILE_APPEND);
+        }
     }
 
     /**
