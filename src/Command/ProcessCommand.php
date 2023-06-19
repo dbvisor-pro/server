@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\ServiceApi\Actions\SendDumpLogs;
-use Exception;
+use App\Exception\NoSuchMethodException;
+use App\Service\PublicCommand\DatabaseProcessor;
+use DbManager\CoreBundle\Exception\NoSuchEngineException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -19,18 +19,18 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 #[AsCommand(
-    name: 'app:db:log',
-    description: 'Send logs to service',
+    name: 'app:db:process',
+    description: 'Start processing database by database id and temporary database name',
 )]
-final class AppDbLogCommand extends Command
+final class ProcessCommand extends Command
 {
     /**
-     * @param SendDumpLogs      $sendDumpLogs
+     * @param DatabaseProcessor $databaseProcessor
      * @param LoggerInterface   $logger
      * @param string|null       $name
      */
     public function __construct(
-        protected readonly SendDumpLogs $sendDumpLogs,
+        protected readonly DatabaseProcessor $databaseProcessor,
         protected readonly LoggerInterface $logger,
         string $name = null
     ) {
@@ -38,53 +38,23 @@ final class AppDbLogCommand extends Command
     }
 
     /**
-     * @inheritdoc
-     */
-    protected function configure(): void
-    {
-        $this->addOption(
-            'uuid',
-            'u',
-            InputOption::VALUE_REQUIRED,
-            'Dump UUID data'
-        )->addOption(
-            'status',
-            null,
-            InputOption::VALUE_REQUIRED,
-            'Status'
-        )->addOption(
-            'message',
-            null,
-            InputOption::VALUE_REQUIRED,
-            'Message'
-        );
-    }
-
-    /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     *
      * @return int
-     * @throws Exception
+     * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->sendDumpLogs->execute(
-                $input->getOption('uuid'),
-                $input->getOption('status'),
-                $input->getOption('message')
-            );
+            $this->databaseProcessor->execute($input, $output);
         } catch (
-            Exception
-            | ClientExceptionInterface
+            ClientExceptionInterface
             | RedirectionExceptionInterface
             | ServerExceptionInterface
             | DecodingExceptionInterface
+            | NoSuchMethodException
             | TransportExceptionInterface $e
         ) {
-            $output->writeln($e->getMessage());
-
             $this->logger->error($e->getMessage());
 
             return Command::FAILURE;

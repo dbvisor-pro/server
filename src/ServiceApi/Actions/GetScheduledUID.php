@@ -29,7 +29,7 @@ final class GetScheduledUID extends AppService
      * @throws TransportExceptionInterface
      * @throws Exception
      */
-    public function execute(): string
+    public function execute(): array
     {
         $result = $this->getScheduledDB();
 
@@ -39,11 +39,11 @@ final class GetScheduledUID extends AppService
     /**
      * @param array $data
      *
-     * @return string
+     * @return array
      *
      * @throws Exception
      */
-    protected function formUIDData(array $data): string
+    protected function formUIDData(array $data): array
     {
         if (!count($data)) {
             throw new Exception('There are no scheduled Databases');
@@ -54,7 +54,7 @@ final class GetScheduledUID extends AppService
             throw new Exception('An information about DB was not found...');
         }
 
-        return $data['uuid'] . ':' . $data['db']['uid'];
+        return $data;
     }
 
     /**
