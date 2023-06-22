@@ -9,6 +9,10 @@ parameters:
     app.service_url: '%env(APP_SERVICE_URL)%'
     app.private_keys_path: '%env(APP_KEY_PATH)%'
     app.dump_path: '%env(APP_DUMP_PATH)%'
+    app.work_db_user: '%env(WORK_DB_USER)%'
+    app.work_db_password: '%env(WORK_DB_PASSWORD)%'
+    app.work_db_host: '%env(WORK_DB_HOST)%'
+    app.work_db_port: '%env(WORK_DB_PORT)%'
 
 services:
     # default configuration for services in *this* file
@@ -39,7 +43,14 @@ services:
         arguments:
             $dumpPath: '%app.dump_path%'
 
-
+    App\Service\AppConfig:
+        arguments:
+            $config: {
+                work_db_user: '%app.work_db_user%',
+                work_db_password: '%app.work_db_password%',
+                work_db_host: '%app.work_db_host%',
+                work_db_port: '%app.work_db_port%',
+            }
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
