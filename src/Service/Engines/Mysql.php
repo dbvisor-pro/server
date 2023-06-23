@@ -74,10 +74,14 @@ class Mysql extends AbstractEngine
             LogStatusEnum::PROCESSING->value,
             "Creating dump"
         );
+
+        $password = $this->appConfig->getConfig('work_db_password')
+            ? sprintf("-p%s", $this->appConfig->getConfig('work_db_password'))
+            : '';
         $this->shellProcess->run(sprintf(
-            "mysqldump -u%s -p%s -h%s -P%s %s > %s",
+            "mysqldump -u%s %s -h%s -P%s %s > %s",
             $this->appConfig->getConfig('work_db_user'),
-            $this->appConfig->getConfig('work_db_password'),
+            $password,
             $this->appConfig->getConfig('work_db_host'),
             $this->appConfig->getConfig('work_db_port'),
             $tempDbName,
