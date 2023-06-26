@@ -60,7 +60,7 @@ final class TableService implements DataProcessorInterface
         if ($condition) {
             $this->queryWithCondition($condition, true)->update(
                 [
-                    $field => $this->connection->raw($this->connection->escape($value)),
+                    $field => $this->connection->raw($value),
                 ]
             );
 
@@ -68,7 +68,7 @@ final class TableService implements DataProcessorInterface
         }
         $this->query(true)->update(
             [
-                $field => $this->connection->raw($this->connection->escape($value)),
+                $field => $this->connection->raw($value),
             ]
         );
     }

@@ -47,7 +47,7 @@ final class EavDataProcessorService implements DataProcessorInterface
      */
     public function delete(string $condition, ?string $column = null): void
     {
-        $this->update($column, 'null', $condition);
+        $this->update($column, 'NULL', $condition);
     }
 
     /**
@@ -55,7 +55,7 @@ final class EavDataProcessorService implements DataProcessorInterface
      */
     public function truncate(?string $column = null): void
     {
-        $this->update($column, 'null');
+        $this->update($column, 'NULL');
     }
 
     /**
@@ -85,7 +85,7 @@ final class EavDataProcessorService implements DataProcessorInterface
             $attributeData['attribute_id']
         )->update(
             [
-                'value' => $this->connection->raw($this->connection->escape($value)),
+                'value' => $this->connection->raw($value),
             ]
         );
     }
