@@ -29,6 +29,13 @@ final class Processor extends AbstractEngineProcessor implements EngineInterface
         $this->connection->statement('SET FOREIGN_KEY_CHECKS = 0');
 
         foreach ($dbDataManager->getIterableRules() as $table => $rule) {
+            $this->dataProcessor = $this->dataProcessorFactory->create(
+                $table,
+                $rule,
+                $dbDataManager->getPlatform(),
+                $this->connection
+            );
+
             $this->processTable($table, $rule);
         }
 
@@ -88,7 +95,6 @@ final class Processor extends AbstractEngineProcessor implements EngineInterface
      */
     protected function processTable(string $table, array $rule): void
     {
-        $this->dataProcessor = $this->dataProcessorFactory->create($table, $rule, $this->connection);
         if (!isset($rule['columns'])) {
             $this->processMethod($table, $rule);
 

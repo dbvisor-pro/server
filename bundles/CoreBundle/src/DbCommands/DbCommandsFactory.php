@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DbManager\CoreBundle\DumpProcessor;
+namespace DbManager\CoreBundle\DbCommands;
 
 use DbManager\CoreBundle\Exception\NoSuchEngineException;
 use InvalidArgumentException;
@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Dump Processor Factory
  */
-final class DumpProcessorFactory
+final class DbCommandsFactory
 {
     /**
      * @param ContainerInterface $container
@@ -21,10 +21,10 @@ final class DumpProcessorFactory
     }
 
     /**
-     * @return DumpProcessorInterface
+     * @return DbCommandsInterface
      * @throws NoSuchEngineException
      */
-    public function create(): DumpProcessorInterface
+    public function create(): DbCommandsInterface
     {
         $engine = env('DATABASE_ENGINE');
 
@@ -36,7 +36,7 @@ final class DumpProcessorFactory
      *
      * @param string $engine
      *
-     * @return DumpProcessorInterface
+     * @return DbCommandsInterface
      *
      * @throws NoSuchEngineException
      */
@@ -49,7 +49,7 @@ final class DumpProcessorFactory
         }
 
         $engine = $this->container->get($serviceName);
-        if (!($engine instanceof DumpProcessorInterface)) {
+        if (!($engine instanceof DbCommandsInterface)) {
             throw new InvalidArgumentException('The engine must be instance of EngineInterface');
         }
 
