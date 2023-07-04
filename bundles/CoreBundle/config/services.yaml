@@ -2,7 +2,7 @@ services:
   DbManager\CoreBundle\DbProcessorFactory:
     arguments:
       $container: '@service_container'
-  DbManager\CoreBundle\DbCommands\DbCommandsFactory:
+  DbManager\CoreBundle\DBManagement\DBManagementFactory:
     arguments:
       $container: '@service_container'
   DbManager\CoreBundle\Service\DbDataManager:

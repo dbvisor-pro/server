@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace DbManager\MysqlBundle\DbCommands;
+namespace DbManager\MysqlBundle\DBManagement;
 
-use DbManager\CoreBundle\DbCommands\AbstractDbCommands;
-use DbManager\CoreBundle\DbCommands\DbCommandsInterface;
+use DbManager\CoreBundle\DBManagement\AbstractDBManagement;
+use DbManager\CoreBundle\DBManagement\DBManagementInterface;
 
 /**
  * Mysql Dump Processor instance
  */
-final class Commands extends AbstractDbCommands implements DbCommandsInterface
+final class Management extends AbstractDBManagement implements DBManagementInterface
 {
-    protected function getDropCommandLine(string $dbName): string
+    protected function getDropLine(string $dbName): string
     {
         return sprintf(
             "mysql -u%s %s -h%s -P%s -e 'DROP DATABASE %s'",
@@ -24,7 +24,7 @@ final class Commands extends AbstractDbCommands implements DbCommandsInterface
         );
     }
 
-    protected function getCreateCommandLine(string $dbName): string
+    protected function getCreateLine(string $dbName): string
     {
         return sprintf(
             "mysql -u%s %s -h%s -P%s -e 'CREATE DATABASE %s'",
@@ -36,7 +36,7 @@ final class Commands extends AbstractDbCommands implements DbCommandsInterface
         );
     }
 
-    protected function getImportCommandLine(string $dbName, string $inputPath): string
+    protected function getImportLine(string $dbName, string $inputPath): string
     {
         return sprintf(
             "mysql -u%s %s -h%s -P%s %s < %s",
@@ -49,7 +49,7 @@ final class Commands extends AbstractDbCommands implements DbCommandsInterface
         );
     }
 
-    protected function getDumpCommandLine(string $dbName, string $outputPath): string
+    protected function getDumpLine(string $dbName, string $outputPath): string
     {
         return sprintf(
             'mysqldump -h%s -p%s -u%s -P%s %s > %s',

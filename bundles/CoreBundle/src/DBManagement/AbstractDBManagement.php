@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DbManager\CoreBundle\DbCommands;
+namespace DbManager\CoreBundle\DBManagement;
 
 use App\Service\AppConfig;
 use DbManager\CoreBundle\Exception\ShellProcessorException;
@@ -10,9 +10,9 @@ use DbManager\CoreBundle\Interfaces\DbDataManagerInterface;
 use Symfony\Component\Process\Process;
 
 /**
- * Mysql Processor instance
+ * Abstract
  */
-abstract class AbstractDbCommands implements DbCommandsInterface
+abstract class AbstractDBManagement implements DBManagementInterface
 {
     public function __construct(
         protected readonly AppConfig $appConfig
@@ -24,9 +24,9 @@ abstract class AbstractDbCommands implements DbCommandsInterface
      */
     public function create(DbDataManagerInterface $database): bool
     {
-        $command = $this->getCreateCommandLine($database->getName());
+        $command = $this->getCreateLine($database->getName());
 
-        $this->runCommand($command);
+        $this->execute($command);
 
         return true;
     }
@@ -36,9 +36,9 @@ abstract class AbstractDbCommands implements DbCommandsInterface
      */
     public function drop(DbDataManagerInterface $database): bool
     {
-        $command = $this->getDropCommandLine($database->getName());
+        $command = $this->getDropLine($database->getName());
 
-        $this->runCommand($command);
+        $this->execute($command);
 
         return true;
     }
@@ -48,9 +48,9 @@ abstract class AbstractDbCommands implements DbCommandsInterface
      */
     public function dump(DbDataManagerInterface $database): string
     {
-        $command = $this->getDumpCommandLine($database->getName(), '.');
+        $command = $this->getDumpLine($database->getName(), '.');
 
-        return $this->runCommand($command);
+        return $this->execute($command);
     }
 
     /**
@@ -58,20 +58,20 @@ abstract class AbstractDbCommands implements DbCommandsInterface
      */
     public function import(DbDataManagerInterface $database): string
     {
-        $command = $this->getImportCommandLine($database->getName(), $database->offsetGet('inputFile'));
+        $command = $this->getImportLine($database->getName(), $database->offsetGet('inputFile'));
 
-        return $this->runCommand($command);
+        return $this->execute($command);
     }
 
     /**
-     * Run shell command
+     * Execute process command
      *
      * @param string $command
      *
      * @return string
      * @throws ShellProcessorException
      */
-    protected function runCommand(string $command): string
+    protected function execute(string $command): string
     {
         $process = new Process([$command]);
         $process->setTimeout(null);
@@ -82,19 +82,6 @@ abstract class AbstractDbCommands implements DbCommandsInterface
         }
 
         return $process->getOutput();
-    }
-
-    /**
-     * Get dump command line
-     *
-     * @param string $dbName
-     * @param string $outputPath
-     *
-     * @return string
-     */
-    protected function getDumpCommandLine(string $dbName, string $outputPath): string
-    {
-        return '';
     }
 
     /**

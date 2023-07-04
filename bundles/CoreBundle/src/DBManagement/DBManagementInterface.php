@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DbManager\CoreBundle\DbCommands;
+namespace DbManager\CoreBundle\DBManagement;
 
 use DbManager\CoreBundle\Exception\ShellProcessorException;
 use DbManager\CoreBundle\Interfaces\DbDataManagerInterface;
 
-interface DbCommandsInterface
+interface DBManagementInterface
 {
     /**
      * Create DB
@@ -15,6 +15,7 @@ interface DbCommandsInterface
      * @param DbDataManagerInterface $database
      *
      * @return bool
+     * @throws ShellProcessorException
      */
     public function create(DbDataManagerInterface $database): bool;
 
@@ -24,6 +25,7 @@ interface DbCommandsInterface
      * @param DbDataManagerInterface $database
      *
      * @return bool
+     * @throws ShellProcessorException
      */
     public function drop(DbDataManagerInterface $database): bool;
 

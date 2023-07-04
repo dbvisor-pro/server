@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DbManager\CoreBundle\DbCommands;
+namespace DbManager\CoreBundle\DBManagement;
 
 use DbManager\CoreBundle\Exception\NoSuchEngineException;
 use InvalidArgumentException;
@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Dump Processor Factory
  */
-final class DbCommandsFactory
+final class DBManagementFactory
 {
     /**
      * @param ContainerInterface $container
@@ -21,10 +21,10 @@ final class DbCommandsFactory
     }
 
     /**
-     * @return DbCommandsInterface
+     * @return DBManagementInterface
      * @throws NoSuchEngineException
      */
-    public function create(): DbCommandsInterface
+    public function create(): DBManagementInterface
     {
         $engine = env('DATABASE_ENGINE');
 
@@ -36,7 +36,7 @@ final class DbCommandsFactory
      *
      * @param string $engine
      *
-     * @return DbCommandsInterface
+     * @return DBManagementInterface
      *
      * @throws NoSuchEngineException
      */
@@ -49,7 +49,7 @@ final class DbCommandsFactory
         }
 
         $engine = $this->container->get($serviceName);
-        if (!($engine instanceof DbCommandsInterface)) {
+        if (!($engine instanceof DBManagementInterface)) {
             throw new InvalidArgumentException('The engine must be instance of EngineInterface');
         }
 
@@ -65,6 +65,6 @@ final class DbCommandsFactory
      */
     private function getServiceName(string $engine): string
     {
-        return sprintf("db_manager_core.dump.engines.%s", $engine);
+        return sprintf("db_manager_core.management.engines.%s", $engine);
     }
 }

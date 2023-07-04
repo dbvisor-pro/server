@@ -5,8 +5,8 @@ services:
     class: DbManager\MysqlBundle\Processor
     arguments: []
 
-  db_manager_core.dump.engines.mysql:
+  db_manager_core.management.engines.mysql:
     autowire: true
     public: true
-    class: DbManager\MysqlBundle\DbCommands\Commands
+    class: DbManager\MysqlBundle\DBManagement\Management
     arguments: []

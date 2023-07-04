@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use DbManager\CoreBundle\DbCommands\DbCommandsFactory;
+use DbManager\CoreBundle\DBManagement\DBManagementFactory;
 use DbManager\CoreBundle\Exception\NoSuchEngineException;
 use DbManager\CoreBundle\Exception\ShellProcessorException;
 use DbManager\CoreBundle\Service\DbDataManager;
@@ -12,10 +12,10 @@ use DbManager\CoreBundle\Service\DbDataManager;
 class DumpProcessor
 {
     /**
-     * @param DbCommandsFactory $dbCommandsFactory
+     * @param DBManagementFactory $dbManagementFactory
      */
     public function __construct(
-        private readonly DbCommandsFactory $dbCommandsFactory
+        private readonly DBManagementFactory $dbManagementFactory
     ) {
     }
 
@@ -29,8 +29,8 @@ class DumpProcessor
      */
     public function dump(string $tempDatabase, string $backupPath = ''): void
     {
-        $dbCommand = $this->dbCommandsFactory->create();
-        $dbCommand->dump(
+        $dbManagement = $this->dbManagementFactory->create();
+        $dbManagement->dump(
             new DbDataManager([
                 'name' => $tempDatabase,
                 'backupPath' => $backupPath
