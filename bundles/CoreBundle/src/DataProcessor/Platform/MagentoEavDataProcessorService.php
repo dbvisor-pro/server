@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace DbManager\CoreBundle\DataProcessor;
+namespace DbManager\CoreBundle\DataProcessor\Platform;
 
+use DbManager\CoreBundle\DataProcessor\DataProcessorInterface;
 use Exception;
 use Illuminate\Database\Connection;
 use stdClass;
 
-final class EavDataProcessorService implements DataProcessorInterface
+final class MagentoEavDataProcessorService implements DataProcessorInterface
 {
     /**
      * @var string

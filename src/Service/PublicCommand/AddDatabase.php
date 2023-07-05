@@ -8,7 +8,13 @@ use App\Enum\MethodsEnum;
 use App\Service\AppConfig;
 use App\Service\AppLogger;
 use App\Service\Database\Analyzer;
+use App\Service\InputOutput;
 use App\ServiceApi\Actions\AddDatabase as ServiceApiAddDatabase;
+use DbManager\CoreBundle\DBManagement\DBManagementFactory;
+use DbManager\CoreBundle\Exception\EngineNotSupportedException;
+use DbManager\CoreBundle\Exception\NoSuchEngineException;
+use DbManager\CoreBundle\Exception\ShellProcessorException;
+use DbManager\CoreBundle\Service\DbDataManager;
 use Exception;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -30,12 +36,14 @@ class AddDatabase extends AbstractCommand
      * @param AppConfig $appConfig
      * @param ServiceApiAddDatabase $addDatabase
      * @param Analyzer $databaseAnalyzer
+     * @param DBManagementFactory $dbManagementFactory
      */
     public function __construct(
         private readonly AppLogger $appLogger,
         private readonly AppConfig $appConfig,
         private readonly ServiceApiAddDatabase $addDatabase,
-        protected readonly Analyzer $databaseAnalyzer
+        protected readonly Analyzer $databaseAnalyzer,
+        private readonly DBManagementFactory $dbManagementFactory
     ) {
     }
 
@@ -89,9 +97,7 @@ class AddDatabase extends AbstractCommand
         if ($this->validateConnection()) {
             $this->appConfig->saveDatabaseConfig($this->config);
 
-            if ($inputOutput->confirm("Would you like to analyze a new database structure?")) {
-                $this->databaseAnalyzer->process($this->config['db_uid'], $this->config['name']);
-            }
+            $this->analyzeDb($inputOutput);
         }
         $this->addDatabase();
     }
@@ -149,7 +155,7 @@ class AddDatabase extends AbstractCommand
                 break;
             case MethodsEnum::MANUAL->value:
                 $this->config['dump_name'] = $this->getInputOutput()
-                    ->ask('What is dump file name?');
+                    ->ask('Enter full path to DB dump file?');
         }
     }
 
@@ -178,5 +184,45 @@ class AddDatabase extends AbstractCommand
 
     private function askSshCredentials(): void
     {
+    }
+
+    /**
+     * @param InputOutput $inputOutput
+     *
+     * @return void
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws EngineNotSupportedException
+     * @throws NoSuchEngineException
+     * @throws ShellProcessorException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    private function analyzeDb(InputOutput $inputOutput): void
+    {
+        if (!$inputOutput->confirm("Would you like to analyze a new database structure?")) {
+            return;
+        }
+
+        $dbManagement = $this->dbManagementFactory->create();
+        switch ($this->config['method']) {
+            case MethodsEnum::DUMP->value:
+            case MethodsEnum::SSH_DUMP->value:
+                break;
+            case MethodsEnum::MANUAL->value:
+                $dbDataManager = new DbDataManager([
+                    'name'      => $this->config['name'],
+                    'inputFile' => $this->config['dump_name']
+                ]);
+
+                $inputOutput->info('Processing...');
+                $dbManagement->create($dbDataManager);
+                $dbManagement->import($dbDataManager);
+        }
+
+        $this->databaseAnalyzer->process($this->config['db_uid'], $this->config['name']);
+        $inputOutput->info('The DB structure analyzing successfully finished.');
     }
 }
