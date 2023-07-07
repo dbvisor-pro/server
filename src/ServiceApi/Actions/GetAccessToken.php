@@ -5,43 +5,39 @@ declare(strict_types=1);
 namespace App\ServiceApi\Actions;
 
 use App\ServiceApi\AppService;
-use Illuminate\Database\Eloquent\Casts\Json;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-final class SendDbStructure extends AppService
+final class GetAccessToken extends AppService
 {
-    protected string $action = 'databases';
+    protected string $action = 'login_check';
 
     /**
-     * Set DB structure
+     * Get Security Token
      *
-     * @param string $dbUid
-     * @param array $structure
+     * @param string $username
+     * @param string $password
      *
-     * @return void
+     * @return string
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function execute(string $dbUid, array $structure): void
+    public function execute(string $username, string $password): string
     {
-        $this->action .= '/' . $dbUid;
+        $result = $this->getToken($username, $password);
 
-        $this->sendData(
-            JSON::encode($structure['db_schema']),
-            JSON::encode($structure['additional_data']),
-        );
+        return $result['token'];
     }
 
     /**
-     * @param string $dbSchema
-     * @param string $additionalData
+     * @param string $username
+     * @param string $password
      *
      * @return array
      *
@@ -51,16 +47,15 @@ final class SendDbStructure extends AppService
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    protected function sendData(string $dbSchema, string $additionalData): array
+    protected function getToken(string $username, string $password): array
     {
         return $this->sendRequest(
             [
-                'json' => [
-                    'dbSchema' => $dbSchema,
-                    'additionalData' => $additionalData
+                'query' => [
+                    'username' => $username,
+                    'password' => $password
                 ]
-            ],
-            'PATCH'
+            ]
         );
     }
 
@@ -70,8 +65,9 @@ final class SendDbStructure extends AppService
     protected function getHeaders(): array
     {
         $headers = parent::getHeaders();
-        $headers['Content-Type'] = 'application/merge-patch+json';
-        $headers['Authorization'] = 'Bearer ' . '';
+        if (isset($headers['Authorization'])) {
+            unset($headers['Authorization']);
+        }
 
         return $headers;
     }

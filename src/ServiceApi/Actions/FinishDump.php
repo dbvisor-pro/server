@@ -18,7 +18,8 @@ final class FinishDump extends AppService
 
     /**
      * @param string $dumpUuid
-     * @param string $filename
+     * @param string $status
+     * @param string|null $filename
      *
      * @return void
      *
@@ -27,7 +28,6 @@ final class FinishDump extends AppService
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws Exception
      */
     public function execute(string $dumpUuid, string $status, ?string $filename = ''): void
     {
