@@ -7,7 +7,8 @@ namespace DbManager\MysqlBundle;
 use DbManager\CoreBundle\Interfaces\DbDataManagerInterface;
 use DbManager\CoreBundle\Interfaces\EngineInterface;
 use DbManager\CoreBundle\Service\AbstractEngineProcessor;
-use Doctrine\DBAL\Exception;
+use Exception;
+use Illuminate\Database\Connection;
 
 /**
  * Mysql Processor instance
@@ -28,6 +29,13 @@ final class Processor extends AbstractEngineProcessor implements EngineInterface
         $this->connection->statement('SET FOREIGN_KEY_CHECKS = 0');
 
         foreach ($dbDataManager->getIterableRules() as $table => $rule) {
+            $this->dataProcessor = $this->dataProcessorFactory->create(
+                $table,
+                $rule,
+                $dbDataManager->getPlatform(),
+                $this->connection
+            );
+
             $this->processTable($table, $rule);
         }
 
@@ -39,15 +47,42 @@ final class Processor extends AbstractEngineProcessor implements EngineInterface
      */
     public function getDbStructure(DbDataManagerInterface $dbDataManager): array
     {
-        $structure  = [];
+        $dbSchema   = [];
         $connection = $this->getDbConnection($dbDataManager->getName());
 
         $tables = new \ArrayIterator($connection->getDoctrineSchemaManager()->listTables());
         foreach ($tables as $table) {
-            $structure[$table->getName()] = array_map(fn($column) => $column->getName(), $table->getColumns());
+            $dbSchema[$table->getName()] = array_map(fn($column) => $column->getName(), $table->getColumns());
         }
 
-        return $structure;
+        return [
+            'db_schema'       => $dbSchema,
+            'additional_data' => $this->getAdditionalData($dbDataManager, $connection)
+        ];
+    }
+
+    /**
+     * Get platform additional attributes
+     *
+     * @param DbDataManagerInterface $dbDataManager
+     * @param Connection $connection
+     *
+     * @return array
+     */
+    protected function getAdditionalData(DbDataManagerInterface $dbDataManager, Connection $connection): array
+    {
+        $data = [];
+        if ($dbDataManager->getPlatform() === 'magento') {
+            $attributes = $connection->select(
+                "SELECT `attribute_code`, `backend_type`, `eav_entity_type`.`entity_type_code`"
+                . " FROM `eav_attribute` LEFT JOIN `eav_entity_type` "
+                . " ON `eav_entity_type`.`entity_type_id` = `eav_attribute`.`entity_type_id` "
+                . " WHERE `backend_type` != 'static' AND `source_model` IS NULL;"
+            );
+
+            $data['eav_attributes'] = $attributes;
+        }
+        return $data;
     }
 
     /**
@@ -60,7 +95,6 @@ final class Processor extends AbstractEngineProcessor implements EngineInterface
      */
     protected function processTable(string $table, array $rule): void
     {
-        $this->dataProcessor = $this->dataProcessorFactory->create($table, $this->connection);
         if (!isset($rule['columns'])) {
             $this->processMethod($table, $rule);
 
@@ -76,13 +110,15 @@ final class Processor extends AbstractEngineProcessor implements EngineInterface
      * Truncate table
      *
      * @param array $rule
+     * @param string|null $column
      *
      * @return void
+     * @throws Exception
      */
-    protected function truncate(array $rule): void
+    protected function truncate(array $rule, ?string $column = null): void
     {
         if (isset($rule['where'])) {
-            $this->dataProcessor->delete($rule['where']);
+            $this->dataProcessor->delete($rule['where'], $column);
 
             return;
         }
@@ -92,21 +128,20 @@ final class Processor extends AbstractEngineProcessor implements EngineInterface
     /**
      * Update table
      *
-     * @param array  $rule
+     * @param array $rule
      * @param string $column
      *
      * @return void
+     * @throws Exception
      */
     protected function update(array $rule, string $column): void
     {
-        if (isset($rule['where'])) {
-            $this->dataProcessor->update($column, $rule['value'], $rule['where']);
-
-            return;
-        }
-        $this->dataProcessor->update($column, $rule['value']);
+        $this->dataProcessor->update($column, $rule['value'], $rule['where'] ?? null);
     }
 
+    /**
+     * @throws Exception
+     */
     protected function fake(string $table, array $rule, string $column): void
     {
         if (isset($rule['where'])) {

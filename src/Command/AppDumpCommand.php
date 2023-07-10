@@ -61,7 +61,7 @@ final class AppDumpCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->dumpProcessor->process(
+            $this->dumpProcessor->dump(
                 $input->getOption('db'),
                 $input->getOption('path')
             );

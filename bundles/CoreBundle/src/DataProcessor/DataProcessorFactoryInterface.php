@@ -12,9 +12,16 @@ interface DataProcessorFactoryInterface
      * Create Data Processor instance
      *
      * @param string     $tableName
+     * @param array      $rule
+     * @param string     $platform
      * @param Connection $connection
      *
      * @return DataProcessorInterface
      */
-    public function create(string $tableName, Connection $connection): DataProcessorInterface;
+    public function create(
+        string $tableName,
+        array $rule,
+        string $platform,
+        Connection $connection
+    ): DataProcessorInterface;
 }
