@@ -4,19 +4,12 @@ declare(strict_types=1);
 
 namespace App\Service\PublicCommand;
 
-use App\Enum\MethodsEnum;
 use App\Service\AppConfig;
 use App\Service\AppLogger;
-use App\Service\Database\Analyzer;
-use App\Service\InputOutput;
-use App\ServiceApi\Actions\AddDatabase as ServiceApiAddDatabase;
-use App\ServiceApi\Actions\GetAccessToken;
-use DbManager\CoreBundle\DBManagement\DBManagementFactory;
-use DbManager\CoreBundle\Exception\EngineNotSupportedException;
-use DbManager\CoreBundle\Exception\NoSuchEngineException;
-use DbManager\CoreBundle\Exception\ShellProcessorException;
-use DbManager\CoreBundle\Service\DbDataManager;
+use App\ServiceApi\Actions\AddServer;
+use App\ServiceApi\Actions\GetUserByEmail;
 use Exception;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -28,17 +21,28 @@ use Symfony\Component\Console\Output\OutputInterface;
 class InstallApp extends AbstractCommand
 {
     /**
+     * Get IP
+     */
+    public const GET_IP_URL = 'https://ipecho.net/plain';
+
+    /**
      * @var array
      */
     private array $config = [];
 
     /**
      * @param AppLogger $appLogger
-     * @param GetAccessToken $accessToken
+     * @param AppConfig $appConfig
+     * @param AddServer $addServer
+     * @param GetUserByEmail $getUserByEmail
+     * @param HttpClientInterface $httpClient
      */
     public function __construct(
         private readonly AppLogger $appLogger,
-        private readonly GetAccessToken $getAccessToken
+        private readonly AppConfig $appConfig,
+        private readonly AddServer $addServer,
+        private readonly GetUserByEmail $getUserByEmail,
+        private readonly HttpClientInterface $httpClient
     ) {
     }
 
@@ -83,12 +87,46 @@ class InstallApp extends AbstractCommand
     {
         $inputOutput = $this->getInputOutput();
 
-        $userName = $inputOutput->ask("Enter your Username");
-        $password = $inputOutput->askHidden("Enter your Password");
+        $userEmail  = $inputOutput->ask("Enter your Email");
+        $password   = $inputOutput->askHidden("Enter your Password");
+        $serverName = $inputOutput->ask("Enter server name");
 
-        $token = $this->getAccessToken->execute($userName, $password);
+        $user   = $this->getUserByEmail->setCredentials($userEmail, $password)->execute($userEmail);
+        $server = $this->addServer->execute(
+            [
+                'name' => $serverName,
+                'status' => 'pending',
+                'ip_address' => $this->getIpAddress(),
+                'workspace_id_id' => $user['workspace']['id'] // What if customer has a few Workspaces ???
+            ]
+        );
 
+        $inputOutput->success("Server successfully added, please set next parameters in .env file:");
+        $message = sprintf(
+            "please set next parameters in .env file: APP_SERVER_UUID: %s and APP_SERVER_SECRET_KEY: %s",
+            $server['uuid'],
+            $server['secret_key']
+        );
+        $inputOutput->note($message);
         // Generate server info
         // Send data about server to service
+    }
+
+    /**
+     * Get IP address
+     *
+     * @return string
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    private function getIpAddress(): string
+    {
+        try {
+            return $this->httpClient->request('GET', self::GET_IP_URL)->getContent();
+        } catch (\Exception $e) {
+            return '127.0.0.1';
+        }
     }
 }

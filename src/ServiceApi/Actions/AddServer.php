@@ -5,33 +5,34 @@ declare(strict_types=1);
 namespace App\ServiceApi\Actions;
 
 use App\ServiceApi\AppService;
-use Exception;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-final class GetDumpByUuid extends AppService
+final class AddServer extends AppService
 {
-    protected string $action = 'database_dumps';
+    protected string $action = 'servers';
 
     /**
-     * @param string $dumpUuid
+     * @param array $data
      *
-     * @return void
-     *
+     * @return array
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws Exception
+     * @throws InvalidArgumentException
      */
-    public function execute(string $dumpUuid): array
+    public function execute(array $data): array
     {
-        $this->action .= '/' . $dumpUuid;
-
-        return $this->sendRequest([], 'GET');
+        return $this->sendRequest(
+            [
+                'json' => $data
+            ]
+        );
     }
 }

@@ -71,7 +71,6 @@ final class SendDbStructure extends AppService
     {
         $headers = parent::getHeaders();
         $headers['Content-Type'] = 'application/merge-patch+json';
-        $headers['Authorization'] = 'Bearer ' . '';
 
         return $headers;
     }

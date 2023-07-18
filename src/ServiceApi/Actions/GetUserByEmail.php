@@ -5,39 +5,22 @@ declare(strict_types=1);
 namespace App\ServiceApi\Actions;
 
 use App\ServiceApi\AppService;
+use Exception;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-final class GetAccessToken extends AppService
+final class GetUserByEmail extends AppService
 {
-    protected string $action = 'login_check';
+    protected string $action = 'users';
 
     /**
-     * Get Security Token
+     * Get user data
      *
-     * @param string $username
-     * @param string $password
-     *
-     * @return string
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
-     */
-    public function execute(string $username, string $password): string
-    {
-        $result = $this->getToken($username, $password);
-
-        return $result['token'];
-    }
-
-    /**
-     * @param string $username
-     * @param string $password
+     * @param string $email
      *
      * @return array
      *
@@ -46,29 +29,40 @@ final class GetAccessToken extends AppService
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws Exception
      */
-    protected function getToken(string $username, string $password): array
+    public function execute(string $email): array
+    {
+        $result = $this->getUserByEmail($email);
+
+        if (!count($result)) {
+            throw new Exception(sprintf('There user with email %s was not found', $email));
+        }
+        return current($result);
+    }
+
+    /**
+     * @param string $email
+     *
+     * @return array
+     *
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws InvalidArgumentException
+     */
+    protected function getUserByEmail(string $email): array
     {
         return $this->sendRequest(
             [
                 'query' => [
-                    'username' => $username,
-                    'password' => $password
+                    'email' => $email
                 ]
-            ]
+            ],
+            'GET'
         );
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function getHeaders(): array
-    {
-        $headers = parent::getHeaders();
-        if (isset($headers['Authorization'])) {
-            unset($headers['Authorization']);
-        }
-
-        return $headers;
     }
 }
