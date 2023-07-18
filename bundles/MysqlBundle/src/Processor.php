@@ -55,8 +55,11 @@ final class Processor extends AbstractEngineProcessor implements EngineInterface
             /** @var \Doctrine\DBAL\Schema\Table $table */
             /** @var \Doctrine\DBAL\Schema\Column $column */
             foreach ($table->getColumns() as $column) {
-                $columnData = $column->toArray();
-                $columnData['type'] = $columnData['type']->getName();
+                $columnData = [
+                    'type' => $column->getType()->getName(),
+                    'length' => $column->getLength(),
+                    'name' => $column->getName()
+                ];
                 $dbSchema[$table->getName()][$column->getName()] = $columnData;
             }
         }
