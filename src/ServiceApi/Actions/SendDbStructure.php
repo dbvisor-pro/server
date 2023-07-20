@@ -63,15 +63,4 @@ final class SendDbStructure extends AppService
             'PATCH'
         );
     }
-
-    /**
-     * @inheritDoc
-     */
-    protected function getHeaders(): array
-    {
-        $headers = parent::getHeaders();
-        $headers['Content-Type'] = 'application/merge-patch+json';
-
-        return $headers;
-    }
 }

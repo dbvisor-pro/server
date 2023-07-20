@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\ServiceApi;
 
+use App\Service\AppConfig;
 use Exception;
 use Psr\Cache\InvalidArgumentException;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -19,6 +19,11 @@ class AppService
 {
     private const AUTH_TYPE_USER = 'User';
     private const AUTH_TYPE_TOKEN = 'Token';
+
+    /**
+     * @var string
+     */
+    protected string $method = 'POST';
 
     /**
      * @var string
@@ -36,12 +41,12 @@ class AppService
     protected null|string $pass = null;
 
     /**
-     * @param ParameterBagInterface $parameterBag
+     * @param AppConfig $appConfig
      * @param AppServiceClient $client
      * @param CacheInterface $cacheAdapter
      */
     public function __construct(
-        private readonly ParameterBagInterface $parameterBag,
+        private readonly AppConfig $appConfig,
         private readonly AppServiceClient $client,
         private readonly CacheInterface $cacheAdapter
     ) {
@@ -81,6 +86,7 @@ class AppService
         if (!$this->action) {
             throw new Exception("Action is required");
         }
+        $this->method = $method;
 
         $options  = $this->getOptions($params);
         $response = $this->getClient()->request($method, $this->action, $options);
@@ -200,8 +206,8 @@ class AppService
                     'Content-Type' => 'application/json',
                 ],
                 'json' => [
-                    'uuid' => $this->parameterBag->get('app.service_uuid'),
-                    'secret_key' => $this->parameterBag->get('app.service_secret_key'),
+                    'uuid'       => $this->appConfig->getServerUuid(),
+                    'secret_key' => $this->appConfig->getServerSecretKey(),
                 ]
             ]
         );
@@ -221,7 +227,7 @@ class AppService
     {
         return [
             'Accept'       => 'application/json',
-            'Content-Type' => 'application/json',
+            'Content-Type' => $this->method === 'PATCH' ? 'application/merge-patch+json' : 'application/json',
             'Authorization-Type' => $this->getAuthorizationType(),
             'Authorization'      => sprintf('Bearer %s', $this->getSecurityToken())
         ];
