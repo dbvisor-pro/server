@@ -12,10 +12,6 @@ use App\Service\PublicCommand\Database\Analyzer;
 use App\ServiceApi\Actions\AddDatabase as ServiceApiAddDatabase;
 use App\ServiceApi\Entity\Server;
 use DbManager\CoreBundle\DBManagement\DBManagementFactory;
-use DbManager\CoreBundle\Exception\EngineNotSupportedException;
-use DbManager\CoreBundle\Exception\NoSuchEngineException;
-use DbManager\CoreBundle\Exception\ShellProcessorException;
-use DbManager\CoreBundle\Service\DbDataManager;
 use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -38,7 +34,6 @@ class AddDatabase extends AbstractCommand
      * @param AppConfig $appConfig
      * @param Server $serverApi
      * @param ServiceApiAddDatabase $addDatabase
-     * @param Analyzer $databaseAnalyzer
      * @param DBManagementFactory $dbManagementFactory
      */
     public function __construct(
@@ -46,8 +41,7 @@ class AddDatabase extends AbstractCommand
         private readonly AppConfig $appConfig,
         private readonly Server $serverApi,
         private readonly ServiceApiAddDatabase $addDatabase,
-        protected readonly Analyzer $databaseAnalyzer,
-        private readonly DBManagementFactory $dbManagementFactory
+        protected readonly Analyzer $databaseAnalyzer
     ) {
     }
 
@@ -139,7 +133,7 @@ class AddDatabase extends AbstractCommand
             "workspaceId" => (int)str_replace('/api/workspaces/', '', $server['workspaceId'])
         ]);
 
-        $this->config['db_uid'] = $data['uid'];
+        $this->config['db_uuid'] = $data['uid'];
     }
 
     /**
@@ -200,17 +194,12 @@ class AddDatabase extends AbstractCommand
 
     /**
      * @param InputOutput $inputOutput
-     *
      * @return void
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws EngineNotSupportedException
-     * @throws NoSuchEngineException
-     * @throws ShellProcessorException
-     * @throws \Doctrine\DBAL\Exception
      */
     private function analyzeDb(InputOutput $inputOutput): void
     {
@@ -218,25 +207,9 @@ class AddDatabase extends AbstractCommand
             return;
         }
 
-        $dbManagement = $this->dbManagementFactory->create();
-        switch ($this->config['method']) {
-            case MethodsEnum::DUMP->value:
-            case MethodsEnum::SSH_DUMP->value:
-                break;
-            case MethodsEnum::MANUAL->value:
-                $dbDataManager = new DbDataManager([
-                    'name'      => $this->config['name'],
-                    'inputFile' => $this->config['dump_name']
-                ]);
-
-                $inputOutput->info('Processing...');
-                $dbManagement->create($dbDataManager);
-                $dbManagement->import($dbDataManager);
-        }
-
         $this->databaseAnalyzer
             ->setInputOutput($inputOutput)
-            ->createTempDbAndProcess($this->config['db_uid']);
+            ->createTempDbAndProcess($this->config['db_uuid']);
         $inputOutput->info('The DB structure analyzing successfully finished.');
     }
 }

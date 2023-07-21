@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace App\Service\PublicCommand\Database;
 
 use App\Service\AppConfig;
-use App\Service\Engines\Engine;
-use App\Service\Methods\Method;
 use App\Service\PublicCommand\AbstractCommand;
+use App\Service\DumpManagement;
 use App\ServiceApi\Actions\GetDatabaseRules;
 use App\ServiceApi\Actions\SendDbStructure;
+use DbManager\CoreBundle\DBManagement\DBManagementFactory;
 use DbManager\CoreBundle\DbProcessorFactory;
 use DbManager\CoreBundle\Exception\EngineNotSupportedException;
 use DbManager\CoreBundle\Exception\NoSuchEngineException;
 use DbManager\CoreBundle\Service\DbDataManager;
 use Doctrine\DBAL\Exception;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -30,16 +31,15 @@ class Analyzer extends AbstractCommand
      * @param SendDbStructure $sendDbStructure
      * @param GetDatabaseRules $getDatabaseRules
      * @param DbProcessorFactory $processorFactory
-     * @param Engine $engine
-     * @param Method $method
+     * @param DBManagementFactory $dbManagementFactory
      */
     public function __construct(
         private readonly AppConfig $appConfig,
         private readonly SendDbStructure $sendDbStructure,
         private readonly GetDatabaseRules $getDatabaseRules,
         private readonly DbProcessorFactory $processorFactory,
-        private readonly Engine $engine,
-        private readonly Method $method
+        private readonly DBManagementFactory $dbManagementFactory,
+        private readonly DumpManagement $dumpManagement
     ) {
     }
 
@@ -55,6 +55,7 @@ class Analyzer extends AbstractCommand
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws InvalidArgumentException
      */
     public function execute(InputInterface $input, OutputInterface $output): void
     {
@@ -68,7 +69,6 @@ class Analyzer extends AbstractCommand
         } else {
             $this->process($databaseUid, $tempDatabase);
         }
-
     }
 
     /**
@@ -86,47 +86,54 @@ class Analyzer extends AbstractCommand
     {
         try {
             $dbInfo = $this->getDbInfo($databaseUid);
-            $io = $this->getInputOutput();
-
             $tempDatabase = 'temp_' . time();
-            $filename = time() . '.sql';
 
+            $io = $this->getInputOutput();
             $io->info("Dump database...");
-            $method = $this->method->getMethodClass($dbInfo['method']);
-            $method->execute($dbInfo, $databaseUid, $filename);
+            $file = $this->dumpManagement->createDump($databaseUid);
 
-            /** @var \App\Service\Engines\Mysql $engine */
             $io->info("Import temporary database...");
-            $engine = $this->engine->getEngineClass($dbInfo['engine']);
-            $originFile = $this->appConfig->getDumpUntouchedDirectory() . '/' . $databaseUid . '/' . $filename;
+            $dbManager = new DbDataManager(
+                array_merge(
+                    $dbInfo,
+                    [
+                        'name' => $tempDatabase,
+                        'inputFile' => $file->getPathname()
+                    ]
+                )
+            );
 
-            $engine->setupTemporaryDatabase($tempDatabase, $originFile);
+            $dbManagement = $this->dbManagementFactory->create();
+            $dbManagement->create($dbManager);
+            $dbManagement->import($dbManager);
 
             $io->info("Analyzing...");
             $this->process($databaseUid, $tempDatabase);
 
             $io->info("Drop temporary database...");
-            $engine->dropTemporaryDatabase($tempDatabase);
+            $dbManagement->drop($dbManager);
         } catch (\Exception $exception) {
             $this->getInputOutput()->error($exception->getMessage());
         }
     }
 
     /**
+     * Process with existing database
+     *
      * @param string $databaseUid
      * @param string $tempDatabase
-     *
      * @return void
      * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
      * @throws EngineNotSupportedException
+     * @throws Exception
      * @throws NoSuchEngineException
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws Exception
+     * @throws InvalidArgumentException
      */
-    public function process(string $databaseUid, ?string $tempDatabase = null): void
+    public function process(string $databaseUid, string $tempDatabase): void
     {
         $dbInfo = $this->getDbInfo($databaseUid);
 
@@ -165,7 +172,7 @@ class Analyzer extends AbstractCommand
             }
 
             return $dbData;
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             return $this->getDatabaseRules->get($databaseUid);
         }
     }

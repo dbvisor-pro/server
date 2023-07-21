@@ -6,12 +6,13 @@ namespace App\Service\PublicCommand;
 
 use App\Enum\LogStatusEnum;
 use App\Exception\NoSuchMethodException;
-use App\Service\AppConfig;
 use App\Service\AppLogger;
-use App\Service\Engines\Mysql;
-use App\Service\Methods\Method;
+use App\Service\DumpManagement;
 use App\ServiceApi\Actions\GetScheduledUID;
 use App\ServiceApi\Actions\FinishDump;
+use App\ServiceApi\Actions\GetDatabaseRules;
+use DbManager\CoreBundle\DbProcessorFactory;
+use DbManager\CoreBundle\Service\DbDataManager;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -19,24 +20,27 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use DbManager\CoreBundle\DBManagement\DBManagementFactory;
 
 class DatabaseProcessor extends AbstractCommand
 {
     /**
      * @param AppLogger $appLogger
-     * @param AppConfig $appConfig
      * @param GetScheduledUID $getScheduledUID
      * @param FinishDump $finishDump
-     * @param Method $method
-     * @param Mysql $mysql
+     * @param DumpManagement $dumpManagement
+     * @param DBManagementFactory $dbManagementFactory
+     * @param DbProcessorFactory $processorFactory
+     * @param GetDatabaseRules $getDatabaseRules
      */
     public function __construct(
-        private readonly AppLogger $appLogger,
-        private readonly AppConfig $appConfig,
+        private readonly AppLogger       $appLogger,
         private readonly GetScheduledUID $getScheduledUID,
-        private readonly FinishDump $finishDump,
-        private readonly Method $method,
-        private readonly Mysql $mysql
+        private readonly FinishDump      $finishDump,
+        private readonly DumpManagement   $dumpManagement,
+        private readonly DBManagementFactory $dbManagementFactory,
+        private readonly DbProcessorFactory $processorFactory,
+        private readonly GetDatabaseRules $getDatabaseRules
     ) {
     }
 
@@ -61,40 +65,34 @@ class DatabaseProcessor extends AbstractCommand
                 throw new \Exception("Something went wrong. Scheduled uuid and database uuid is required");
             }
 
-            $this->init($scheduledData['db']['uid']);
-
-            $databaseConfig = $this->appConfig->getDatabaseConfig($scheduledData['db']['uid']);
-            $filename = time() . '.sql';
-
-            $method = $this->method->getMethodClass($databaseConfig['method']);
             $this->appLogger->logToService(
                 $scheduledData['uuid'],
                 LogStatusEnum::PROCESSING->value,
                 "Preparing backup"
             );
-            $method->execute($databaseConfig, $scheduledData['db']['uid'], $filename);
+            $file = $this->dumpManagement->createDump($scheduledData['db']['uid']);
 
-            // TODO automatically detect engine
-            $this->mysql->execute($scheduledData['uuid'], $scheduledData['db']['uid'], $filename);
+            $tempDatabase = 'temp_' . time();
 
-            $this->finishDump->execute($scheduledData['uuid'], 'ready', $filename);
-        }
-    }
+            $database = new DbDataManager(
+                array_merge(
+                    $this->getDatabaseRules->get($scheduledData['db']['uid']),
+                    [
+                        'name' => $tempDatabase,
+                        'inputFile' => $file->getPathname()
+                    ]
+                )
+            );
+            $dbManagement = $this->dbManagementFactory->create();
+            $dbManagement->create($database);
+            $dbManagement->import($database);
 
-    /**
-     * @param string $dbuid
-     * @return void
-     */
-    private function init(string $dbuid): void
-    {
-        $untouchedDir = $this->appConfig->getDumpUntouchedDirectory() . '/' . $dbuid;
-        $processedDir = $this->appConfig->getDumpProcessedDirectory() . '/' . $dbuid;
-        if (!is_dir($untouchedDir)) {
-            mkdir($untouchedDir);
-        }
+            $this->processorFactory->create($database->getEngine())->process($database);
 
-        if (!is_dir($processedDir)) {
-            mkdir($processedDir);
+            $dbManagement->dump($database);
+            $dbManagement->drop($database);
+
+            $this->finishDump->execute($scheduledData['uuid'], 'ready', $file->getFilename());
         }
     }
 }
