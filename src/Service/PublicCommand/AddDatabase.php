@@ -7,8 +7,8 @@ namespace App\Service\PublicCommand;
 use App\Enum\MethodsEnum;
 use App\Service\AppConfig;
 use App\Service\AppLogger;
-use App\Service\Database\Analyzer;
 use App\Service\InputOutput;
+use App\Service\PublicCommand\Database\Analyzer;
 use App\ServiceApi\Actions\AddDatabase as ServiceApiAddDatabase;
 use DbManager\CoreBundle\DBManagement\DBManagementFactory;
 use DbManager\CoreBundle\Exception\EngineNotSupportedException;
@@ -16,13 +16,13 @@ use DbManager\CoreBundle\Exception\NoSuchEngineException;
 use DbManager\CoreBundle\Exception\ShellProcessorException;
 use DbManager\CoreBundle\Service\DbDataManager;
 use Exception;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 class AddDatabase extends AbstractCommand
 {
@@ -222,7 +222,9 @@ class AddDatabase extends AbstractCommand
                 $dbManagement->import($dbDataManager);
         }
 
-        $this->databaseAnalyzer->process($this->config['db_uid'], $this->config['name']);
+        $this->databaseAnalyzer
+            ->setInputOutput($inputOutput)
+            ->createTempDbAndProcess($this->config['db_uid']);
         $inputOutput->info('The DB structure analyzing successfully finished.');
     }
 }

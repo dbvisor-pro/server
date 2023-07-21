@@ -74,6 +74,7 @@ class DatabaseProcessor extends AbstractCommand
             );
             $method->execute($databaseConfig, $scheduledData['db']['uid'], $filename);
 
+            // TODO automatically detect engine
             $this->mysql->execute($scheduledData['uuid'], $scheduledData['db']['uid'], $filename);
 
             $this->finishDump->execute($scheduledData['uuid'], 'ready', $filename);

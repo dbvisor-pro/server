@@ -10,6 +10,8 @@ use App\Exception\NoSuchMethodException;
 class Method
 {
     /**
+     * TODO: replace by service
+     *
      * @param Manual $manual
      * @param Dump $dump
      */
