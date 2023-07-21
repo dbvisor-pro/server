@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Service\PublicCommand\InstallApp;
+use App\Service\PublicCommand\Server\Add;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -18,18 +18,18 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 #[AsCommand(
-    name: 'app:install',
-    description: 'Install APP',
+    name: 'app:server:add',
+    description: 'Add server',
 )]
-final class AppInstallCommand extends Command
+final class AppServerAddCommand extends Command
 {
     /**
-     * @param InstallApp $installApp
+     * @param Add $serverAdd
      * @param LoggerInterface $logger
      * @param string|null $name
      */
     public function __construct(
-        protected readonly InstallApp $installApp,
+        protected readonly Add $serverAdd,
         protected readonly LoggerInterface $logger,
         string $name = null
     ) {
@@ -46,7 +46,7 @@ final class AppInstallCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->installApp->execute($input, $output);
+            $this->serverAdd->execute($input, $output);
         } catch (
             ClientExceptionInterface
             | RedirectionExceptionInterface
