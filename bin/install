@@ -1,0 +1,58 @@
+#!/bin/bash
+
+export PROJECT_ROOT="$(dirname "$(realpath $0)")"
+
+# Validate is docker installed and run
+function _validateDocker() {
+  if [ ! -x "$(command -v docker)" ]; then
+    echo "You must install docker before start."
+    exit;
+  fi
+}
+
+# Replace Function
+function _replace_pattern () {
+  local FROM=$1
+  local TO=$2
+  local FILE=$3
+
+  if [ "$(uname)" != "Darwin" ]; then
+    sed -i "s|${FROM}|${TO}|g" ${FILE}
+  else
+    LC_ALL=C sed -i '' "s|${FROM}|${TO}|g" ${FILE}
+  fi
+}
+
+echo "Init configurations"
+
+# 1. Validate environment.
+# 1.1. Check is docker installed
+_validateDocker
+
+# 1.2. Check is composer installed
+
+# 2. Install all requirement env.
+
+# 3. Init configurations:
+# 3.1. Get path to dumps folder
+# 3.2. Validate and create all folders and sub-folders
+
+# 4. Start docker with DB's
+
+# 5. Add required commands to cron
+"${PROJECT_ROOT}"/bin/console app:cron:install
+
+# 6. Start initializing / adding server and backups
+"${PROJECT_ROOT}"/bin/console app:server:add
+
+
+# Get path to dumps and configs folders
+folder=''
+while [[ ${folder} == '' || "${folder}" =~ "~" ]]; do
+  read -p "Enter the full the path to folder with dumps:" folder
+  if [ "${folder::1}" != "/" ]; then
+    folder="/${folder}"
+  fi
+done
+
+_replace_pattern "PROJECTS_FOLDER=" "PROJECTS_FOLDER=${folder}" ${ODOCKER_DIR_DATA}/.env

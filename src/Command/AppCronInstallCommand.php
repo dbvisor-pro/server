@@ -1,0 +1,57 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Command;
+
+use App\Service\Crontab\CrontabManager;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+#[AsCommand(
+    name: 'app:cron:install',
+    description: 'Generates and installs crontab for current user',
+)]
+final class AppCronInstallCommand extends Command
+{
+    /**
+     * @param CrontabManager $crontabManager
+     * @param string|null $name
+     */
+    public function __construct(
+        protected readonly CrontabManager $crontabManager,
+        string $name = null
+    ) {
+        parent::__construct($name);
+    }
+
+    /**
+     * Executes "app:cron:install" command.
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     *
+     * @return int|null
+     * @throws \Exception
+     */
+    protected function execute(InputInterface $input, OutputInterface $output): ?int
+    {
+        try {
+            if ($this->crontabManager->getTasks()) {
+                $output->writeln('<error>Crontab has already been generated and saved</error>');
+                return Command::FAILURE;
+            }
+
+            $this->crontabManager->saveTasks();
+        } catch (\Exception $e) {
+            $output->writeln('<error>' . $e->getMessage() . '</error>');
+            return Command::FAILURE;
+        }
+
+        $output->writeln('<info>Crontab has been generated and saved</info>');
+
+        return Command::SUCCESS;
+    }
+}
