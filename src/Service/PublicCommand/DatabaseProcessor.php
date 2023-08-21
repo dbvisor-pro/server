@@ -7,9 +7,9 @@ namespace App\Service\PublicCommand;
 use App\Enum\LogStatusEnum;
 use App\Exception\NoSuchMethodException;
 use App\Service\AppLogger;
+use App\ServiceApi\Entity\DatabaseDump;
+use Psr\Cache\InvalidArgumentException;
 use App\Service\DumpManagement;
-use App\ServiceApi\Actions\GetScheduledUID;
-use App\ServiceApi\Actions\FinishDump;
 use App\ServiceApi\Actions\GetDatabaseRules;
 use DbManager\CoreBundle\DbProcessorFactory;
 use DbManager\CoreBundle\Service\DbDataManager;
@@ -26,18 +26,16 @@ class DatabaseProcessor extends AbstractCommand
 {
     /**
      * @param AppLogger $appLogger
-     * @param GetScheduledUID $getScheduledUID
-     * @param FinishDump $finishDump
+     * @param DatabaseDump $databaseDump
      * @param DumpManagement $dumpManagement
      * @param DBManagementFactory $dbManagementFactory
      * @param DbProcessorFactory $processorFactory
      * @param GetDatabaseRules $getDatabaseRules
      */
     public function __construct(
-        private readonly AppLogger       $appLogger,
-        private readonly GetScheduledUID $getScheduledUID,
-        private readonly FinishDump      $finishDump,
-        private readonly DumpManagement   $dumpManagement,
+        private readonly AppLogger $appLogger,
+        private readonly DatabaseDump $databaseDump,
+        private readonly DumpManagement $dumpManagement,
         private readonly DBManagementFactory $dbManagementFactory,
         private readonly DbProcessorFactory $processorFactory,
         private readonly GetDatabaseRules $getDatabaseRules
@@ -55,11 +53,12 @@ class DatabaseProcessor extends AbstractCommand
      * @throws TransportExceptionInterface
      * @throws NoSuchMethodException
      * @throws \Exception
+     * @throws InvalidArgumentException
      */
     public function execute(InputInterface $input, OutputInterface $output): void
     {
         $this->appLogger->initAppLogger($output);
-        $scheduledData = $this->getScheduledUID->execute();
+        $scheduledData = $this->databaseDump->getScheduled();
         if (!empty($scheduledData)) {
             $dbuuid = $scheduledData['db']['uid'];
             $dumpuuid = $scheduledData['uuid'];
@@ -124,7 +123,7 @@ class DatabaseProcessor extends AbstractCommand
             );
             $dbManagement->drop($database);
 
-            $this->finishDump->execute($dumpuuid, 'ready', $destinationFile->getFilename());
+            $this->databaseDump->updateByUuid($dumpuuid, 'ready', $destinationFile->getFilename());
         }
     }
 }
