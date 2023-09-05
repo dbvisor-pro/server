@@ -17,7 +17,10 @@ class Manual extends AbstractMethod
      */
     public function execute(array $dbConfig, string $dbUuid, ?string $filename = null): string
     {
-        $originFile = $this->getOriginFile($dbUuid, $dbConfig['dump_name']);
+        $originFile = $dbConfig['dump_name'];
+        if (!is_file($originFile)) {
+            $originFile = $this->getOriginFile($dbUuid, $dbConfig['dump_name']);
+        }
 
         if (!$filename) {
             $filename = time() . '.sql';
