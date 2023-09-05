@@ -77,7 +77,7 @@ final class GetDatabaseRules extends AppService
             throw new Exception('An information about DB processing rules was not found...');
         }
 
-        return $this->prepareRules($data['rule']['rule']);
+        return $this->prepareRules($data['databaseRule']['rule']);
     }
 
     /**
