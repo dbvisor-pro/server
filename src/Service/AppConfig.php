@@ -128,7 +128,7 @@ class AppConfig
     {
         $path = trim(env('APP_CONFIG_PATH')) ? trim(env('APP_CONFIG_PATH')) : $this->getProjectDir();
 
-        return rtrim($path, '/') . '/config';
+        return rtrim($path, '/');
     }
 
     /**
@@ -140,7 +140,7 @@ class AppConfig
     {
         $path = !empty(trim(env('APP_DUMP_PATH'))) ? trim(env('APP_DUMP_PATH')) : $this->getProjectDir();
 
-        return rtrim($path, '/') . '/dumps';
+        return rtrim($path, '/');
     }
 
     /**

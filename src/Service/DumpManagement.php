@@ -19,6 +19,8 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class DumpManagement
 {
+    const DEFAULT_FILE_PERMISSION = 0777;
+
     /**
      * @param DatabaseDump $databaseDump
      * @param AppConfig $appConfig
@@ -116,11 +118,11 @@ class DumpManagement
         $untouchedDir = $this->appConfig->getDumpUntouchedDirectory() . '/' . $dbuid;
         $processedDir = $this->appConfig->getDumpProcessedDirectory() . '/' . $dbuid;
         if (!is_dir($untouchedDir)) {
-            mkdir($untouchedDir);
+            mkdir($untouchedDir, self::DEFAULT_FILE_PERMISSION, true);
         }
 
         if (!is_dir($processedDir)) {
-            mkdir($processedDir);
+            mkdir($untouchedDir, self::DEFAULT_FILE_PERMISSION, true);
         }
     }
 }
