@@ -118,20 +118,7 @@ final class GetDatabaseRules extends AppService
      */
     private function prepareRules(array $rules): array
     {
-        $transformedRules = [];
-        foreach ($rules as $rule) {
-            $transformedRules[$rule['table']] = [
-                'columns' => [],
-                'method' => $rule['method']
-            ];
-
-            foreach ($rule['columns'] as $column) {
-                $transformedRules[$rule['table']]['columns'][$column['name']] = $column;
-                // TODO REMOVE THIS SHIT
-                $transformedRules[$rule['table']]['columns'][$column['name']]['method'] = $rule['method'];
-            }
-        }
-
-        return $transformedRules;
+        // Nothing to do here. Rules should be delivered prepared :) 
+        return $rules;
     }
 }
