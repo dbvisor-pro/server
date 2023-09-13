@@ -118,7 +118,7 @@ final class GetDatabaseRules extends AppService
      */
     private function prepareRules(array $rules): array
     {
-        // Nothing to do here. Rules should be delivered prepared :) 
+        // Nothing to do here. Rules should be delivered prepared :)
         return $rules;
     }
 }

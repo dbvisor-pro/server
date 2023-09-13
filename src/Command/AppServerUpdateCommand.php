@@ -37,6 +37,19 @@ final class AppServerUpdateCommand extends Command
     }
 
     /**
+     * @inheritdoc
+     */
+    protected function configure(): void
+    {
+        $this->addOption(
+            'current',
+            null,
+            null,
+            'If this option set it command only updates server credentials'
+        );
+    }
+
+    /**
      * @param InputInterface $input
      * @param OutputInterface $output
      *
