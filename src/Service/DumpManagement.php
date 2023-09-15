@@ -44,6 +44,9 @@ class DumpManagement
     {
         $this->initDumpDirectories($dbUuid);
         $dbConfig = $this->appConfig->getDatabaseConfig($dbUuid);
+        if (!$dbConfig) {
+            throw new \Exception("Couldn't find database config");
+        }
         $method = $this->methodFactory->create($dbConfig['method']);
         $dumpFile = $method->execute($dbConfig, $dbUuid, $filename);
 
