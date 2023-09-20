@@ -154,22 +154,20 @@ class AppService
     protected function getSecurityToken(): string
     {
         $authType = $this->getAuthorizationType();
-        $key = 'apg-token-' . $authType;
+        $key = 'dbm-token-' . $authType;
 
         $token = $this->cacheAdapter->get($key, function (ItemInterface $item) use ($authType) {
-            if (!$item->isHit()) {
-                switch ($authType) {
-                    case self::AUTH_TYPE_TOKEN:
-                        $response = $this->getServerToken();
-                        break;
-                    case self::AUTH_TYPE_USER:
-                        $response = $this->getUserAccessToken();
-                        break;
-                }
-
-                $item->expiresAfter(3600);
-                $item->set($response);
+            switch ($authType) {
+                case self::AUTH_TYPE_TOKEN:
+                    $response = $this->getServerToken();
+                    break;
+                case self::AUTH_TYPE_USER:
+                    $response = $this->getUserAccessToken();
+                    break;
             }
+
+            $item->expiresAfter(3600);
+            $item->set($response);
             return $item->get();
         });
 
