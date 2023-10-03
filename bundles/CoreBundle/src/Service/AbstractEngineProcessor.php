@@ -93,7 +93,6 @@ abstract class AbstractEngineProcessor implements EngineInterface
                     break;
             }
         } catch (Exception $e) {
-            var_dump($e->getMessage());
             return;
         }
     }
@@ -108,7 +107,7 @@ abstract class AbstractEngineProcessor implements EngineInterface
      */
     protected function generateFake(string $method, array $options): string
     {
-        return $this->getFakerInstance()->{$method}(...$options);
+        return (string)$this->getFakerInstance()->{$method}(...$options);
         // TODO need to think about unique value. Currently it makes looping when there are a lot of records
         $value = $this->getFakerInstance()->{$method}(...$options);
         if (isset($this->generated[$method]) && in_array($value, $this->generated[$method])) {
