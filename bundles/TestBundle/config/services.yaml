@@ -1,0 +1,4 @@
+services:
+  DbManager\TestBundle\Command\ProcessDebugCommand:
+    autowire: true
+    tags: ['console.command']

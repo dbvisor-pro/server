@@ -1,0 +1,75 @@
+[
+{"type":"header","version":"5.2.1","comment":"Export to JSON plugin for PHPMyAdmin"},
+{"type":"database","name":"test_db1"},
+{"type":"table","name":"order","database":"test_db1","data":
+[
+{"id":"1","user_id":"1","shipping_address":"49017 Medhurst Fort\r\nKovacekton, KY 95425-7124","total":"118"},
+{"id":"2","user_id":"5","shipping_address":"1474 Aliza Inlet\r\nWest Eugenia, HI 14552","total":"117"},
+{"id":"3","user_id":"10","shipping_address":"5399 Bernier Forge Apt. 035\r\nBeierview, WY 36227","total":"76"},
+{"id":"4","user_id":"1","shipping_address":"9234 Wehner Ports Suite 111\r\nNorth Tyler, MD 64354-9422","total":"141"},
+{"id":"5","user_id":"5","shipping_address":"20806 Joseph Shore Suite 893\r\nLake Stevieland, AL 17668-7330","total":"125"},
+{"id":"6","user_id":"5","shipping_address":"93345 Cole Track Apt. 272\r\nLamontburgh, DE 55380","total":"56"},
+{"id":"7","user_id":"3","shipping_address":"20360 Tromp Junction\r\nThielshire, VT 19358-8353","total":"118"},
+{"id":"8","user_id":"6","shipping_address":"4102 Thompson Lodge\r\nArvidberg, MN 58238-4257","total":"143"},
+{"id":"9","user_id":"7","shipping_address":"70360 Shirley Ridges Apt. 156\r\nNorth Lunaside, OH 96848-4168","total":"103"},
+{"id":"10","user_id":"1","shipping_address":"842 Franco Pine\r\nSouth Kenyaport, WI 45283-4208","total":"150"}
+]
+}
+,{"type":"table","name":"order_items","database":"test_db1","data":
+[
+{"id":"1","order_id":"6","product_id":"5"},
+{"id":"2","order_id":"4","product_id":"4"},
+{"id":"3","order_id":"4","product_id":"5"},
+{"id":"4","order_id":"10","product_id":"4"},
+{"id":"5","order_id":"7","product_id":"1"},
+{"id":"6","order_id":"7","product_id":"2"},
+{"id":"7","order_id":"9","product_id":"10"},
+{"id":"8","order_id":"10","product_id":"9"},
+{"id":"9","order_id":"2","product_id":"8"},
+{"id":"10","order_id":"1","product_id":"1"}
+]
+}
+,{"type":"table","name":"products","database":"test_db1","data":
+[
+{"id":"1","name":"Modi Qui","price":"71","sku":"modi_qui","description":"Dolorum et inventore molestias maiores nihil. Omnis ea architecto facere et ut et.","url":"http:\/\/www.jenkins.biz\/in-at-dolorum-qui-explicabo-numquam-excepturi"},
+{"id":"2","name":"Nisi Eos","price":"86","sku":"nisi_eos","description":"Fugit dignissimos sequi quo est id dignissimos. Suscipit veniam quo sint ullam molestias. Et illo ut facilis impedit quas et. Dignissimos quo veniam architecto molestias.","url":"http:\/\/www.ohara.info\/"},
+{"id":"3","name":"Minus Qui","price":"46","sku":"minus_qui","description":"Ut porro ex debitis qui sed voluptas. Ut et reprehenderit error maiores dolores id. Magnam nulla deleniti eligendi qui ullam qui quo.","url":"http:\/\/langosh.org\/alias-enim-velit-aut-odit-omnis"},
+{"id":"4","name":"Autem Incidunt","price":"92","sku":"autem_incidunt","description":"Porro suscipit asperiores autem vel. Accusantium doloribus qui et eius. Quo consequatur nobis consequuntur vero. Ipsum rerum perferendis molestias rerum.","url":"http:\/\/veum.com\/consequuntur-et-officia-sunt-similique-ut-eius-aperiam"},
+{"id":"5","name":"Optio Architecto","price":"60","sku":"optio_architecto","description":"Nihil nemo sint molestiae vero eum consequatur aut. Ullam nostrum architecto porro. Autem aut voluptate aut et voluptas.","url":"http:\/\/www.brekke.net\/sunt-quis-quisquam-eum-enim-nobis-libero"},
+{"id":"6","name":"Ab Sit","price":"57","sku":"ab_sit","description":"Est neque qui suscipit impedit nostrum voluptatum ex et. Omnis temporibus praesentium ut commodi quis distinctio. Possimus nihil molestiae sed velit. Sit aliquid veniam a quia provident.","url":"https:\/\/morar.com\/porro-ad-tempora-praesentium-qui-et-unde.html"},
+{"id":"7","name":"Quis Sequi","price":"84","sku":"quis_sequi","description":"Nisi nulla vel ea. Distinctio excepturi mollitia ratione explicabo odio placeat eos. Atque dolorem error aliquam inventore iure odit cum officia.","url":"http:\/\/batz.org\/illo-amet-laborum-earum-porro-dolorum-voluptas.html"},
+{"id":"8","name":"Dignissimos Dolore","price":"85","sku":"dignissimos_dolore","description":"Aut esse aspernatur delectus provident magni. Sit dolorem ex nulla libero a dolorum qui. Quasi nobis repellendus et officiis eius fugiat est. Minus tempora nulla aut ab.","url":"https:\/\/schamberger.com\/perspiciatis-pariatur-quo-voluptatibus-quis-et-sed-qui-inventore.html"},
+{"id":"9","name":"Delectus Sit","price":"79","sku":"delectus_sit","description":"Placeat non aliquid quam ipsum. Ullam sed odio cumque temporibus autem iure. Ducimus consequuntur aut placeat blanditiis sed officiis.","url":"http:\/\/cronin.com\/reiciendis-velit-et-corporis-at-omnis-commodi"},
+{"id":"10","name":"Perspiciatis Et","price":"85","sku":"perspiciatis_et","description":"Et cupiditate totam harum atque sint iste alias ullam. Eum vitae est quis eum sequi. Enim tempore veritatis et magnam voluptatem esse numquam. Ut porro et sed voluptates saepe voluptas non.","url":"http:\/\/www.blanda.com\/et-modi-dolorem-corporis-id-et-hic-repellendus"}
+]
+}
+,{"type":"table","name":"users","database":"test_db1","data":
+[
+{"id":"1","email":"email@bridge.digital","firstname":"Bridge","lastname":"Digital","telephone":"111-111-111","company":"Bridge Digital"},
+{"id":"2","email":"maude.stamm@yahoo.com","firstname":"Terrell","lastname":"Christiansen","telephone":"(283) 662-5350","company":"Fay Group"},
+{"id":"3","email":"jonatan37@hotmail.com","firstname":"Earline","lastname":"Lubowitz","telephone":"1-413-342-0220","company":"Eichmann, Kunde and Dibbert"},
+{"id":"4","email":"chloe52@gmail.com","firstname":"Adelbert","lastname":"Dooley","telephone":"620.769.4961","company":"Ritchie-Hane"},
+{"id":"5","email":"cali.tromp@hyatt.com","firstname":"Elena","lastname":"Hessel","telephone":"+12314465303","company":"Hintz, Mraz and Abshire"},
+{"id":"6","email":"nella.ruecker@kassulke.info","firstname":"Thad","lastname":"Walter","telephone":"(229) 948-1509","company":"Conner-Schinner"},
+{"id":"7","email":"vbeier@leuschke.com","firstname":"Korey","lastname":"Cassin","telephone":"619-563-5702","company":"Jakubowski-Prohaska"},
+{"id":"8","email":"edythe.ankunding@yahoo.com","firstname":"Everett","lastname":"Bernhard","telephone":"1-959-414-8037","company":"Roberts, McLaughlin and Nader"},
+{"id":"9","email":"gunner.nicolas@hotmail.com","firstname":"Darron","lastname":"Goodwin","telephone":"830-249-0754","company":"Bogisich-Dickinson"},
+{"id":"10","email":"nicolas.rodrigo@hotmail.com","firstname":"Glennie","lastname":"Goyette","telephone":"+1-785-858-7903","company":"Gutkowski, Jaskolski and Torphy"},
+{"id":"11","email":"lourdes.ryan@hotmail.com","firstname":"Alfonzo","lastname":"Morar","telephone":"+1.360.645.4488","company":"Torphy, Rippin and Parisian"}
+]
+}
+,{"type":"table","name":"user_notifications","database":"test_db1","data":
+[
+{"id":"1","status":"voluptas","message":"Tenetur culpa voluptatem magni veniam. Ab eum ipsum est ab veniam ullam."},
+{"id":"2","status":"et","message":"Eos aut accusamus rerum accusantium placeat. Sed sed animi autem omnis libero. Ullam perspiciatis ad voluptatem doloremque sunt iste et error."},
+{"id":"3","status":"enim","message":"Nobis fuga non nihil dolor ullam. Similique assumenda amet neque sunt magni et. Ut in magni aut nemo. Qui est natus aut culpa."},
+{"id":"4","status":"consequuntur","message":"Est architecto et doloremque asperiores non illum eos. Id temporibus velit voluptatem magni id non maxime. Aut et ipsum similique suscipit. Aliquam facere cum sit numquam qui."},
+{"id":"5","status":"quaerat","message":"Eligendi reiciendis ad est adipisci. Laudantium sit maiores id porro. Officiis non rerum aut deleniti tempora."},
+{"id":"6","status":"provident","message":"Atque sed ut dolore vel similique consectetur. Quis eum et eaque ipsa."},
+{"id":"7","status":"sequi","message":"Nesciunt unde reprehenderit in accusamus eveniet. Quos dolorem sed ut ut molestiae exercitationem. Omnis et unde qui ut incidunt."},
+{"id":"8","status":"aut","message":"Ipsum libero quis consectetur in. Ratione dolorum est sint molestiae. Provident quia nulla iure. Debitis illo eos in. Autem voluptatibus praesentium fugiat non. In itaque voluptatem temporibus."},
+{"id":"9","status":"minus","message":"Sed occaecati sequi nisi cum. Ipsum consequatur aut omnis porro. Ea consequuntur ratione quia debitis voluptatem error aut. Corporis qui perferendis odit enim labore. Aperiam ut aut tempore."},
+{"id":"10","status":"doloremque","message":"Sed qui labore recusandae dolores beatae tenetur sit. Ipsam delectus soluta ipsum. Quia consequatur itaque modi ea maxime vitae rerum rerum. Voluptatem sunt totam dolore."}
+]
+}
+]

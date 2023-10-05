@@ -1,0 +1,15 @@
+{
+    "name": "db-manager/test-bundle",
+    "description": "Bundle for tests",
+    "type": "symfony-bundle",
+    "require": {
+    },
+    "autoload": {
+        "psr-4": {
+            "DbManager\\TestBundle\\": "src/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+    ]
+}

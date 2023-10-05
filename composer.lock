@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "866dfbe3d8d5bf84ee60a978c91d8b98",
+    "content-hash": "614cc3b59f9e3ea3f4e83f458167d91b",
     "packages": [
         {
             "name": "brick/math",
@@ -4384,6 +4384,28 @@
     ],
     "packages-dev": [
         {
+            "name": "db-manager/test-bundle",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "bundles/TestBundle",
+                "reference": "b86e9ab00b77dd56a0d1536e2dfce77d304ce063"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "DbManager\\TestBundle\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Bundle for tests",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
             "name": "dg/bypass-finals",
             "version": "v1.4.1",
             "source": {
@@ -6621,7 +6643,8 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "db-manager/core-bundle": 20,
-        "db-manager/mysql-bundle": 20
+        "db-manager/mysql-bundle": 20,
+        "db-manager/test-bundle": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
