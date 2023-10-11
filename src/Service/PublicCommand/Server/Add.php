@@ -25,8 +25,8 @@ final class Add extends AbstractServerCommand
         $inputOutput = $this->getInputOutput();
 
         try {
-            $userEmail  = $inputOutput->ask("Enter your Email");
-            $password   = $inputOutput->askHidden("Enter your Password");
+            $userEmail  = $this->input->getOption('email') ?? $inputOutput->ask("Enter your Email");
+            $password   = $this->input->getOption('password') ?? $inputOutput->askHidden("Enter your Password");
             $user       = $this->getUserByEmail->setCredentials($userEmail, $password)->execute($userEmail);
             $server     = $this->createServer($inputOutput, $user, $userEmail, $password);
 

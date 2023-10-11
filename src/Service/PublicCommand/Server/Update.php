@@ -25,11 +25,11 @@ final class Update extends AbstractServerCommand
         $inputOutput = $this->getInputOutput();
 
         try {
-            $userEmail  = $inputOutput->ask("Enter your Email");
-            $password   = $inputOutput->askHidden("Enter your Password");
+            $userEmail  = $this->input->getOption('email') ?? $inputOutput->ask("Enter your Email");
+            $password   = $this->input->getOption('password') ?? $inputOutput->askHidden("Enter your Password");
             $user       = $this->getUserByEmail->setCredentials($userEmail, $password)->execute($userEmail);
-            $server     = $this->updateServer($inputOutput, $user, $userEmail, $password);
 
+            $server     = $this->updateServer($inputOutput, $user, $userEmail, $password);
             $this->updateEnvFile($server['uuid'], $server['secret_key']);
 
             return true;
@@ -73,7 +73,6 @@ final class Update extends AbstractServerCommand
             $uuid = $inputOutput->ask("Enter server UUID");
         }
         $server = $this->serverApi->setCredentials($userEmail, $password)->get(htmlspecialchars($uuid));
-
         $serverWorkspace = str_replace('/api/workspaces/', '', $server['workspace']);
 
         if (!in_array($serverWorkspace, array_column($user['workspaces'], 'code'))) {
