@@ -65,7 +65,11 @@ _validatePhp
 # 3. Init configurations:
 cp ${PROJECT_ROOT}/env-sample ${PROJECT_ROOT}/.env
 
-# 3.1. Get path to dumps folder
+# 3.1. Get Service URL
+read -p "Enter the host name for service:" APP_SERVICE_URL
+_replace_pattern "APP_SERVICE_URL=" "APP_SERVICE_URL=${APP_SERVICE_URL}" ${PROJECT_ROOT}/.env
+
+# 3.2. Get path to dumps folder
 PROJECT_BACKUPS_FOLDERS=''
 while [[ ${PROJECT_BACKUPS_FOLDERS} == '' || "${PROJECT_BACKUPS_FOLDERS}" =~ "~" ]]; do
     read -p "Enter the full the path to folder with dumps:" PROJECT_BACKUPS_FOLDERS
@@ -73,20 +77,39 @@ while [[ ${PROJECT_BACKUPS_FOLDERS} == '' || "${PROJECT_BACKUPS_FOLDERS}" =~ "~"
         PROJECT_BACKUPS_FOLDERS="/${PROJECT_BACKUPS_FOLDERS}"
     fi
 done
-
 _replace_pattern "PROJECTS_FOLDER=" "PROJECTS_FOLDER=${PROJECT_BACKUPS_FOLDERS}" ${PROJECT_ROOT}/.env
+
+# 3.3. Select engines:
+options=("MySQL" "Postgres" "Continue")
+select option in "${options[@]}"; do
+    case $REPLY in
+        1)
+            cp ${PROJECT_ROOT}/env.mysql-sample ${PROJECT_ROOT}/.env.mysql
+            ;;
+        2)
+            cp ${PROJECT_ROOT}/env.postgres-sample ${PROJECT_ROOT}/.env.postgres
+            ;;
+        3)
+            break
+            ;;
+        *)
+            echo "Invalid option. Please select a valid option."
+            ;;
+    esac
+done
+
+# 3.4. Generate JWT secret
 _replace_pattern "CADDY_MERCURE_JWT_SECRET=" "CADDY_MERCURE_JWT_SECRET=$(_generateJwtKey)" ${PROJECT_ROOT}/.env
 
-# 3.2. Validate and create all folders and sub-folders
+# 3.5. Validate and create all folders and sub-folders
 mkdir -p "${PROJECT_BACKUPS_FOLDERS}"/dumps "${PROJECT_BACKUPS_FOLDERS}"/dumps/processed "${PROJECT_BACKUPS_FOLDERS}"/dumps/untoched \
   && chown -R "$(id -u)":"$(id -g)" "${PROJECT_BACKUPS_FOLDERS}"/*
 
 # 4. Start docker with DB's
-
-
+"${PROJECT_ROOT}"/bin/docker start
 
 # 5. Add required commands to cron
-"${PROJECT_ROOT}"/bin/console app:cron:install
+"${PROJECT_ROOT}"/bin/docker console app:cron:install
 
 # 6. Start initializing / adding server and backups
-"${PROJECT_ROOT}"/bin/console app:server:add
+"${PROJECT_ROOT}"/bin/docker console app:server:add

@@ -21,13 +21,17 @@ final class DBManagementFactory
     }
 
     /**
+     * TODO: Engine must be required and depends on DB
+     *
      * @param string|null $engine
+     *
      * @return DBManagementInterface
      * @throws NoSuchEngineException
      */
     public function create(?string $engine = null): DBManagementInterface
     {
         $engine = $engine ?? env('DATABASE_ENGINE');
+
         return $this->getEngine($engine);
     }
 

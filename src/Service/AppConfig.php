@@ -13,6 +13,13 @@ class AppConfig
 {
     private array $databaseConfig = [];
 
+    /**
+     * Get DB engine configurations
+     *
+     * @var array
+     */
+    private array $dbEngineConfig = [];
+
     private ?array $defaultConfig = null;
 
     /**
@@ -66,12 +73,51 @@ class AppConfig
     }
 
     /**
+     * Get configuration by DB engine
+     *
+     * @param string $config
+     * @param string $engine
+     *
+     * @return string|null
+     * @throws Exception
+     */
+    public function getDbEngineConfig(string $config, string $engine = 'mysql'): ?string
+    {
+        if (!isset($this->dbEngineConfig[$engine])) {
+            if (!$this->filesystem->exists($this->getProjectDir() . '/.env.' . $engine)) {
+                throw new Exception("Can't allocate database configurations.");
+            }
+
+            $this->dbEngineConfig[$engine] = array_change_key_case(
+                $this->getConfigFile($this->getProjectDir(), '.env.' . $engine)
+            );
+        }
+
+        return $this->dbEngineConfig[$engine][strtolower($config)] ?? null;
+    }
+
+    /**
      * @param string $config
      * @return string|null
      */
     public function getConfig(string $config): null | string
     {
         return $this->defaultConfig[strtolower($config)] ?? null;
+    }
+
+    /**
+     * Get DB password
+     *
+     * @param string $engine
+     *
+     * @return string
+     * @throws Exception
+     */
+    public function getPassword(string $engine = 'mysql'): string
+    {
+        return $this->getDbEngineConfig('database_password', $engine)
+            ? $this->getDbEngineConfig('database_password', $engine)
+            : '';
     }
 
     /**

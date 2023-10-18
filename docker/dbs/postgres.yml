@@ -4,15 +4,14 @@ services:
   # -------------- #
   # -- Database -- #
   # -------------- #
-  mysql:
-    image: mariadb:${MARIA_DB_VERSION:-latest}
-    command: --max_allowed_packet=64M
+  postgres:
+    image: postgres:${POSTGRES_DB_VERSION:-latest}
     environment:
-      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-root}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-root}
     ports:
-      - ${DATABASE_PORT:-3306}:3306
+      - ${DATABASE_PORT:-5432}:5432
     expose:
-      - ${DATABASE_PORT:-3306}
+      - ${DATABASE_PORT:-5432}
     init: true
     networks:
       - db-manager-network

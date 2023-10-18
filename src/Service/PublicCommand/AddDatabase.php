@@ -34,7 +34,7 @@ class AddDatabase extends AbstractCommand
      * @param AppConfig $appConfig
      * @param Server $serverApi
      * @param ServiceApiAddDatabase $addDatabase
-     * @param DBManagementFactory $dbManagementFactory
+     * @param Analyzer $databaseAnalyzer
      */
     public function __construct(
         private readonly AppLogger $appLogger,

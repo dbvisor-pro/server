@@ -23,7 +23,6 @@ help:
 	@echo "$(call format,start,'Start all containers.')"
 	@echo "$(call format,stop,'Stop server container.')"
 	@echo "$(call format,stopall,'Stop all containers.')"
-	@echo "$(call format,status,'Check the container status.')"
 	@echo "$(call format,console,'Run symfony bin/console command.')"
 
 console:
@@ -47,8 +46,8 @@ start-db:
 stop-db:
 	@./bin/docker/stop-db $(call args)
 
-status:
-	@./bin/docker/status
-
 logs:
 	@./bin/docker/logs
+
+app-db-add:
+	@./bin/docker/console app:db:add

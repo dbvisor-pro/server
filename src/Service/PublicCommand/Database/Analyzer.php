@@ -122,6 +122,7 @@ class Analyzer extends AbstractCommand
      *
      * @param string $databaseUid
      * @param string $tempDatabase
+     *
      * @return void
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
