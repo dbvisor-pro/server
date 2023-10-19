@@ -5,6 +5,9 @@ services:
     build:
       context: .
       target: frankenphp_prod
+      args:
+        UID: ${DOCKER_UID}
+        GID: ${DOCKER_GID}
     image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
     environment:
@@ -42,6 +45,8 @@ services:
     restart: always
     ports:
       - 8080:8080
+    networks:
+      - db-manager-network
 
 volumes:
   caddy_data:
@@ -51,4 +56,3 @@ networks:
   db-manager-network:
     external: true
     name: db-manager-network
-    driver: bridge

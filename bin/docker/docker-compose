@@ -11,8 +11,15 @@ ENV_FILE=${PROJECT_ROOT}/.env
 # Get project configurations
 export $(cat "${ENV_FILE}" | grep -v ^# | grep -v ^alias | xargs)
 
-if [[ -z $APP_DUMP_PATH ]]; then
-  export $APP_DUMP_PATH='/app/dumps/'
+# Get path to config
+if [ "$(uname)" == "Darwin" ]; then
+  export DOCKER_UID=1000
+  export DOCKER_GID=1000
+else
+  # shellcheck disable=SC2155
+  export DOCKER_UID=$(id -u)
+  # shellcheck disable=SC2155
+  export DOCKER_GID=$(id -g)
 fi
 
 if docker compose version > /dev/null 2>&1; then

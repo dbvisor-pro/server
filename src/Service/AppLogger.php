@@ -54,6 +54,7 @@ class AppLogger
      * @param string $status
      * @param string $message
      * @param bool $localLog
+     *
      * @return void
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface

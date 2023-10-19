@@ -21,4 +21,3 @@ networks:
   db-manager-network:
     external: true
     name: db-manager-network
-    driver: bridge

@@ -52,7 +52,8 @@ final class AppDumpCommand extends Command
             'engine',
             null,
             InputOption::VALUE_OPTIONAL,
-            'Db Engine ( mysql | postgres )'
+            'Db Engine ( mysql | postgres )',
+            'mysql'
         );
     }
 

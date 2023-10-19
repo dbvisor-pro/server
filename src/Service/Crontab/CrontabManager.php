@@ -24,8 +24,14 @@ class CrontabManager
      * List of Tasks
      */
     public const CRON_TASKS = [
-        '* * * * * /bin/php {rootDir}/bin/console app:db:process >> {logDir}/cron.log',
-        '* * * * * /bin/php {rootDir}/bin/console app:db:backups:clear >> {logDir}/cron.log'
+        [
+            'time'    => '* * * * *',
+            'command' => '{rootDir}/bin/console app:db:process >> {logDir}/cron.log'
+        ],
+        [
+            'time'    => '* * * * *',
+            'command' => '{rootDir}/bin/console app:db:backups:clear >> {logDir}/cron.log'
+        ]
     ];
     /**#@-*/
 
@@ -66,10 +72,12 @@ class CrontabManager
     }
 
     /**
-     * @return array|string[]
+     * Get cron tasks list
+     *
+     * @return array
      * @throws Exception
      */
-    public function getTasks()
+    public function getTasks(): array
     {
         $this->checkSupportedOs();
         $content = $this->getCrontabContent();
@@ -77,10 +85,8 @@ class CrontabManager
 
         if (preg_match($pattern, $content, $matches)) {
             $tasks = trim($matches[2], PHP_EOL);
-            $tasks = explode(PHP_EOL, $tasks);
-            return $tasks;
+            return explode(PHP_EOL, $tasks);
         }
-
         return [];
     }
 
@@ -99,11 +105,7 @@ class CrontabManager
         $tasks = self::CRON_TASKS;
 
         foreach ($tasks as $key => $task) {
-            $tasks[$key] = str_replace(
-                ['{rootDir}', '{logDir}'],
-                [$baseDir, $logDir],
-                $task[$key]
-            );
+            $tasks[$key]['command'] = str_replace(['{rootDir}', '{logDir}'], [$baseDir, $logDir], $task['command']);
         }
 
         $content = $this->getCrontabContent();
@@ -123,7 +125,7 @@ class CrontabManager
      */
     private function generateSection(string $content, array $tasks = []): string
     {
-        if ($tasks) {
+        if (count($tasks)) {
             // Add EOL symbol to previous line if not exist.
             if (!str_ends_with($content, PHP_EOL)) {
                 $content .= PHP_EOL;
@@ -131,7 +133,7 @@ class CrontabManager
 
             $content .= $this->getTasksBlockStart() . PHP_EOL;
             foreach ($tasks as $task) {
-                $content .= $task['expression'] . ' ' . PHP_BINARY . ' ' . $task['command'] . PHP_EOL;
+                $content .= $task['time'] . ' ' . PHP_BINARY . ' ' . $task['command'] . PHP_EOL;
             }
             $content .= $this->getTasksBlockEnd() . PHP_EOL;
         }

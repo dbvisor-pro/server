@@ -7,6 +7,14 @@ FROM composer/composer:2-bin AS composer_upstream
 # BaseFrankenPHP image
 FROM frankenphp_upstream AS frankenphp_base
 
+ARG GID
+ARG UID
+
+RUN addgroup -g $GID app \
+    && adduser -G app -u $UID -h /app -s /bin/bash -S app
+
+USER app:app
+
 WORKDIR /app
 
 # persistent / runtime deps
@@ -17,7 +25,9 @@ RUN apk add --no-cache \
     gettext \
     git \
     nss-tools \
-    openssl
+    openssl \
+    mariadb-client \
+    postgresql-client
 
 RUN set -eux; \
     install-php-extensions \

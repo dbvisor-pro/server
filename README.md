@@ -1,11 +1,9 @@
-# DB Manager Server Symfony Tool #
+# DB Manager Server Tool #
 
 Requirements:
 ------------
-* PHP 8.1^
 * Docker 
 * Docker Compose
-* Composer
 
 Installation
 ------------

@@ -39,7 +39,8 @@ final class AppCronInstallCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): ?int
     {
         try {
-            if ($this->crontabManager->getTasks()) {
+            $tasks = $this->crontabManager->getTasks();
+            if (count($tasks)) {
                 $output->writeln('<error>Crontab has already been generated and saved</error>');
                 return Command::FAILURE;
             }

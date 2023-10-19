@@ -19,20 +19,33 @@ help:
 	@echo ""
 	@echo "$(call yellow,Use the following CLI commands:)"
 	@echo "$(call red,===============================)"
+	@echo "$(call format,cli,'Run the cli commands')"
 	@echo "$(call format,setup,'Run the project setup process.')"
 	@echo "$(call format,start,'Start all containers.')"
 	@echo "$(call format,stop,'Stop server container.')"
 	@echo "$(call format,stopall,'Stop all containers.')"
-	@echo "$(call format,console,'Run symfony bin/console command.')"
+	@echo "$(call format,console,'Run symfony bin/console command, to run commands pass them via the param c=, ex.: c='app:db:add')"
+
+cli:
+	@$(eval c ?=)
+	@./bin/docker/cli $(c)
+
+composer:
+	@$(eval c ?=)
+	@./bin/docker/cli composer $(c)
 
 console:
-	@./bin/docker/console $(call args)
+	@$(eval c ?=)
+	@./bin/docker/cli bin/console $(c)
+
+cc: c=c:c
+cc: console
 
 setup:
 	@./bin/setup
 
 start:
-	@./bin/docker/start
+	@./bin/docker/start $(call args)
 
 stop:
 	@./bin/docker/stop
@@ -48,6 +61,3 @@ stop-db:
 
 logs:
 	@./bin/docker/logs
-
-app-db-add:
-	@./bin/docker/console app:db:add
