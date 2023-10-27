@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace DbManager\TestBundle\Command;
 
-use App\Exception\NoSuchMethodException;
-use App\Service\PublicCommand\DatabaseDebugProcessor;
 use Psr\Log\LoggerInterface;
+use DbManager\TestBundle\Service\PublicCommand\DatabaseDebugProcessor;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -70,7 +69,6 @@ final class ProcessDebugCommand extends Command
             | RedirectionExceptionInterface
             | ServerExceptionInterface
             | DecodingExceptionInterface
-            | NoSuchMethodException
             | TransportExceptionInterface $e
         ) {
             $this->logger->error($e->getMessage());
