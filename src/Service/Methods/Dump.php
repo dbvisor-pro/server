@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Methods;
 
+use App\Service\InputOutput;
 use \Exception;
 
 class Dump extends AbstractMethod
@@ -33,5 +34,52 @@ class Dump extends AbstractMethod
         ));
 
         return $destFile;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function validate(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCode(): string
+    {
+        return 'dump';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getDescription(): string
+    {
+        return 'Database located at current server. Use regular mysqldump command';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function askConfig(InputOutput $inputOutput): array
+    {
+        $validateRequired = function ($value) {
+            if (empty($value)) {
+                throw new \RuntimeException('Value is required.');
+            }
+
+            return $value;
+        };
+        $config = [];
+
+        $config['db_host'] = $inputOutput->ask('Host', 'localhost', $validateRequired);
+        $config['db_user'] = $inputOutput->ask('User:', 'root', $validateRequired);
+        $config['db_password'] = $inputOutput->askHidden('Password');
+        $config['db_name'] = $inputOutput->ask('Database name:', null, $validateRequired);
+        $config['db_port'] = $inputOutput->ask('Port: ', '3306', $validateRequired);
+
+        return $config;
     }
 }

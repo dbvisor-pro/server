@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Methods;
 
 use App\Exception\DumpNotFoundException;
+use App\Service\InputOutput;
 
 class Manual extends AbstractMethod
 {
@@ -35,5 +36,39 @@ class Manual extends AbstractMethod
 //        rename($originFile, $destFile);
 
         return $destFile;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function validate(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function askConfig(InputOutput $inputOutput): array
+    {
+        $config = [];
+        $config['dump_name'] = $inputOutput->ask('Enter full path to DB dump file?');
+        return $config;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCode(): string
+    {
+        return 'manual';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getDescription(): string
+    {
+        return 'Configure manual dump deployment';
     }
 }

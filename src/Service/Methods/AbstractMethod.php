@@ -29,4 +29,15 @@ abstract class AbstractMethod implements MethodInterface
     {
         return $this->appConfig->getDumpUntouchedDirectory() . '/' . $dbUuid . '/' . $filename;
     }
+
+    /**
+     * For now support everything
+     *
+     * @param string $engine
+     * @return bool
+     */
+    public function support(string $engine): bool
+    {
+        return true;
+    }
 }

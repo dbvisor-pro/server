@@ -56,5 +56,12 @@ services:
                 work_db_port: '%app.work_db_port%',
             }
 
+    App\Service\Methods\MethodProcessor:
+        arguments:
+            $methods:
+                - "@App\\Service\\Methods\\Manual"
+                - "@App\\Service\\Methods\\Dump"
+                - "@App\\Service\\Methods\\DumpOverSsh"
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

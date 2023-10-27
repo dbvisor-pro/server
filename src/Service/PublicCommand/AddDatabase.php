@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service\PublicCommand;
 
-use App\Enum\MethodsEnum;
 use App\Service\AppConfig;
 use App\Service\AppLogger;
 use App\Service\InputOutput;
+use App\Service\Methods\MethodInterface;
+use App\Service\Methods\MethodProcessor;
 use App\Service\PublicCommand\Database\Analyzer;
 use App\ServiceApi\Actions\AddDatabase as ServiceApiAddDatabase;
 use App\ServiceApi\Entity\Server;
-use DbManager\CoreBundle\DBManagement\DBManagementFactory;
 use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -34,14 +34,16 @@ class AddDatabase extends AbstractCommand
      * @param AppConfig $appConfig
      * @param Server $serverApi
      * @param ServiceApiAddDatabase $addDatabase
-     * @param DBManagementFactory $dbManagementFactory
+     * @param Analyzer $databaseAnalyzer
+     * @param MethodProcessor $methodProcessor
      */
     public function __construct(
         private readonly AppLogger $appLogger,
         private readonly AppConfig $appConfig,
         private readonly Server $serverApi,
         private readonly ServiceApiAddDatabase $addDatabase,
-        protected readonly Analyzer $databaseAnalyzer
+        protected readonly Analyzer $databaseAnalyzer,
+        private readonly MethodProcessor $methodProcessor
     ) {
     }
 
@@ -143,54 +145,21 @@ class AddDatabase extends AbstractCommand
      */
     private function getDumpMethods(): void
     {
-        $methods = [];
-        foreach (MethodsEnum::cases() as $case) {
-            $methods[$case->value] = $case->description($this->config['engine']);
+        /** @var MethodInterface[] $methods */
+        $methods = $this->methodProcessor->getMethods($this->config['engine']);
+        $availableMethods = [];
+
+        foreach ($methods as $method) {
+            $availableMethods[$method->getCode()] = $method->getDescription();
         }
+
         $this->config['method'] = $this->getInputOutput()->choice(
             "Please select how to create dumps of real database?",
-            $methods
+            $availableMethods
         );
 
-        switch ($this->config['method']) {
-            case MethodsEnum::DUMP->value:
-                $this->askDbCredentials();
-                break;
-            case MethodsEnum::SSH_DUMP->value:
-                $this->askSshCredentials();
-                $this->askDbCredentials();
-                break;
-            case MethodsEnum::MANUAL->value:
-                $this->config['dump_name'] = $this->getInputOutput()
-                    ->ask('Enter full path to DB dump file?');
-        }
-    }
-
-    /**
-     * @return void
-     * @throws Exception
-     */
-    private function askDbCredentials(): void
-    {
-        $validateRequired = function ($value) {
-            if (empty($value)) {
-                throw new \RuntimeException('Value is required.');
-            }
-
-            return $value;
-        };
-
-        $inputOutput = $this->getInputOutput();
-
-        $this->config['db_host'] = $inputOutput->ask('Host', 'localhost', $validateRequired);
-        $this->config['db_user'] = $inputOutput->ask('User:', 'root', $validateRequired);
-        $this->config['db_password'] = $inputOutput->askHidden('Password');
-        $this->config['db_name'] = $inputOutput->ask('Database name:', null, $validateRequired);
-        $this->config['db_port'] = $inputOutput->ask('Port: ', '3306', $validateRequired);
-    }
-
-    private function askSshCredentials(): void
-    {
+        $methodConfig = $methods[$this->config['method']]->askConfig($this->getInputOutput());
+        $this->config = array_merge($methodConfig, $this->config);
     }
 
     /**
