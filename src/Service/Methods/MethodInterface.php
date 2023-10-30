@@ -53,5 +53,5 @@ interface MethodInterface
      *
      * @return bool
      */
-    public function validate(): bool;
+    public function validate(array $config): bool;
 }

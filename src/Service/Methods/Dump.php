@@ -9,7 +9,6 @@ use \Exception;
 
 class Dump extends AbstractMethod
 {
-
     /**
      * @param array $dbConfig
      * @param string $dbUuid
@@ -26,9 +25,11 @@ class Dump extends AbstractMethod
         $destFile = $this->getOriginFile($dbUuid, $filename);
         $dbPassword = !empty($dbConfig['db_password']) ? sprintf('-p%s', $dbConfig['db_password']) : '';
         $this->shellProcess->run(sprintf(
-            "mysqldump -u %s %s %s > %s",
+            "mysqldump -u %s %s -h%s -P%s %s > %s",
             $dbConfig['db_user'],
             $dbPassword,
+            $dbConfig['db_host'],
+            $dbConfig['db_port'],
             $dbConfig['db_name'],
             $destFile
         ));
@@ -37,11 +38,22 @@ class Dump extends AbstractMethod
     }
 
     /**
-     * @inheritDoc
+     * @param array $config
+     * @return bool
+     * @throws Exception
      */
-    public function validate(): bool
+    public function validate(array $config): bool
     {
-        return true;
+        $dbPassword = !empty($config['db_password']) ? sprintf('-p%s', $config['db_password']) : '';
+        $process = $this->shellProcess->run(sprintf(
+            "mysql -u %s %s -h%s -P%s %s -e 'SELECT 1'",
+            $config['db_user'],
+            $dbPassword,
+            $config['db_host'],
+            $config['db_port'],
+            $config['db_name'],
+        ));
+        return str_replace("\n", "", $process->getOutput()) === '11';
     }
 
     /**

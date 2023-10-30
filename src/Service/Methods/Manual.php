@@ -41,9 +41,9 @@ class Manual extends AbstractMethod
     /**
      * @inheritDoc
      */
-    public function validate(): bool
+    public function validate(array $config): bool
     {
-        return true;
+        return is_file($config['dump_name']);
     }
 
     /**

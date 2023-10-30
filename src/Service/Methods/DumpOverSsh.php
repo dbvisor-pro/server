@@ -21,9 +21,26 @@ class DumpOverSsh extends AbstractMethod
      */
     public function execute(array $dbConfig, string $dbUuid, ?string $filename = null): string
     {
+        if (!$filename) {
+            $filename = time() . '.sql';
+        }
 
+        $destFile = $this->getOriginFile($dbUuid, $filename);
+        $dbPassword = !empty($dbConfig['db_password']) ? sprintf('-p%s', $dbConfig['db_password']) : '';
+        $mysqlCommand = sprintf(
+            "mysqldump -u %s %s -h%s -P%s %s",
+            $dbConfig['db_user'],
+            $dbPassword,
+            $dbConfig['db_host'],
+            $dbConfig['db_port'],
+            $dbConfig['db_name']
+        );
 
-        return '';
+        $sshCommand = $this->prepareSshCommand($dbConfig);
+
+        $this->shellProcess->run(sprintf('%s "%s" > %s', $sshCommand, $mysqlCommand, $destFile));
+
+        return $destFile;
     }
 
     /**
@@ -43,11 +60,26 @@ class DumpOverSsh extends AbstractMethod
     }
 
     /**
-     * @inheritDoc
+     * @param array $config
+     * @return bool
+     * @throws Exception
      */
-    public function validate(): bool
+    public function validate(array $config): bool
     {
-        return true;
+        $dbPassword = !empty($config['db_password']) ? sprintf('-p%s', $config['db_password']) : '';
+        $mysqlCommand = sprintf(
+            "mysql -u%s -h%s %s %s -e 'SELECT 1'",
+            $config['db_user'],
+            $config['db_host'],
+            $dbPassword,
+            $config['db_name']
+        );
+
+        $sshCommand = $this->prepareSshCommand($config);
+
+        $process = $this->shellProcess->run(sprintf('%s "%s"', $sshCommand, $mysqlCommand));
+
+        return str_replace("\n", "", $process->getOutput()) === '11';
     }
 
     /**
@@ -61,6 +93,44 @@ class DumpOverSsh extends AbstractMethod
         ];
     }
 
+    /**
+     * Generate shell string to connect to SSH from config
+     *
+     * @param array $config
+     * @return string
+     * @throws Exception
+     */
+    private function prepareSshCommand(array $config): string
+    {
+        if ($config['ssh_auth'] === self::AUTH_TYPE_PASS) {
+            $sshCommand = sprintf(
+                "sshpass -p '%s' ssh %s@%s -p %s",
+                $config['ssh_password'],
+                $config['ssh_user'],
+                $config['ssh_host'],
+                $config['ssh_port']
+            );
+        } elseif ($config['ssh_auth'] === self::AUTH_TYPE_KEY) {
+            $sshCommand = sprintf(
+                "ssh -i %s %s@%s -p %s",
+                $config['ssh_key_path'],
+                $config['ssh_user'],
+                $config['ssh_host'],
+                $config['ssh_port']
+            );
+        } else {
+            throw new \Exception(sprintf("Undefined authentication type %s", $config['ssh_auth']));
+        }
+
+        return $sshCommand;
+    }
+
+    /**
+     * Ask for SSH credentials
+     *
+     * @param InputOutput $inputOutput
+     * @return array
+     */
     private function askSSHConfig(InputOutput $inputOutput): array
     {
         $validateRequired = function ($value) {

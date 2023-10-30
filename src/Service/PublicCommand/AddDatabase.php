@@ -87,7 +87,7 @@ class AddDatabase extends AbstractCommand
 
         $server = $this->serverApi->get($this->appConfig->getServerUuid());
 
-        $this->config['name']   = $inputOutput->ask("Enter database name");
+        $this->config['name'] = $inputOutput->ask("Enter database name");
         $this->config['engine'] = $inputOutput->choice("Select engine", [
             'mysql', 'postgresql'
         ]);
@@ -95,23 +95,32 @@ class AddDatabase extends AbstractCommand
             'custom', 'magento', 'wordpress', 'shopware'
         ]);
 
-        $this->sendDatabaseToService($server);
         $this->getDumpMethods();
 
         if ($this->validateConnection()) {
+            $this->sendDatabaseToService($server);
             $this->appConfig->saveDatabaseConfig($this->config);
 
             $this->analyzeDb($inputOutput);
+        } else {
+            $this->getInputOutput()->warning("Can't connect to database");
+            if ($this->getInputOutput()->confirm("Do you want continue?", false)) {
+                $this->sendDatabaseToService($server);
+            } else {
+                $this->getInputOutput()->warning("Database is not saved. Please try one more time");
+            }
         }
         $this->addDatabase();
     }
 
     /**
      * @return bool
+     * @throws Exception
      */
     private function validateConnection(): bool
     {
-        return true;
+        $method = $this->methodProcessor->getMethodByCode($this->config['method']);
+        return $method->validate($this->config);
     }
 
     /**
