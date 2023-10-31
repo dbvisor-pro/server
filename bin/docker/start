@@ -8,8 +8,6 @@ if [[ -n ${1} && ${1} == '-b' ]]; then
 fi
 bin/docker/docker-compose up -d
 
-bin/docker/cron start
-
 # Start required DBs
 if [ -f "${PROJECT_ROOT}/.env.mysql" ]; then
     bin/docker/start-db mysql
@@ -18,3 +16,5 @@ fi
 if [ -f "${PROJECT_ROOT}/.env.postgres" ]; then
     bin/docker/start-db postgres
 fi
+
+bin/docker/cron start

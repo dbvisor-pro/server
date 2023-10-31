@@ -8,6 +8,7 @@ use App\Service\Crontab\CrontabManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -28,6 +29,18 @@ final class AppCronInstallCommand extends Command
     }
 
     /**
+     * @inheritdoc
+     */
+    protected function configure(): void
+    {
+        $this->addOption(
+            'hide-errors',
+            null,
+            InputOption::VALUE_OPTIONAL
+        );
+    }
+
+    /**
      * Executes "app:cron:install" command.
      *
      * @param InputInterface $input
@@ -40,19 +53,22 @@ final class AppCronInstallCommand extends Command
     {
         try {
             $tasks = $this->crontabManager->getTasks();
-            if (count($tasks)) {
-                $output->writeln('<error>Crontab has already been generated and saved</error>');
-                return Command::FAILURE;
+            if (!count($tasks)) {
+                $this->crontabManager->saveTasks();
+
+                $output->writeln('<info>Crontab has been generated and saved</info>');
+                return Command::SUCCESS;
             }
 
-            $this->crontabManager->saveTasks();
+            if ($input->hasOption('hide-errors')) {
+                return Command::SUCCESS;
+            }
+
+            $output->writeln('<error>Crontab has already been generated and saved</error>');
+            return Command::FAILURE;
         } catch (\Exception $e) {
             $output->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::FAILURE;
         }
-
-        $output->writeln('<info>Crontab has been generated and saved</info>');
-
-        return Command::SUCCESS;
     }
 }

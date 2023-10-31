@@ -9,6 +9,7 @@
 /public/bundles/
 /var/
 /vendor/
+/backups/*
 
 ###> symfony/phpunit-bridge ###
 .phpunit.result.cache
