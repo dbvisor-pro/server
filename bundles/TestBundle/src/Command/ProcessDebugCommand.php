@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Command;
+namespace DbManager\TestBundle\Command;
 
-use App\Exception\NoSuchMethodException;
-use App\Service\PublicCommand\DatabaseDebugProcessor;
-use DbManager\CoreBundle\Exception\EngineNotSupportedException;
 use Psr\Log\LoggerInterface;
+use DbManager\TestBundle\Service\PublicCommand\DatabaseDebugProcessor;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,7 +24,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 final class ProcessDebugCommand extends Command
 {
     /**
-     * @param DatabaseProcessor $databaseProcessor
+     * @param DatabaseDebugProcessor $databaseProcessor
      * @param LoggerInterface $logger
      * @param string|null $name
      */
@@ -38,6 +36,9 @@ final class ProcessDebugCommand extends Command
         parent::__construct($name);
     }
 
+    /**
+     * @return void
+     */
     protected function configure(): void
     {
         $this->addOption(
@@ -53,12 +54,11 @@ final class ProcessDebugCommand extends Command
         );
     }
 
-
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int
-     * @throws \Exception
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -69,7 +69,6 @@ final class ProcessDebugCommand extends Command
             | RedirectionExceptionInterface
             | ServerExceptionInterface
             | DecodingExceptionInterface
-            | NoSuchMethodException
             | TransportExceptionInterface $e
         ) {
             $this->logger->error($e->getMessage());

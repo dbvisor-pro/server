@@ -10,6 +10,7 @@ use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -47,6 +48,18 @@ final class AppServerUpdateCommand extends Command
             null,
             null,
             'If this option set it command only updates server credentials'
+        );
+        $this->addOption(
+            'email',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Email to authorize'
+        );
+        $this->addOption(
+            'password',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Password to authorize'
         );
     }
 

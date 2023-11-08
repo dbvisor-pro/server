@@ -9,6 +9,7 @@
          convertDeprecationsToExceptions="false"
 >
     <php>
+        <env name="KERNEL_CLASS" value="App\Kernel" />
         <ini name="display_errors" value="1" />
         <ini name="error_reporting" value="-1" />
         <server name="APP_ENV" value="test" force="true" />
@@ -18,6 +19,7 @@
         <server name="DATABASE_USER" value="root" />
         <server name="DATABASE_PASSWD" value="12345" />
         <server name="DATABASE_HOST" value="mysql" />
+        <server name="DATABASE_NAME" value="test_db1" />
         <server name="DATABASE_PORT" value="3306" />
     </php>
 
@@ -27,6 +29,9 @@
         </testsuite>
         <testsuite name="MysqlBundle Test Suite">
             <directory>bundles/MysqlBundle/tests</directory>
+        </testsuite>
+        <testsuite name="General tests">
+            <directory>bundles/TestBundle/tests</directory>
         </testsuite>
     </testsuites>
 

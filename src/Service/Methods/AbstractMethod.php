@@ -29,4 +29,39 @@ abstract class AbstractMethod implements MethodInterface
     {
         return $this->appConfig->getDumpUntouchedDirectory() . '/' . $dbUuid . '/' . $filename;
     }
+
+    /**
+     * Retrieve destination file
+     *
+     * @param string $dbUuid
+     * @param string|null $filename
+     * @return string
+     */
+    protected function getDestinationFile(string $dbUuid, ?string $filename): string
+    {
+        if (!$filename) {
+            $filename = time() . '.sql';
+        }
+
+        return $this->getOriginFile($dbUuid, $filename);
+    }
+
+    /**
+     * For now support everything
+     *
+     * @param string $engine
+     * @return bool
+     */
+    public function support(string $engine): bool
+    {
+        return true;
+    }
+
+    static function validateRequired($value) {
+        if (empty($value)) {
+            throw new \RuntimeException('Value is required.');
+        }
+
+        return $value;
+    }
 }

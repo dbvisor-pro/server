@@ -8,6 +8,9 @@
     "db-manager/mysql-bundle": {
         "version": "dev-main"
     },
+    "db-manager/test-bundle": {
+        "version": "dev-main"
+    },
     "phpunit/phpunit": {
         "version": "9.6",
         "recipe": {

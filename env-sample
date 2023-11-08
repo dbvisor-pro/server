@@ -19,7 +19,7 @@ APP_ENV=dev
 APP_SECRET=
 ###< symfony/framework-bundle ###
 
-APP_SERVICE_URL=
+APP_SERVICE_URL=https://db-manager.bridge2.digital/
 APP_SERVICE_WORKSPACE=
 APP_SERVICE_TOKEN=
 

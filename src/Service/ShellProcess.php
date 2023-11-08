@@ -8,7 +8,7 @@ use Symfony\Component\Process\Process;
 
 class ShellProcess
 {
-    public function run(string $command): void
+    public function run(string $command): Process
     {
         $process = Process::fromShellCommandline($command);
 
@@ -18,5 +18,7 @@ class ShellProcess
         if (!$process->isSuccessful()) {
             throw new \Exception($process->getErrorOutput());
         }
+
+        return $process;
     }
 }

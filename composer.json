@@ -11,6 +11,10 @@
         {
             "type": "path",
             "url": "bundles/MysqlBundle"
+        },
+        {
+            "type": "path",
+            "url": "bundles/TestBundle"
         }
     ],
     "require": {
@@ -18,6 +22,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-openssl": "*",
+        "aws/aws-sdk-php": "^3.283",
         "db-manager/core-bundle": "dev-main",
         "db-manager/mysql-bundle": "dev-main",
         "doctrine/dbal": "^3.6",
@@ -35,7 +40,8 @@
         "symfony/process": "6.2.*",
         "symfony/runtime": "6.2.*",
         "symfony/yaml": "6.2.*",
-        "vlucas/phpdotenv": "^5.5"
+        "vlucas/phpdotenv": "^5.5",
+        "ext-ssh2": "*"
     },
     "config": {
         "allow-plugins": {
@@ -86,6 +92,7 @@
         }
     },
     "require-dev": {
+        "db-manager/test-bundle": "dev-main",
         "dg/bypass-finals": "^1.4",
         "phpunit/phpunit": "^9.5",
         "symfony/browser-kit": "6.2.*",
