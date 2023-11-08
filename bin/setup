@@ -2,9 +2,10 @@
 
 export PROJECT_ROOT
 PROJECT_ROOT="$(dirname "$(realpath $0)")/../"
+USE_DOCKER=0
 
 # Validate is docker installed and run
-function _validateDocker() {
+function _installDocker() {
     if [ ! -x "$(command -v docker)" ]; then
         read -r -p "Did Docker get installed! Do you want to proceed? (Y/N) " yn
         case $yn in
@@ -63,7 +64,14 @@ function _generateJwtKey() {
 echo "Started Project setting"
 
 # Validate environment.
-_validateDocker
+read -r -p "Do you want to use a docker? (Y/N) " yn
+case $yn in
+    [Yy]* )
+        USE_DOCKER=1
+        _installDocker ;;
+    [Nn]* )
+        ;;
+esac
 
 # Init configurations:
 echo "Initializing Base configurations"
@@ -75,8 +83,10 @@ if [ ! -f ${PROJECT_ROOT}/.env ]; then
     _replace_pattern "APP_SERVICE_URL=" "APP_SERVICE_URL=${APP_SERVICE_URL}" ${PROJECT_ROOT}/.env
 
     # Get Server URL
-    read -rp "Enter the host name for the Server:" APP_DOCKER_SERVER_URL
-    _replace_pattern "APP_DOCKER_SERVER_URL=" "APP_DOCKER_SERVER_URL=${APP_DOCKER_SERVER_URL}" ${PROJECT_ROOT}/.env
+    if [ $USE_DOCKER == 1 ]; then
+        read -rp "Enter the host name for the Server:" APP_DOCKER_SERVER_URL
+        _replace_pattern "APP_DOCKER_SERVER_URL=" "APP_DOCKER_SERVER_URL=${APP_DOCKER_SERVER_URL}" ${PROJECT_ROOT}/.env
+    fi
 
     # Get path to dumps folder
     APP_DUMP_PATH=''
@@ -135,13 +145,17 @@ if [[ ! -z ${APP_DOCKER_SERVER_URL} && -z $(grep ${APP_DOCKER_SERVER_URL} /etc/h
     echo "127.0.0.1 ::1 ${APP_DOCKER_SERVER_URL}" | sudo tee -a /etc/hosts
 fi
 
-# Start docker with DB's
-echo "Starting Docker containers"
-"${PROJECT_ROOT}"bin/docker/start -b
+if [ $USE_DOCKER == 1 ]; then
+    # Start docker with DB's
+    echo "Starting Docker containers"
+    "${PROJECT_ROOT}"bin/docker/start -b
 
-# Install symfony modules
-echo "Installing required modules"
-# "${PROJECT_ROOT}"bin/docker/cli composer install --prefer-dist --no-progress --no-interaction
+    # Start initializing / adding server and backups
+    "${PROJECT_ROOT}"bin/docker/cli bin/console app:server:add
+else
+    if [ -z "$(ls -A "${PROJECT_ROOT}/vendor/" 2>/dev/null)" ]; then
+        composer install --working-dir="${PROJECT_ROOT}" --prefer-dist --no-progress --no-interaction
+    fi
 
-# Start initializing / adding server and backups
-"${PROJECT_ROOT}"bin/docker/cli bin/console app:server:add
+    php "${PROJECT_ROOT}"bin/console app:server:add
+fi
