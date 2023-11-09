@@ -7,6 +7,8 @@ namespace DbManager\CoreBundle\Service;
 use DbManager\CoreBundle\DataProcessor\DataProcessorFactoryInterface;
 use DbManager\CoreBundle\DataProcessor\DataProcessorInterface;
 use DbManager\CoreBundle\Interfaces\EngineInterface;
+use DbManager\CoreBundle\Interfaces\ErrorInterface;
+use DbManager\CoreBundle\Enums\ErrorSeverityEnum;
 use Exception;
 use Faker\Factory;
 use Faker\Generator;
@@ -39,10 +41,34 @@ abstract class AbstractEngineProcessor implements EngineInterface
     protected DataProcessorInterface $dataProcessor;
 
     /**
+     * @var ErrorInterface[]
+     */
+    protected array $errors = [];
+
+    /**
      * @param DataProcessorFactoryInterface $dataProcessorFactory
      */
     public function __construct(protected readonly DataProcessorFactoryInterface $dataProcessorFactory)
     {
+    }
+
+    /**
+     * @return ErrorInterface[]
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+
+    /**
+     * @param string $message
+     * @param int $severity
+     * @return void
+     */
+    public function addError(string $message, int $severity = ErrorSeverityEnum::WARNING->value): void
+    {
+        $error = new DbDataManager\Error($message, $severity);
+        $this->errors[] = $error;
     }
 
     /**
@@ -151,7 +177,7 @@ abstract class AbstractEngineProcessor implements EngineInterface
             throw new Exception('The method is required');
         }
 
-        if ($rule['method'] === 'update') {
+        if ($rule['method'] === 'update' || $rule['method'] === 'fake') {
             if (!$column) {
                 throw new Exception('For method Update column is required');
             }

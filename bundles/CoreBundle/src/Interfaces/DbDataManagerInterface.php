@@ -72,4 +72,20 @@ interface DbDataManagerInterface
      * @return array
      */
     public function getRules(): array;
+
+    /**
+     * Set additions
+     *
+     * @param array $additions
+     *
+     * @return DbDataManagerInterface
+     */
+    public function setAdditions(array $additions): DbDataManagerInterface;
+
+    /**
+     * Get additions
+     *
+     * @return array
+     */
+    public function getAdditions(): array;
 }

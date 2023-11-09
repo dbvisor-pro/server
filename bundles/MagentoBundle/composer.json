@@ -1,0 +1,16 @@
+{
+    "name": "db-manager/magento-bundle",
+    "description": "Magento platform bundle",
+    "type": "symfony-bundle",
+    "require": {
+        "db-manager/mysql-bundle": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "DbManager\\MagentoBundle\\": "src/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+    ]
+}

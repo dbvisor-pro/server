@@ -6,4 +6,5 @@ return [
     DbManager\MysqlBundle\DbManagerMysqlBundle::class => ['all' => true],
     DbManager\CoreBundle\DbManagerCoreBundle::class => ['all' => true],
     DbManager\TestBundle\DbManagerTestBundle::class => ['dev' => true, 'test' => true],
+    DbManager\MagentoBundle\DbManagerMagentoBundle::class => ['dev' => true, 'test' => true],
 ];

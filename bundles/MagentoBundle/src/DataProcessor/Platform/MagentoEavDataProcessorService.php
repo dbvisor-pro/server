@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace DbManager\CoreBundle\DataProcessor\Platform;
+namespace DbManager\MagentoBundle\DataProcessor\Platform;
 
 use DbManager\CoreBundle\DataProcessor\DataProcessorInterface;
+use DbManager\CoreBundle\DataProcessor\Platform\DataProcessorPlatformInterface;
 use Exception;
 use Illuminate\Database\Connection;
 use stdClass;
 
-final class MagentoEavDataProcessorService implements DataProcessorInterface
+final class MagentoEavDataProcessorService implements DataProcessorInterface, DataProcessorPlatformInterface
 {
     /**
      * @var string
@@ -41,6 +42,14 @@ final class MagentoEavDataProcessorService implements DataProcessorInterface
         $this->tableName = $tableName;
         $this->rule = $rule;
         $this->connection = $connection;
+    }
+
+    /**
+     * @return string
+     */
+    public function getKey(): string
+    {
+        return 'magento';
     }
 
     /**
@@ -86,7 +95,50 @@ final class MagentoEavDataProcessorService implements DataProcessorInterface
             $attributeData['attribute_id']
         )->update(
             [
-                'value' => $this->connection->raw($value),
+                'value' => $value,
+            ]
+        );
+    }
+
+    /**
+     * @param string $field
+     * @param array $values
+     * @param string|null $condition
+     * @return void
+     * @throws Exception
+     */
+    public function fake(string $field, array $values, ?string $condition = null): void
+    {
+        $attributeData = $this->getAttributeData($field);
+
+        if ($attributeData['backend_type'] === 'static' || $attributeData['source_model'] !== null) {
+            return;
+        }
+
+        $query = $this->connection->table(
+            $attributeData['attribute_table']
+        );
+
+        if ($condition) {
+            $rowId = $this->getEntityRowId($condition);
+
+            $query->where('row_id', '=', $rowId);
+        }
+
+        // this code selects random element from provided array
+        $randValues = sprintf(
+            "elt(floor(rand()*%d) + 1, '%s')",
+            count($values),
+            implode("','", $values)
+        );
+
+        $query->where(
+            'attribute_id',
+            '=',
+            $attributeData['attribute_id']
+        )->update(
+            [
+                'value' => $this->connection->raw($randValues),
             ]
         );
     }
@@ -142,9 +194,9 @@ final class MagentoEavDataProcessorService implements DataProcessorInterface
                 'entity_type_id',
                 '=',
                 $entity->entity_type_id
-            )->whereIn(
+            )->where(
                 'attribute_code',
-                $this->getColumns()
+                $field
             )->get(
                 ['attribute_id', 'is_unique', 'backend_type', 'attribute_code']
             );
@@ -182,15 +234,5 @@ final class MagentoEavDataProcessorService implements DataProcessorInterface
             )->first(
                 ['entity_type_id', 'value_table_prefix']
             );
-    }
-
-    /**
-     * Get columns list
-     *
-     * @return array
-     */
-    private function getColumns(): array
-    {
-        return array_keys($this->rule['columns']);
     }
 }

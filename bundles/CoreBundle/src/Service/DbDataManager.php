@@ -117,6 +117,34 @@ class DbDataManager extends ArrayObject implements DbDataManagerInterface, Array
     }
 
     /**
+     * @inheritdoc
+     */
+    public function setAdditions(array $additions): DbDataManagerInterface
+    {
+        $this->offsetSet('additions', $additions);
+
+        return $this;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAdditions(): array
+    {
+        return $this->offsetGet('additions');
+    }
+
+    /**
+     * Get iterable rules
+     *
+     * @return ArrayIterator
+     */
+    public function getIterableAdditions(): ArrayIterator
+    {
+        return new ArrayIterator($this->getAdditions());
+    }
+
+    /**
      * Get iterable rules
      *
      * @return ArrayIterator

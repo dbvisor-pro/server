@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3bdf32314e5f248d65748874288901ac",
+    "content-hash": "4689a7b17ede086ec2928052b22e7323",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -5128,6 +5128,31 @@
     ],
     "packages-dev": [
         {
+            "name": "db-manager/magento-bundle",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "bundles/MagentoBundle",
+                "reference": "127aa840fa4d6d78d37507176f3db1dd79fa81f9"
+            },
+            "require": {
+                "db-manager/mysql-bundle": "*"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "DbManager\\MagentoBundle\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Magento platform bundle",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
             "name": "db-manager/test-bundle",
             "version": "dev-main",
             "dist": {
@@ -7388,6 +7413,7 @@
     "stability-flags": {
         "db-manager/core-bundle": 20,
         "db-manager/mysql-bundle": 20,
+        "db-manager/magento-bundle": 20,
         "db-manager/test-bundle": 20
     },
     "prefer-stable": true,
@@ -7396,7 +7422,8 @@
         "php": ">=8.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "ext-openssl": "*"
+        "ext-openssl": "*",
+        "ext-ssh2": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.3.0"

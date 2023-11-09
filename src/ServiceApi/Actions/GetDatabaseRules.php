@@ -48,6 +48,7 @@ final class GetDatabaseRules extends AppService
             'engine'    => $this->formEngineData($result),
             'platform'  => $this->formPlatformData($result),
             'rules'     => $this->formRulesData($result),
+            'additions' => $this->formAdditionsData($result),
         ];
     }
 
@@ -60,7 +61,7 @@ final class GetDatabaseRules extends AppService
     protected function formEngineData(array $data): string
     {
         if (!isset($data['engine'])) {
-            throw new Exception('An information about DB engine was not found...');
+            throw new Exception('Information about the DB engine was not found...');
         }
         return (string)$data['engine'];
     }
@@ -74,10 +75,22 @@ final class GetDatabaseRules extends AppService
     protected function formRulesData(array $data): array
     {
         if (!isset($data['databaseRule'])) {
-            throw new Exception('An information about DB processing rules was not found...');
+            throw new Exception('Information about the DB processing rules was not found...');
         }
 
         return $this->prepareRules($data['databaseRule']['rule']);
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     * @throws Exception
+     */
+    protected function formAdditionsData(array $data): array
+    {
+        $additions = $data['databaseRule']['addition'] ?? [];
+        return $this->prepareRules($additions);
     }
 
     /**

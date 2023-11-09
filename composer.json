@@ -14,6 +14,10 @@
         },
         {
             "type": "path",
+            "url": "bundles/MagentoBundle"
+        },
+        {
+            "type": "path",
             "url": "bundles/TestBundle"
         }
     ],
@@ -91,6 +95,7 @@
         }
     },
     "require-dev": {
+        "db-manager/magento-bundle": "dev-main",
         "db-manager/test-bundle": "dev-main",
         "dg/bypass-finals": "^1.4",
         "phpunit/phpunit": "^9.5",
