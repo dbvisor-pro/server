@@ -17,6 +17,8 @@ final class DatabaseDump extends AppService
 {
     protected string $action = 'database_dumps';
 
+    protected string $endpoint = 'database_dumps';
+
     /**
      * @param string $dumpUuid
      *
@@ -31,7 +33,7 @@ final class DatabaseDump extends AppService
      */
     public function getByUuid(string $dumpUuid): array
     {
-        $this->action .= '/' . $dumpUuid;
+        $this->action = $this->endpoint . '/' . $dumpUuid;;
 
         return $this->sendRequest([], 'GET');
     }
@@ -79,7 +81,7 @@ final class DatabaseDump extends AppService
      */
     public function updateByUuid(string $dumpUuid, string $status, ?string $filename = ''): void
     {
-        $this->action  .= '/' . $dumpUuid;
+        $this->action = $this->endpoint . '/' . $dumpUuid;
         $this->sendRequest(
             [
                 'json' => [
@@ -103,7 +105,7 @@ final class DatabaseDump extends AppService
      */
     public function delete(string $dumpUuid): void
     {
-        $this->action  .= '/' . $dumpUuid;
+        $this->action = $this->endpoint . '/' . $dumpUuid;;
 
         $this->sendDeleteRequest([]);
     }

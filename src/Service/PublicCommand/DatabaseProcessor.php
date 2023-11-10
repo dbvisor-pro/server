@@ -93,6 +93,7 @@ class DatabaseProcessor extends AbstractCommand
                 }
             }
 
+            $this->lockService->unlock();
         } else {
             throw new LockException("There is another process running. Aborting...");
         }
@@ -198,6 +199,7 @@ class DatabaseProcessor extends AbstractCommand
             LogStatusEnum::SUCCESS->value,
             "Completed!"
         );
+
         $this->databaseDump->updateByUuid($dumpuuid, 'ready', $destinationFile->getFilename());
     }
 }
