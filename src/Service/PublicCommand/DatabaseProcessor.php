@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Service\PublicCommand;
 
 use App\Enum\LogStatusEnum;
+use App\Exception\LockException;
 use App\Exception\NoSuchMethodException;
 use App\Service\AppLogger;
+use App\Service\LockService;
 use App\ServiceApi\Entity\DatabaseDump;
 use Psr\Cache\InvalidArgumentException;
 use App\Service\DumpManagement;
@@ -33,6 +35,7 @@ class DatabaseProcessor extends AbstractCommand
      * @param DbProcessorFactory $processorFactory
      * @param GetDatabaseRules $getDatabaseRules
      * @param Analyzer $analyzer
+     * @param LockService $lockService
      */
     public function __construct(
         private readonly AppLogger $appLogger,
@@ -41,7 +44,8 @@ class DatabaseProcessor extends AbstractCommand
         private readonly DBManagementFactory $dbManagementFactory,
         private readonly DbProcessorFactory $processorFactory,
         private readonly GetDatabaseRules $getDatabaseRules,
-        private readonly Analyzer $analyzer
+        private readonly Analyzer $analyzer,
+        private readonly LockService $lockService
     ) {
     }
 
@@ -51,40 +55,46 @@ class DatabaseProcessor extends AbstractCommand
      * @return void
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws LockException
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws NoSuchMethodException
-     * @throws \Exception
-     * @throws InvalidArgumentException
      */
     public function execute(InputInterface $input, OutputInterface $output): void
     {
-        $this->appLogger->initAppLogger($output);
-        try {
-            $scheduledData = $this->databaseDump->getScheduled();
-        } catch (\Exception $exception) {
-            if ($output->isVerbose()) {
-                $output->writeln($exception->getMessage());
+        if (!$this->lockService->isLocked()) {
+            $this->lockService->lock();
+
+            $this->appLogger->initAppLogger($output);
+            try {
+                $scheduledData = $this->databaseDump->getScheduled();
+            } catch (\Exception $exception) {
+                if ($output->isVerbose()) {
+                    $output->writeln($exception->getMessage());
+                }
             }
-        }
-        if (!empty($scheduledData)) {
-            $dbuuid = $scheduledData['db']['uid'];
-            $dumpuuid = $scheduledData['uuid'];
-            if (empty($dumpuuid) || empty($dbuuid)) {
-                throw new \Exception("Something went wrong. Scheduled uuid and database uuid is required");
+            if (!empty($scheduledData)) {
+                $dbuuid = $scheduledData['db']['uid'];
+                $dumpuuid = $scheduledData['uuid'];
+                if (empty($dumpuuid) || empty($dbuuid)) {
+                    throw new \Exception("Something went wrong. Scheduled uuid and database uuid is required");
+                }
+
+                try {
+                    $this->process($dbuuid, $dumpuuid);
+                } catch (\Exception $exception) {
+                    $this->appLogger->logToService(
+                        $dumpuuid,
+                        LogStatusEnum::ERROR->value,
+                        sprintf("Something went wrong during update. Msg: %s", $exception->getMessage())
+                    );
+                    $this->databaseDump->updateByUuid($dumpuuid, 'error');
+                }
             }
 
-            try {
-                $this->process($dbuuid, $dumpuuid);
-            } catch (\Exception $exception) {
-                $this->appLogger->logToService(
-                    $dumpuuid,
-                    LogStatusEnum::ERROR->value,
-                    sprintf("Something went wrong during update. Msg: %s", $exception->getMessage())
-                );
-                $this->databaseDump->updateByUuid($dumpuuid, 'error');
-            }
+        } else {
+            throw new LockException("There is another process running. Aborting...");
         }
     }
 
@@ -106,6 +116,7 @@ class DatabaseProcessor extends AbstractCommand
      */
     private function process(string $dbuuid, string $dumpuuid): void
     {
+        $this->databaseDump->updateByUuid($dumpuuid, 'processing');
         $this->appLogger->logToService(
             $dumpuuid,
             LogStatusEnum::PROCESSING->value,
