@@ -6,9 +6,13 @@ namespace App\Service\PublicCommand;
 
 use App\Service\AppConfig;
 use App\Service\AppLogger;
+use App\Service\Engine\EngineInterface;
+use App\Service\Engine\EngineProcessor;
 use App\Service\InputOutput;
 use App\Service\Methods\MethodInterface;
 use App\Service\Methods\MethodProcessor;
+use App\Service\Platform\PlatformInterface;
+use App\Service\Platform\PlatformProcessor;
 use App\Service\PublicCommand\Database\Analyzer;
 use App\ServiceApi\Actions\AddDatabase as ServiceApiAddDatabase;
 use App\ServiceApi\Entity\Server;
@@ -36,6 +40,8 @@ class AddDatabase extends AbstractCommand
      * @param ServiceApiAddDatabase $addDatabase
      * @param Analyzer $databaseAnalyzer
      * @param MethodProcessor $methodProcessor
+     * @param EngineProcessor $engineProcessor
+     * @param PlatformProcessor $platformProcessor
      */
     public function __construct(
         private readonly AppLogger $appLogger,
@@ -43,7 +49,9 @@ class AddDatabase extends AbstractCommand
         private readonly Server $serverApi,
         private readonly ServiceApiAddDatabase $addDatabase,
         protected readonly Analyzer $databaseAnalyzer,
-        private readonly MethodProcessor $methodProcessor
+        private readonly MethodProcessor $methodProcessor,
+        private readonly EngineProcessor $engineProcessor,
+        private readonly PlatformProcessor $platformProcessor
     ) {
     }
 
@@ -88,13 +96,9 @@ class AddDatabase extends AbstractCommand
         $server = $this->serverApi->get($this->appConfig->getServerUuid());
 
         $this->config['name'] = $inputOutput->ask("Enter database name");
-        $this->config['engine'] = $inputOutput->choice("Select engine", [
-            'mysql', 'postgresql'
-        ]);
-        $this->config['platform'] = $inputOutput->choice("Select platform", [
-            'custom', 'magento', 'wordpress', 'shopware'
-        ]);
 
+        $this->getEngines();
+        $this->getPlatforms();
         $this->getDumpMethods();
 
         try {
@@ -153,6 +157,40 @@ class AddDatabase extends AbstractCommand
         ]);
 
         $this->config['db_uuid'] = $data['uid'];
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    private function getPlatforms(): void
+    {
+        $platforms = $this->platformProcessor->getPlatforms();
+        $availablePlatforms = [];
+
+        /** @var PlatformInterface $platform */
+        foreach ($platforms as $platform) {
+            $availablePlatforms[$platform->getCode()] = $platform->getCode();
+        }
+
+        $this->config['platform'] = $this->getInputOutput()->choice("Select platform", $availablePlatforms);
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    private function getEngines(): void
+    {
+        $engines = $this->engineProcessor->getEngines();
+        $availableEngines = [];
+
+        /** @var EngineInterface $engine */
+        foreach ($engines as $engine) {
+            $availableEngines[$engine->getCode()] = $engine->getCode();
+        }
+
+        $this->config['engine'] = $this->getInputOutput()->choice("Select engine", $availableEngines);
     }
 
     /**

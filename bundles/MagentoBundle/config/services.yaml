@@ -4,3 +4,7 @@ services:
     public: true
     class: DbManager\MagentoBundle\Processor
     arguments: []
+
+  DbManager\MagentoBundle\Service\Platform\Magento:
+    tags:
+      - { name: 'app.platform' }

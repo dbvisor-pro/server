@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Methods;
+namespace DbManager\MysqlBundle\Service\Methods;
 
 use App\Service\InputOutput;
+use DbManager\MysqlBundle\Service\Engine\Mysql as MysqlEngine;
 use \Exception;
 
 /**
  * TODO: maybe better to use ssh2_shell to connect by SSH instead of Process
  */
-class DumpOverSsh extends AbstractMethod
+class MysqldumpOverSsh extends \App\Service\Methods\AbstractMethod
 {
     const AUTH_TYPE_KEY = 'key';
     const AUTH_TYPE_PASS = 'password';
@@ -176,5 +177,14 @@ class DumpOverSsh extends AbstractMethod
         $config['db_port'] = $inputOutput->ask('Database Port: ', '3306', self::validateRequired(...));
 
         return $config;
+    }
+
+    /**
+     * @param string $engine
+     * @return bool
+     */
+    public function support(string $engine): bool
+    {
+        return $engine === MysqlEngine::ENGINE_CODE;
     }
 }

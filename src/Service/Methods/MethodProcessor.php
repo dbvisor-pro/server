@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Service\Methods;
 
 use \Exception;
-class MethodProcessor
+readonly class MethodProcessor
 {
     /**
      * @param MethodInterface[] $methods
      */
     public function __construct(
-        private readonly array $methods = []
+        private Iterable $methods = []
     ) {
     }
 

@@ -10,3 +10,18 @@ services:
     public: true
     class: DbManager\MysqlBundle\DBManagement\Management
     arguments: []
+
+  DbManager\MysqlBundle\Service\Methods\Mysqldump:
+    autowire: true
+    tags:
+      - { name: 'app.backup_method' }
+
+  DbManager\MysqlBundle\Service\Methods\MysqldumpOverSsh:
+    autowire: true
+    tags:
+      - { name: 'app.backup_method' }
+
+  DbManager\MysqlBundle\Service\Engine\Mysql:
+    autowire: true
+    tags:
+      - { name: 'app.engine' }

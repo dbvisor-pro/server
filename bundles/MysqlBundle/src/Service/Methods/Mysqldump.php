@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Methods;
+namespace DbManager\MysqlBundle\Service\Methods;
 
 use App\Service\InputOutput;
+use DbManager\MysqlBundle\Service\Engine\Mysql as MysqlEngine;
 use \Exception;
 
-class Dump extends AbstractMethod
+class Mysqldump extends \App\Service\Methods\AbstractMethod
 {
     /**
      * @param array $dbConfig
@@ -57,7 +58,7 @@ class Dump extends AbstractMethod
      */
     public function getCode(): string
     {
-        return 'dump';
+        return 'mysqldump';
     }
 
     /**
@@ -82,5 +83,14 @@ class Dump extends AbstractMethod
         $config['db_port'] = $inputOutput->ask('Port: ', '3306', self::validateRequired(...));
 
         return $config;
+    }
+
+    /**
+     * @param string $engine
+     * @return bool
+     */
+    public function support(string $engine): bool
+    {
+        return $engine === MysqlEngine::ENGINE_CODE;
     }
 }
