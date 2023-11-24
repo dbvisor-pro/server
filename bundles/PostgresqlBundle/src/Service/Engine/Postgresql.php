@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace DbManager\MysqlBundle\Service\Engine;
+namespace DbManager\PostgresqlBundle\Service\Engine;
 
 use App\Service\Engine\AbstractEngine;
 
-class Mysql extends AbstractEngine
+class Postgresql extends AbstractEngine
 {
-    const ENGINE_CODE = 'mysql';
+    const ENGINE_CODE = 'pgsql';
 
     /**
      * @return string
@@ -23,6 +23,6 @@ class Mysql extends AbstractEngine
      */
     public function getName(): string
     {
-        return 'MySQL';
+        return 'PostgreSQL';
     }
 }

@@ -11,6 +11,7 @@ use App\Service\Engine\EngineProcessor;
 use App\Service\InputOutput;
 use App\Service\Methods\MethodInterface;
 use App\Service\Methods\MethodProcessor;
+use App\Service\Platform\Custom;
 use App\Service\Platform\PlatformInterface;
 use App\Service\Platform\PlatformProcessor;
 use App\Service\PublicCommand\Database\Analyzer;
@@ -118,7 +119,7 @@ class AddDatabase extends AbstractCommand
             if ($this->getInputOutput()->confirm("Do you want continue?", false)) {
                 $this->sendDatabaseToService($server);
             } else {
-                $this->getInputOutput()->warning("Database is not saved. Please try one more time");
+                $this->getInputOutput()->warning("Database is not saved. Please try again. Contact our support if you still face this problem.");
             }
         }
         $this->addDatabase();
@@ -170,10 +171,14 @@ class AddDatabase extends AbstractCommand
 
         /** @var PlatformInterface $platform */
         foreach ($platforms as $platform) {
-            $availablePlatforms[$platform->getCode()] = $platform->getCode();
+            $availablePlatforms[$platform->getCode()] = $platform->getName();
         }
 
-        $this->config['platform'] = $this->getInputOutput()->choice("Select platform", $availablePlatforms);
+        $this->config['platform'] = $this->getInputOutput()->choice(
+            "Select platform",
+            $availablePlatforms,
+            Custom::CODE
+        );
     }
 
     /**
@@ -187,7 +192,7 @@ class AddDatabase extends AbstractCommand
 
         /** @var EngineInterface $engine */
         foreach ($engines as $engine) {
-            $availableEngines[$engine->getCode()] = $engine->getCode();
+            $availableEngines[$engine->getCode()] = $engine->getName();
         }
 
         $this->config['engine'] = $this->getInputOutput()->choice("Select engine", $availableEngines);
