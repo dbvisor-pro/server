@@ -7,4 +7,5 @@ return [
     DbManager\CoreBundle\DbManagerCoreBundle::class => ['all' => true],
     DbManager\TestBundle\DbManagerTestBundle::class => ['dev' => true, 'test' => true],
     DbManager\MagentoBundle\DbManagerMagentoBundle::class => ['dev' => true, 'test' => true],
+    DbManager\PostgresqlBundle\DbManagerPostgresqlBundle::class => ['all' => true],
 ];

@@ -14,6 +14,10 @@
         },
         {
             "type": "path",
+            "url": "bundles/PostgresqlBundle"
+        },
+        {
+            "type": "path",
             "url": "bundles/MagentoBundle"
         },
         {
@@ -30,6 +34,7 @@
         "aws/aws-sdk-php": "^3.283",
         "db-manager/core-bundle": "dev-main",
         "db-manager/mysql-bundle": "dev-main",
+        "db-manager/postgresql-bundle": "dev-main",
         "doctrine/dbal": "^3.6",
         "fakerphp/faker": "^1.22",
         "illuminate/database": "^10.12",

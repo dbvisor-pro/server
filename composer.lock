@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c8fa526cca4768c2f568568d08f085a8",
+    "content-hash": "5cb891b3a65744cabfa42ecfaa9f54b1",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -250,6 +250,28 @@
                 "MIT"
             ],
             "description": "Mysql engine bundle",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "db-manager/postgresql-bundle",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "bundles/PostgresqlBundle",
+                "reference": "d66691654a3fdb70b7707f404b7214e96829fd84"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "DbManager\\PostgresqlBundle\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Porstgresql engine bundle",
             "transport-options": {
                 "relative": true
             }
@@ -7413,6 +7435,7 @@
     "stability-flags": {
         "db-manager/core-bundle": 20,
         "db-manager/mysql-bundle": 20,
+        "db-manager/postgresql-bundle": 20,
         "db-manager/magento-bundle": 20,
         "db-manager/test-bundle": 20
     },
@@ -7426,5 +7449,5 @@
         "ext-ssh2": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
