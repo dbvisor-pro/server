@@ -2,4 +2,8 @@
 
 [ -z "$1" ] && echo "Please specify a Console command (ex. ls)" && exit
 
-bin/docker/docker-compose exec server_manager bin/console "$@"
+if [ -z "${PROJECT_ROOT}" ]; then
+    export PROJECT_ROOT="$( cd "$(dirname "$0")/../../" >/dev/null 2>&1 ; pwd -P )"
+fi
+
+"${PROJECT_ROOT}"bin/docker/docker-compose exec server_manager bin/console "$@"

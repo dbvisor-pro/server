@@ -43,7 +43,7 @@ _installDocker() {
         read -r -p "Did Docker get installed! Do you want to proceed? (Y/N) " yn </dev/tty
         case $yn in
             [Yy]* )
-                "${PROJECT_ROOT}"/bin/docker/install.sh
+                "${PROJECT_ROOT}"bin/docker/install.sh
                 ;;
             [Nn]* )
                 echo "Installation process stopped...";
@@ -184,7 +184,7 @@ _initAlias() {
 _output " Started Project setting " "heading"
 
 # Validate environment.
-read -r -p " \nDo you want to use a docker? (Y/N) " yn </dev/tty
+read -r -p " Do you want to use a docker? (Y/N) " yn </dev/tty
 case $yn in
     [Yy]* )
         USE_DOCKER=1

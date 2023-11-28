@@ -1,20 +1,23 @@
 #!/usr/bin/env bash
 
-export PROJECT_ROOT
-PROJECT_ROOT="$( cd "$(dirname "$0")/../../" >/dev/null 2>&1 ; pwd -P )"
+if [ -z "${PROJECT_ROOT}" ]; then
+    export PROJECT_ROOT="$( cd "$(dirname "$0")/../../" >/dev/null 2>&1 ; pwd -P )"
+fi
+
+echo ${PROJECT_ROOT}
 
 if [[ -n ${1} && ${1} == '-b' ]]; then
-    bin/docker/docker-compose build --no-cache
+    "${PROJECT_ROOT}"bin/docker/docker-compose build --no-cache
 fi
-bin/docker/docker-compose up -d
+"${PROJECT_ROOT}"bin/docker/docker-compose up -d
 
 # Start required DBs
-if [ -f "${PROJECT_ROOT}/.env.mysql" ]; then
-    bin/docker/start-db mysql
+if [ -f "${PROJECT_ROOT}.env.mysql" ]; then
+    "${PROJECT_ROOT}"bin/docker/start-db mysql
 fi
 
-if [ -f "${PROJECT_ROOT}/.env.postgres" ]; then
-    bin/docker/start-db postgres
+if [ -f "${PROJECT_ROOT}.env.postgres" ]; then
+    "${PROJECT_ROOT}"bin/docker/start-db postgres
 fi
 
-bin/docker/cron setup
+"${PROJECT_ROOT}"bin/docker/cron setup

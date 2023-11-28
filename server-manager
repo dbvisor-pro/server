@@ -9,7 +9,7 @@ NC=$'\e[0m'
 
 # Init main directory
 if [ -z "${MANAGER_DIR}" ]; then
-    MANAGER_DIR="$(dirname "$(realpath $0)")"
+    export MANAGER_DIR="$(dirname "$(realpath $0)")"
 fi
 
 # Help commands
