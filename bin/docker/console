@@ -6,4 +6,4 @@ if [ -z "${PROJECT_ROOT}" ]; then
     export PROJECT_ROOT="$(dirname "$(realpath $0)")/../.."
 fi
 
-"${PROJECT_ROOT}"/bin/docker/docker-compose exec server_manager bin/console "$@"
+"${PROJECT_ROOT}"/bin/docker/cli bin/console "$@"

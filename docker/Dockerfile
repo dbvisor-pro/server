@@ -63,6 +63,8 @@ FROM frankenphp_base AS frankenphp_prod
 HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://localhost:2019/metrics || exit 1
 CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile" ]
 
+WORKDIR /app
+
 
 # Cron Dockerfile
 FROM frankenphp_base AS frankenphp_cron

@@ -97,7 +97,7 @@ else
     if [ "${APP_DOCKER_USE}" == "1" ]; then
         case "$1" in
             start)
-                . "${PROJECT_ROOT}"/bin/docker/start
+                . "${PROJECT_ROOT}"/bin/docker/start "${@:2}"
                 ;;
             stop)
                 _checkDocker
