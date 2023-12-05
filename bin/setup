@@ -181,6 +181,21 @@ _initAlias() {
     fi
 }
 
+# Fix possible issues with directory
+_fixDirectory() {
+    DIRECTORY=${1}
+
+    if [ "${DIRECTORY::1}" != "/" ]; then
+        DIRECTORY="/${DIRECTORY}"
+    fi
+
+    if [ "${DIRECTORY: -1}" != "/" ]; then
+        DIRECTORY="${DIRECTORY}/"
+    fi
+
+    echo "${DIRECTORY}"
+}
+
 _output " Started Project setting " "heading"
 
 # Validate environment.
@@ -202,7 +217,10 @@ if [ ! -f "${PROJECT_ROOT}.env" ]; then
 
     cp "${PROJECT_ROOT}env-sample" "${PROJECT_ROOT}.env"
 
-    _replace_pattern "APP_DOCKER_USE=1" "APP_DOCKER_USE=${USE_DOCKER}" ${PROJECT_ROOT}/.env
+    # Get project configurations
+    export $(cat "${PROJECT_ROOT}.env" | grep -v ^# | grep -v ^alias | xargs)
+
+    _replace_pattern "APP_DOCKER_USE=0" "APP_DOCKER_USE=${USE_DOCKER}" ${PROJECT_ROOT}/.env
 
     # Get Server URL
     if [ $USE_DOCKER == 1 ]; then
@@ -213,22 +231,33 @@ if [ ! -f "${PROJECT_ROOT}.env" ]; then
     # Get path to dumps folder
     APP_DUMP_PATH=""
     while [[ ${APP_DUMP_PATH} == '' || "${APP_DUMP_PATH}" =~ "~" ]]; do
-        read -rp " Enter the full the path to folder where processed dumps will be placed (default: "${HOME}/backups/" ): " APP_DUMP_PATH </dev/tty
-        APP_DUMP_PATH=${APP_DUMP_PATH:="${HOME}/backups/"}
-        if [ "${APP_DUMP_PATH::1}" != "/" ]; then
-            APP_DUMP_PATH="/${APP_DUMP_PATH}"
-        fi
-
-        if [ "${APP_DUMP_PATH: -1}" != "/" ]; then
-            APP_DUMP_PATH="${APP_DUMP_PATH}/"
-        fi
+        read -rp " Enter the full the path to folder where processed dumps will be placed (default: "${HOME}/${APP_NAME}-backups/" ): " APP_DUMP_PATH </dev/tty
+        APP_DUMP_PATH=${APP_DUMP_PATH:="${HOME}/${APP_NAME}-backups/"}
+        APP_DUMP_PATH=$(_fixDirectory "${APP_DUMP_PATH}")
     done
 
     if [ $USE_DOCKER == 1 ]; then
-        _replace_pattern "APP_DOCKER_PATH_DUMP=''" "APP_DOCKER_PATH_DUMP='${APP_DUMP_PATH}dumps'" ${PROJECT_ROOT}.env
+        read -r -p " Do you have locally placed backups, or do you plan to use manual backups in future? (Y/N) " yn </dev/tty
+        case $yn in
+            [Yy]* )
+                APP_DOCKER_LOCAL_BACKUPS_PATH=""
+                while [[ ${APP_DOCKER_LOCAL_BACKUPS_PATH} == '' || "${APP_DOCKER_LOCAL_BACKUPS_PATH}" =~ "~" ]]; do
+                    read -rp " Enter the full the path to folder with your local dumps (default: "${HOME}/${APP_NAME}-backups/local_backups/" ): " APP_DOCKER_LOCAL_BACKUPS_PATH </dev/tty
+                    APP_DOCKER_LOCAL_BACKUPS_PATH=${APP_DOCKER_LOCAL_BACKUPS_PATH:="${HOME}/${APP_NAME}-backups/local_backups/"}
+                    APP_DOCKER_LOCAL_BACKUPS_PATH=$(_fixDirectory "${APP_DOCKER_LOCAL_BACKUPS_PATH}")
+                done
+                ;;
+            [Nn]* )
+                ;;
+        esac
+    fi
+
+    if [ $USE_DOCKER == 1 ]; then
+        _replace_pattern "APP_DOCKER_PATH_DUMP=''" "APP_DOCKER_PATH_DUMP='${APP_DUMP_PATH}backups'" ${PROJECT_ROOT}.env
         _replace_pattern "APP_DOCKER_PATH_CONFIG=''" "APP_DOCKER_PATH_CONFIG='${APP_DUMP_PATH}config'" ${PROJECT_ROOT}.env
+        _replace_pattern "APP_DOCKER_LOCAL_BACKUPS_PATH=''" "APP_DOCKER_LOCAL_BACKUPS_PATH='${APP_DOCKER_LOCAL_BACKUPS_PATH}'" ${PROJECT_ROOT}.env
     else
-        _replace_pattern "APP_DUMP_PATH=''" "APP_DUMP_PATH='${APP_DUMP_PATH}dumps'" ${PROJECT_ROOT}.env
+        _replace_pattern "APP_DUMP_PATH=''" "APP_DUMP_PATH='${APP_DUMP_PATH}backups'" ${PROJECT_ROOT}.env
         _replace_pattern "APP_CONFIG_PATH=''" "APP_CONFIG_PATH='${APP_DUMP_PATH}config'" ${PROJECT_ROOT}.env
     fi
 
@@ -267,8 +296,18 @@ done </dev/tty
 export $(cat "${PROJECT_ROOT}.env" | grep -v ^# | grep -v ^alias | xargs)
 
 # Validate and create all folders and sub-folders
-if [ ! -d "${APP_DUMP_PATH}dumps" ]; then
-    mkdir -p "${APP_DUMP_PATH}dumps" "${APP_DUMP_PATH}dumps/processed" "${APP_DUMP_PATH}dumps/untouched"
+if [ ! -d "${APP_DUMP_PATH}backups" ]; then
+    mkdir -p "${APP_DUMP_PATH}backups" "${APP_DUMP_PATH}backups/processed" "${APP_DUMP_PATH}backups/untouched"
+fi
+
+if [ ! -d "${APP_DUMP_PATH}config" ]; then
+    mkdir -p "${APP_DUMP_PATH}config"
+fi
+
+if [ $USE_DOCKER == 1 ]; then
+    if [ ! -d "${APP_DOCKER_LOCAL_BACKUPS_PATH}" ]; then
+        mkdir -p "${APP_DOCKER_LOCAL_BACKUPS_PATH}"
+    fi
 fi
 
 if [[ ! -z ${APP_DOCKER_SERVER_URL} && -z $(grep ${APP_DOCKER_SERVER_URL} /etc/hosts) ]]; then

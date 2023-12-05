@@ -11,6 +11,11 @@ use Exception;
 
 class AppConfig
 {
+    /**
+     * Internal docker backups folder
+     */
+    public const LOCAL_BACKUPS_FOLDER = '/app/backups/local_backups/';
+
     private array $databaseConfig = [];
 
     /**
@@ -183,7 +188,7 @@ class AppConfig
     public function getConfigDirectory(): string
     {
         $path = trim(env('APP_CONFIG_PATH'))
-            ? trim(env('APP_CONFIG_PATH')) : rtrim($this->getProjectDir(), '/') . '/backups/config';
+            ? trim(env('APP_CONFIG_PATH')) : rtrim($this->getProjectDir(), '/') . '/backups/configs';
 
         return rtrim($path, '/');
     }
@@ -196,7 +201,21 @@ class AppConfig
     public function getAppDumpDir(): string
     {
         $path = !empty(trim(env('APP_DUMP_PATH')))
-            ? trim(env('APP_DUMP_PATH')) : rtrim($this->getProjectDir(), '/') . '/backups/dumps';
+            ? trim(env('APP_DUMP_PATH')) : rtrim($this->getProjectDir(), '/') . '/backups/backups';
+
+        return rtrim($path, '/');
+    }
+
+    /**
+     * Get path to local backups
+     *
+     * @return string
+     */
+    public function getLocalBackupsDir(): string
+    {
+        $path = !empty(trim(env('APP_DOCKER_LOCAL_BACKUPS_PATH')))
+            ? trim(env('APP_DOCKER_LOCAL_BACKUPS_PATH'))
+            : rtrim($this->getProjectDir(), '/') . '/backups/local_backups';
 
         return rtrim($path, '/');
     }

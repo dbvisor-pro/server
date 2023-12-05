@@ -13,6 +13,7 @@ class Manual extends AbstractMethod
      * @param array $dbConfig
      * @param string $dbUuid
      * @param string|null $filename
+     *
      * @return string
      * @throws DumpNotFoundException
      */
@@ -54,6 +55,17 @@ class Manual extends AbstractMethod
      */
     public function askConfig(InputOutput $inputOutput): array
     {
+        if ($this->appConfig->isDockerUsed()) {
+            return [
+                'dump_name' => $inputOutput->ask(
+                    sprintf(
+                        "Enter path to DB dump file started from %s/?",
+                        rtrim($this->appConfig->getLocalBackupsDir(), '/')
+                    )
+                )
+            ];
+        }
+
         return [
             'dump_name' => $inputOutput->ask('Enter full path to DB dump file?')
         ];
