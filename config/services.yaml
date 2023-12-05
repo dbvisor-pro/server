@@ -49,14 +49,42 @@ services:
         arguments:
             $config: {}
 
+    App\Service\Platform\Custom:
+        tags:
+        - { name: 'app.platform' }
+
+    App\Service\Platform\PlatformProcessor:
+        arguments:
+            $platforms: !tagged_iterator 'app.platform'
+
+    App\Service\Engine\EngineProcessor:
+        arguments:
+            $engines: !tagged_iterator 'app.engine'
+
     App\Service\Methods\MethodProcessor:
         arguments:
-            $methods:
-                - "@App\\Service\\Methods\\Manual"
-                - "@App\\Service\\Methods\\Dump"
-                - "@App\\Service\\Methods\\DumpOverSsh"
-                - "@App\\Service\\Methods\\AwsS3"
-                - "@App\\Service\\Methods\\Sftp"
+            $methods: !tagged_iterator 'app.backup_method'
+
+    App\Service\Methods\Manual:
+        tags:
+        - { name: 'app.backup_method' }
+
+    App\Service\Methods\AwsS3:
+        tags:
+        - { name: 'app.backup_method' }
+
+    App\Service\Methods\Sftp:
+        tags:
+        - { name: 'app.backup_method' }
+
+#    App\Service\Methods\MethodProcessor:
+#        arguments:
+#            $methods:
+#                - "@App\\Service\\Methods\\Manual"
+#                - "@App\\Service\\Methods\\Dump"
+#                - "@App\\Service\\Methods\\DumpOverSsh"
+#                - "@App\\Service\\Methods\\AwsS3"
+#                - "@App\\Service\\Methods\\Sftp"
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

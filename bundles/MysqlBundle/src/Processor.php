@@ -8,12 +8,11 @@ use DbManager\CoreBundle\Interfaces\DbDataManagerInterface;
 use DbManager\CoreBundle\Interfaces\EngineInterface;
 use DbManager\CoreBundle\Service\AbstractEngineProcessor;
 use Exception;
-use Illuminate\Database\Connection;
 
 /**
  * Mysql Processor instance
  */
-final class Processor extends AbstractEngineProcessor implements EngineInterface
+class Processor extends AbstractEngineProcessor implements EngineInterface
 {
     /**
      * Engine const
@@ -65,33 +64,8 @@ final class Processor extends AbstractEngineProcessor implements EngineInterface
         }
 
         return [
-            'db_schema'       => $dbSchema,
-            'additional_data' => $this->getAdditionalData($dbDataManager, $connection)
+            'db_schema'       => $dbSchema
         ];
-    }
-
-    /**
-     * Get platform additional attributes
-     *
-     * @param DbDataManagerInterface $dbDataManager
-     * @param Connection $connection
-     *
-     * @return array
-     */
-    protected function getAdditionalData(DbDataManagerInterface $dbDataManager, Connection $connection): array
-    {
-        $data = [];
-        if ($dbDataManager->getPlatform() === 'magento') {
-            $attributes = $connection->select(
-                "SELECT `attribute_code`, `backend_type`, `eav_entity_type`.`entity_type_code`"
-                . " FROM `eav_attribute` LEFT JOIN `eav_entity_type` "
-                . " ON `eav_entity_type`.`entity_type_id` = `eav_attribute`.`entity_type_id` "
-                . " WHERE `backend_type` != 'static' AND `source_model` IS NULL;"
-            );
-
-            $data['eav_attributes'] = $attributes;
-        }
-        return $data;
     }
 
     /**

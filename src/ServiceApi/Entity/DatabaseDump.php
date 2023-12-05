@@ -85,6 +85,7 @@ final class DatabaseDump extends AppService
     public function updateByUuid(string $dumpUuid, string $status, ?string $filename = ''): void
     {
         $this->action = self::ACTION_URL . '/' . $dumpUuid;
+
         $this->sendRequest(
             [
                 'json' => [

@@ -15,6 +15,14 @@
         },
         {
             "type": "path",
+            "url": "bundles/PostgresqlBundle"
+        },
+        {
+            "type": "path",
+            "url": "bundles/MagentoBundle"
+        },
+        {
+            "type": "path",
             "url": "bundles/TestBundle"
         }
     ],
@@ -27,6 +35,7 @@
         "aws/aws-sdk-php": "^3.283",
         "db-manager/core-bundle": "dev-main",
         "db-manager/mysql-bundle": "dev-main",
+        "db-manager/postgresql-bundle": "dev-main",
         "doctrine/dbal": "^3.6",
         "fakerphp/faker": "^1.22",
         "illuminate/database": "^10.32",
@@ -35,6 +44,7 @@
         "symfony/console": "6.2.*",
         "symfony/dependency-injection": "6.2.*",
         "symfony/dotenv": "6.2.*",
+        "symfony/filesystem": "6.2.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "6.2.*",
         "symfony/http-client": "6.2.*",
@@ -93,6 +103,7 @@
         }
     },
     "require-dev": {
+        "db-manager/magento-bundle": "dev-main",
         "db-manager/test-bundle": "dev-main",
         "dg/bypass-finals": "^1.4",
         "phpunit/phpunit": "^9.5",

@@ -107,6 +107,7 @@ class Analyzer extends AbstractCommand
             );
 
             $dbManagement = $this->dbManagementFactory->create($dbInfo['engine'] ?? '');
+
             $dbManagement->create($dbManager);
             $dbManagement->import($dbManager);
 
@@ -150,7 +151,7 @@ class Analyzer extends AbstractCommand
             )
         );
 
-        $structure = $this->processorFactory->create($dbManager->getEngine())->getDbStructure($dbManager);
+        $structure = $this->processorFactory->create($dbManager->getEngine(), $dbManager->getPlatform())->getDbStructure($dbManager);
         $this->sendDbStructure->execute($databaseUid, $structure);
     }
 
@@ -165,7 +166,7 @@ class Analyzer extends AbstractCommand
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws \Exception
+     * @throws \Exception|InvalidArgumentException
      */
     private function getDbInfo(string $databaseUid): array
     {

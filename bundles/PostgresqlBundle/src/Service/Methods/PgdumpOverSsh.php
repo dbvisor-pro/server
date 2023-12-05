@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Methods;
+namespace DbManager\PostgresqlBundle\Service\Methods;
 
 use App\Service\InputOutput;
 use \Exception;
@@ -10,7 +10,7 @@ use \Exception;
 /**
  * TODO: maybe better to use ssh2_shell to connect by SSH instead of Process
  */
-class DumpOverSsh extends AbstractMethod
+class PgdumpOverSsh extends PgMethod
 {
     const AUTH_TYPE_KEY = 'key';
     const AUTH_TYPE_PASS = 'password';
@@ -25,18 +25,11 @@ class DumpOverSsh extends AbstractMethod
     public function execute(array $dbConfig, string $dbUuid, ?string $filename = null): string
     {
         $destFile = $this->getDestinationFile($dbUuid, $filename);
-        $dbPassword = !empty($dbConfig['db_password']) ? sprintf('-p%s', $dbConfig['db_password']) : '';
-        $mysqlCommand = sprintf(
-            "mysqldump -u %s %s -h%s -P%s %s",
-            $dbConfig['db_user'],
-            $dbPassword,
-            $dbConfig['db_host'],
-            $dbConfig['db_port'],
-            $dbConfig['db_name']
-        );
 
+        $command = sprintf("pg_dump %s", $this->getPgsqlUrl($dbConfig), $destFile);
         $sshCommand = $this->prepareSshCommand($dbConfig);
-        $this->shellProcess->run(sprintf('%s "%s" > %s', $sshCommand, $mysqlCommand, $destFile));
+
+        $this->shellProcess->run(sprintf('%s "%s" > %s', $sshCommand, $command, $destFile));
 
         return $destFile;
     }
@@ -46,7 +39,7 @@ class DumpOverSsh extends AbstractMethod
      */
     public function getCode(): string
     {
-        return 'ssh-dump';
+        return 'ssh-pgdump';
     }
 
     /**
@@ -54,7 +47,7 @@ class DumpOverSsh extends AbstractMethod
      */
     public function getDescription(): string
     {
-        return 'Database located at remote server. Dump over SSH';
+        return 'PostgreSQL database located at remote server. Dump over SSH';
     }
 
     /**
@@ -64,20 +57,10 @@ class DumpOverSsh extends AbstractMethod
      */
     public function validate(array $config): bool
     {
-        $dbPassword = !empty($config['db_password']) ? sprintf('-p%s', $config['db_password']) : '';
-        $mysqlCommand = sprintf(
-            "mysql -u%s -h%s %s %s -e 'SELECT 1'",
-            $config['db_user'],
-            $config['db_host'],
-            $dbPassword,
-            $config['db_name']
-        );
-
+        $command = sprintf("psql %s -c 'SELECT 1' -At", $this->getPgsqlUrl($config));
         $sshCommand = $this->prepareSshCommand($config);
-
-        $process = $this->shellProcess->run(sprintf('%s "%s"', $sshCommand, $mysqlCommand));
-
-        return str_replace("\n", "", $process->getOutput()) === '11';
+        $process = $this->shellProcess->run(sprintf('%s "%s"', $sshCommand, $command));
+        return trim($process->getOutput()) === '1';
     }
 
     /**
@@ -157,23 +140,6 @@ class DumpOverSsh extends AbstractMethod
         }
 
         $config['ssh_port'] = $inputOutput->ask('SSH Port:', '22', $validateRequired);
-
-        return $config;
-    }
-
-    /**
-     * @param InputOutput $inputOutput
-     * @return array
-     */
-    private function askDatabaseConfig(InputOutput $inputOutput): array
-    {
-        $config = [];
-
-        $config['db_host'] = $inputOutput->ask('Database Host', 'localhost', self::validateRequired(...));
-        $config['db_user'] = $inputOutput->ask('Database User:', 'root', self::validateRequired(...));
-        $config['db_password'] = $inputOutput->askHidden('Password');
-        $config['db_name'] = $inputOutput->ask('Database name:', null, self::validateRequired(...));
-        $config['db_port'] = $inputOutput->ask('Database Port: ', '3306', self::validateRequired(...));
 
         return $config;
     }

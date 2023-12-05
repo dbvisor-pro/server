@@ -49,7 +49,7 @@ final class ProcessDebugCommand extends Command
         )->addOption(
             'db_name',
             null,
-            InputOption::VALUE_OPTIONAL,
+            InputOption::VALUE_REQUIRED,
             ''
         );
     }

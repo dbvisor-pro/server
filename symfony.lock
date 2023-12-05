@@ -5,7 +5,13 @@
     "db-manager/core-bundle": {
         "version": "dev-main"
     },
+    "db-manager/magento-bundle": {
+        "version": "dev-main"
+    },
     "db-manager/mysql-bundle": {
+        "version": "dev-main"
+    },
+    "db-manager/postgresql-bundle": {
         "version": "dev-main"
     },
     "db-manager/test-bundle": {

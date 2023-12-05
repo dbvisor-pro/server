@@ -22,14 +22,41 @@ final class DbProcessorFactory
 
     /**
      * @param string $engine
-     *
+     * @param string $platformName
      * @return EngineInterface
      * @throws EngineNotSupportedException
      * @throws NoSuchEngineException
      */
-    public function create(string $engine): EngineInterface
+    public function create(string $engine, string $platformName = ''): EngineInterface
     {
+        // Try to get platform first
+        if ($platformName) {
+            $platform = $this->getPlatform($platformName);
+            if ($platform) {
+                return $platform;
+            }
+        }
         return $this->getEngine($engine);
+    }
+
+    /**
+     * @param string $platformName
+     * @return object|null
+     */
+    public function getPlatform(string $platformName): ?object
+    {
+        $serviceName = $this->getServiceName($platformName);
+
+        if (!$this->container->has($serviceName)) {
+            return null;
+        }
+
+        $platform = $this->container->get($serviceName);
+        if (!($platform instanceof EngineInterface)) {
+            throw new InvalidArgumentException('The engine must be instance of EngineInterface');
+        }
+
+        return $platform;
     }
 
     /**
@@ -81,6 +108,7 @@ final class DbProcessorFactory
      */
     private function validate(string $engine): void
     {
+        // TODO: remove validation from enum. Use dynamic validation instead
         if (!DatabaseEngineEnum::tryFrom($engine)) {
             throw new EngineNotSupportedException('The DB engine is not supported...');
         }
