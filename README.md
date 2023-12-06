@@ -5,6 +5,13 @@
 ### For Manual Usage
 * Composer
 * PHP 8.2.x
+* PHP Libraries:
+  * Ctype
+  * iconv
+  * PCRE
+  * Session
+  * SimpleXML
+  * PDO
 * Configured Nginx / Apache server ( Symfony guide: https://symfony.com/doc/current/setup/web_server_configuration.html )
 * Database Engine
 
