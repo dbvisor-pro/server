@@ -117,7 +117,7 @@ final class Add extends AbstractServerCommand
     private function setupCronJobs(): void
     {
         if (!$this->appConfig->isDockerUsed()) {
-            $this->shellProcess->run($this->appConfig->getProjectDir() . '/server-manager app:cron:install');
+            $this->shellProcess->run($this->appConfig->getProjectDir() . '/dbvisor-agent app:cron:install');
         }
     }
 }

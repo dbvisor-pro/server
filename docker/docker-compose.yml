@@ -1,8 +1,8 @@
 version: "3.7"
 
 services:
-  server_manager:
-    container_name: ${IMAGES_PREFIX:-}app-server
+  dbvisor_agent:
+    container_name: ${IMAGES_PREFIX:-}dbvisor-agent-server
     build:
       context: .
       target: frankenphp_prod
@@ -41,11 +41,11 @@ services:
     networks:
       - db-manager-network
 
-  server_cron_manager:
+  dbvisor_agent_cron:
     build:
       context: .
       target: frankenphp_cron
-    image: ${IMAGES_PREFIX:-}app-cron-server
+    image: ${IMAGES_PREFIX:-}dbvisor-agent-cron-server
     environment:
       APP_ENV: ${APP_ENV}
       APP_SECRET: ${APP_SECRET}
