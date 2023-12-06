@@ -76,12 +76,14 @@ class Analyzer extends AbstractCommand
      * Process without database
      *
      * @param string $databaseUid
+     *
      * @return void
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface|InvalidArgumentException
+     * @throws TransportExceptionInterface
+     * @throws InvalidArgumentException
      */
     public function createTempDbAndProcess(string $databaseUid): void
     {
@@ -104,7 +106,8 @@ class Analyzer extends AbstractCommand
                 )
             );
 
-            $dbManagement = $this->dbManagementFactory->create($dbInfo['engine']);
+            $dbManagement = $this->dbManagementFactory->create($dbInfo['engine'] ?? '');
+
             $dbManagement->create($dbManager);
             $dbManagement->import($dbManager);
 
@@ -123,6 +126,7 @@ class Analyzer extends AbstractCommand
      *
      * @param string $databaseUid
      * @param string $tempDatabase
+     *
      * @return void
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface

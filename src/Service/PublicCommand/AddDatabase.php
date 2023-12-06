@@ -218,6 +218,9 @@ class AddDatabase extends AbstractCommand
         );
 
         $methodConfig = $methods[$this->config['method']]->askConfig($this->getInputOutput());
+        if ($this->appConfig->isDockerUsed()) {
+            $methodConfig['dump_name'] = AppConfig::LOCAL_BACKUPS_FOLDER . ltrim($methodConfig['dump_name'], '/');
+        }
         $this->config = array_merge($methodConfig, $this->config);
     }
 
@@ -229,6 +232,7 @@ class AddDatabase extends AbstractCommand
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws InvalidArgumentException
      */
     private function analyzeDb(InputOutput $inputOutput): void
     {
@@ -239,6 +243,7 @@ class AddDatabase extends AbstractCommand
         $this->databaseAnalyzer
             ->setInputOutput($inputOutput)
             ->createTempDbAndProcess($this->config['db_uuid']);
+
         $inputOutput->info('The DB structure analyzing successfully finished.');
     }
 }
