@@ -251,6 +251,7 @@ if [ ! -f "${PROJECT_ROOT}.env" ]; then
     done
 
     if [ $USE_DOCKER == 1 ]; then
+        APP_DOCKER_LOCAL_BACKUPS_PATH=${APP_DOCKER_LOCAL_BACKUPS_PATH:="${HOME}/${APP_NAME}-backups/local_backups/"}
         read -r -p " Do you have locally placed backups, or do you plan to use manual backups in future? (Y/N) " yn </dev/tty
         case $yn in
             [Yy]* )
@@ -343,3 +344,6 @@ fi
 _initAlias
 
 _output " The dbvisor agent had been installed successfully. " "info"
+if [ -z "${APP_SERVER_UUID}" ]; then
+    _output " To continue please execute the command: ${MANAGER_CLI} app:server:add " "warning"
+fi
