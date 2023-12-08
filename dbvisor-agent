@@ -17,7 +17,7 @@ _help() {
     if [ ! -f "${PROJECT_ROOT}/.env" ]; then
         echo "
 Usage:
-    ${GREEN}server-manager [command]${NC}
+    ${GREEN}dbvisor-agent [command]${NC}
 
 Options:
     ${GREEN}-l|--list${NC}  - list of available commands
@@ -36,7 +36,7 @@ Tool:
     else
         echo "
 Usage:
-    ${GREEN}server-manager [command]${NC}
+    ${GREEN}dbvisor-agent [command]${NC}
 
 Options:
     ${GREEN}-l|--list${NC}  - list of available commands
@@ -48,8 +48,8 @@ Available Commands:
     ${GREEN}cli${NC}        - allows to run command line command inside of docker environment
     ${GREEN}composer${NC}   - run composer commands
     ${GREEN}mysql${NC}      - run mysql command
-    ${GREEN}console${NC}    - run application commands
-    ${GREEN}cron${NC}       - run application commands
+    ${GREEN}console${NC}    - run app console commands
+    ${GREEN}cron${NC}       - run con commands
 
     ${RED}setup${NC}      - initial setup
 
@@ -81,7 +81,7 @@ export $(cat "${PROJECT_ROOT}/.env" | grep -v ^# | grep -v ^alias | xargs)
 
 # Check is docker been started
 _checkDocker() {
-    if [[ -z $(docker container ls -q --filter "name=${IMAGES_PREFIX:-}app-server") ]]; then
+    if [[ -z $(docker container ls -q --filter "name=${IMAGES_PREFIX:-}dbvisor-agent-server") ]]; then
         echo "You must start docker instance before continue."
 
         exit 1

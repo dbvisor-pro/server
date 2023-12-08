@@ -1,5 +1,5 @@
 APP_ENV=dev
-APP_NAME='server-manager'
+APP_NAME='dbvisor-agent'
 APP_SECRET=
 
 APP_SERVICE_URL=db-manager.bridge2.digital

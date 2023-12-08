@@ -3,7 +3,7 @@
 export PROJECT_ROOT
 PROJECT_ROOT="$(dirname "$(realpath $0)")/"
 USE_DOCKER=0
-MANAGER_CLI="${PROJECT_ROOT}server-manager"
+MANAGER_CLI="${PROJECT_ROOT}dbvisor-agent"
 
 _output() {
     style_start=""
@@ -166,7 +166,7 @@ _generateJwtKey() {
 
 # Init global command alias
 _initAlias() {
-    NAME="server-manager"
+    NAME="dbvisor-agent"
     DEFINITION="${MANAGER_CLI}"
 
     if [ -f ${HOME}/.bash_aliases ]; then
@@ -251,6 +251,7 @@ if [ ! -f "${PROJECT_ROOT}.env" ]; then
     done
 
     if [ $USE_DOCKER == 1 ]; then
+        APP_DOCKER_LOCAL_BACKUPS_PATH=${APP_DOCKER_LOCAL_BACKUPS_PATH:="${HOME}/${APP_NAME}-backups/local_backups/"}
         read -r -p " Do you have locally placed backups, or do you plan to use manual backups in future? (Y/N) " yn </dev/tty
         case $yn in
             [Yy]* )
@@ -342,4 +343,7 @@ fi
 
 _initAlias
 
-_output " The server manager had been installed successfully. " "info"
+_output " The dbvisor agent had been installed successfully. " "info"
+if [ -z "${APP_SERVER_UUID}" ]; then
+    _output " To continue please execute the command: ${MANAGER_CLI} app:server:add " "warning"
+fi
