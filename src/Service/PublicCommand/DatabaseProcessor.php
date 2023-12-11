@@ -126,7 +126,7 @@ class DatabaseProcessor extends AbstractCommand
      */
     private function process(string $dbuuid, string $dumpuuid, array $scheduledData): void
     {
-        $this->databaseDump->updateByUuid($dumpuuid, DumpStatusEnum::PROCESSING->value, $scheduledData['filename']);
+        $this->databaseDump->updateByUuid($dumpuuid, DumpStatusEnum::PROCESSING->value);
         $this->appLogger->logToService(
             $dumpuuid,
             LogStatusEnum::PROCESSING->value,

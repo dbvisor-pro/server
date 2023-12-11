@@ -23,7 +23,7 @@ while [ "$1" != "" ]; do
             _stopContainer "${PROJECT_ROOT}/docker/dbs/mysql.yml"
             ;;
         -p | --postgres )
-            _stopContainer "${PROJECT_ROOT}/docker/dbs/mysql.yml"
+            _stopContainer "${PROJECT_ROOT}/docker/dbs/postgres.yml"
             ;;
         * )
             echo "Invalid option: $1"
