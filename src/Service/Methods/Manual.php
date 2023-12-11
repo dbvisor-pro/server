@@ -61,7 +61,9 @@ class Manual extends AbstractMethod
                 sprintf(
                     "Enter path to DB dump file started from %s/?",
                     rtrim($this->appConfig->getLocalBackupsDir(), '/')
-                )
+                ),
+                null,
+                self::validateRequired(...)
             );
 
             return [
@@ -70,7 +72,11 @@ class Manual extends AbstractMethod
         }
 
         return [
-            'dump_name' => $inputOutput->ask('Enter full path to DB dump file?')
+            'dump_name' => $inputOutput->ask(
+                'Enter full path to DB dump file?',
+                null,
+                self::validateRequired(...)
+            )
         ];
     }
 

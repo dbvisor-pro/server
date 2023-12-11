@@ -38,6 +38,8 @@ services:
         protocol: udp
     extra_hosts:
       - host.docker.internal:host-gateway
+      - db-manager-service.local:host-gateway
+      - db-manager-service.local:10.211.55.2
     networks:
       - dbvisor-network
 
@@ -57,6 +59,8 @@ services:
       - ${APP_DOCKER_LOCAL_BACKUPS_PATH}:/app/backups/local_backups:delegated
     extra_hosts:
       - host.docker.internal:host-gateway
+      - db-manager-service.local:host-gateway
+      - db-manager-service.local:10.211.55.2
     networks:
       - dbvisor-network
 

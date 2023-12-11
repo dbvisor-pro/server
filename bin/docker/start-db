@@ -29,7 +29,7 @@ while [ "$1" != "" ]; do
             _startContainer "${PROJECT_ROOT}/docker/dbs/mysql.yml" "${PROJECT_ROOT}/.env.mysql"
             ;;
         -p | --postgres )
-            _startContainer "${PROJECT_ROOT}/docker/dbs/postgres.yml" "${PROJECT_ROOT}/.env.postgres"
+            _startContainer "${PROJECT_ROOT}/docker/dbs/postgres.yml" "${PROJECT_ROOT}/.env.pgsql"
             ;;
         * )
             echo "Invalid option: $1"
