@@ -14,7 +14,7 @@ if [ -f "${PROJECT_ROOT}/.env.mysql" ]; then
     "${PROJECT_ROOT}"/bin/docker/start-db --mysql
 fi
 
-if [ -f "${PROJECT_ROOT}/.env.postgres" ]; then
+if [ -f "${PROJECT_ROOT}/.env.pgsql" ]; then
     "${PROJECT_ROOT}"/bin/docker/start-db --postgres
 fi
 

@@ -328,8 +328,8 @@ select option in "${options[@]}"; do
             echo "MySQL Selected."
             ;;
         2)
-            if [ ! -f {PROJECT_ROOT}.env.postgres ]; then
-                cp ${PROJECT_ROOT}env.postgres-sample ${PROJECT_ROOT}.env.postgres
+            if [ ! -f {PROJECT_ROOT}.env.pgsql ]; then
+                cp ${PROJECT_ROOT}env.pgsql-sample ${PROJECT_ROOT}.env.pgsql
             fi
             echo "Postgres Selected."
             ;;
