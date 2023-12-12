@@ -192,11 +192,16 @@ class AppConfig
 
     /**
      * Get configuration directory
+     * In case docker used the path must be: <project root : app>/backups/configs
      *
      * @return string
      */
     public function getConfigDirectory(): string
     {
+        if ($this->isDockerUsed()) {
+            return rtrim($this->getProjectDir(), '/') . '/backups/configs';
+        }
+
         $path = trim(env('APP_CONFIG_PATH'))
             ? trim(env('APP_CONFIG_PATH')) : rtrim($this->getProjectDir(), '/') . '/backups/configs';
 
@@ -205,11 +210,16 @@ class AppConfig
 
     /**
      * Get Dump Dir
+     * In case docker used the path must be: <project root : app>/backups/backups
      *
      * @return string
      */
     public function getAppDumpDir(): string
     {
+        if ($this->isDockerUsed()) {
+            return rtrim($this->getProjectDir(), '/') . '/backups/backups';
+        }
+
         $path = !empty(trim(env('APP_DUMP_PATH')))
             ? trim(env('APP_DUMP_PATH')) : rtrim($this->getProjectDir(), '/') . '/backups/backups';
 

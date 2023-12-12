@@ -237,79 +237,99 @@ _fixDirectory() {
 _output " Started Project setting " "heading"
 
 # Validate environment.
-read -r -p " Do you want to use a docker? (Y/N) " yn </dev/tty
-case $yn in
-    [Yy]* )
-        USE_DOCKER=1
-        _checkDockerRequiredLibs
-        _checkDockerPorts
-        _installDocker
-        ;;
-    [Nn]* )
-        _checkRequiredLibs
-        ;;
-esac
+read -r -p " Do you want to use a docker? (Y/n) " yn </dev/tty
+if [[ $yn =~ ^[Nn]$ ]]; then
+    USE_DOCKER=0
+    _checkRequiredLibs
+else
+    USE_DOCKER=1
+    _checkDockerRequiredLibs
+    _checkDockerPorts
+    _installDocker
+fi
 
 # Init configurations:
+ _output " Initializing Base configurations " "heading"
+
 if [ ! -f "${PROJECT_ROOT}.env" ]; then
-    _output " Initializing Base configurations " "heading"
-
     cp "${PROJECT_ROOT}env-sample" "${PROJECT_ROOT}.env"
+fi
 
-    # Get project configurations
-    export $(cat "${PROJECT_ROOT}.env" | grep -v ^# | grep -v ^alias | xargs)
+# Get project configurations
+export $(cat "${PROJECT_ROOT}.env" | grep -v ^# | grep -v ^alias | xargs)
 
-    _replace_pattern "APP_DOCKER_USE=0" "APP_DOCKER_USE=${USE_DOCKER}" ${PROJECT_ROOT}/.env
+if [ "${APP_DOCKER_USE}" != "${USE_DOCKER}" ]; then
+    _replace_pattern "APP_DOCKER_USE=${APP_DOCKER_USE}" "APP_DOCKER_USE=${USE_DOCKER}" ${PROJECT_ROOT}/.env
+fi
 
-    # Get Server URL
-    if [ $USE_DOCKER == 1 ]; then
-        CLIENT_IP=$(_getClientIP)
-        read -rp " Enter the host name for the current Server ( default: ${CLIENT_IP}:${APP_DOCKER_HTTPS_PORT} ): " APP_DOCKER_SERVER_URL </dev/tty
-
-        if [ -z "${APP_DOCKER_SERVER_URL}" ]; then
-            APP_DOCKER_SERVER_URL="${CLIENT_IP}:${APP_DOCKER_HTTPS_PORT}"
-        fi
-        URL_PORT=($(echo "${APP_DOCKER_SERVER_URL}" | tr ":" "\n"))
-
-        _replace_pattern "APP_DOCKER_SERVER_URL=" "APP_DOCKER_SERVER_URL=${URL_PORT[0]:=${CLIENT_IP}}" ${PROJECT_ROOT}/.env
-        _replace_pattern "APP_DOCKER_HTTPS_PORT=8443" "APP_DOCKER_HTTPS_PORT=${URL_PORT[1]:=${APP_DOCKER_HTTPS_PORT}}" ${PROJECT_ROOT}/.env
-        _replace_pattern "APP_DOCKER_HTTP3_PORT=8443" "APP_DOCKER_HTTP3_PORT=${URL_PORT[1]:=${APP_DOCKER_HTTPS_PORT}}" ${PROJECT_ROOT}/.env
-    fi
-
-    # Get path to dumps folder
-    APP_DUMP_PATH=""
-    while [[ ${APP_DUMP_PATH} == '' || "${APP_DUMP_PATH}" =~ "~" ]]; do
-        read -rp " Enter the full path to folder where processed dumps will be placed (default: "${HOME}/${APP_NAME}-backups/" ): " APP_DUMP_PATH </dev/tty
-        APP_DUMP_PATH=${APP_DUMP_PATH:="${HOME}/${APP_NAME}-backups/"}
-        APP_DUMP_PATH=$(_fixDirectory "${APP_DUMP_PATH}")
-    done
-
-    if [ $USE_DOCKER == 1 ]; then
-        APP_DOCKER_LOCAL_BACKUPS_PATH=${APP_DOCKER_LOCAL_BACKUPS_PATH:="${HOME}/${APP_NAME}-backups/local_backups/"}
-        read -r -p " Do you have locally placed backups, or do you plan to use manual backups in future? (Y/N) " yn </dev/tty
-        case $yn in
-            [Yy]* )
-                APP_DOCKER_LOCAL_BACKUPS_PATH=""
-                while [[ ${APP_DOCKER_LOCAL_BACKUPS_PATH} == '' || "${APP_DOCKER_LOCAL_BACKUPS_PATH}" =~ "~" ]]; do
-                    read -rp " Enter the full path to folder with your local dumps (default: "${HOME}/${APP_NAME}-backups/local_backups/" ): " APP_DOCKER_LOCAL_BACKUPS_PATH </dev/tty
-                    APP_DOCKER_LOCAL_BACKUPS_PATH=${APP_DOCKER_LOCAL_BACKUPS_PATH:="${HOME}/${APP_NAME}-backups/local_backups/"}
-                    APP_DOCKER_LOCAL_BACKUPS_PATH=$(_fixDirectory "${APP_DOCKER_LOCAL_BACKUPS_PATH}")
-                done
-                ;;
-            [Nn]* )
-                ;;
-        esac
-    fi
-
-    if [ $USE_DOCKER == 1 ]; then
-        _replace_pattern "APP_DOCKER_PATH_DUMP=''" "APP_DOCKER_PATH_DUMP='${APP_DUMP_PATH}backups'" ${PROJECT_ROOT}.env
-        _replace_pattern "APP_DOCKER_PATH_CONFIG=''" "APP_DOCKER_PATH_CONFIG='${APP_DUMP_PATH}config'" ${PROJECT_ROOT}.env
-        _replace_pattern "APP_DOCKER_LOCAL_BACKUPS_PATH=''" "APP_DOCKER_LOCAL_BACKUPS_PATH='${APP_DOCKER_LOCAL_BACKUPS_PATH}'" ${PROJECT_ROOT}.env
+# Get Server URL
+if [ $USE_DOCKER == 1 ]; then
+    CLIENT_IP=$(_getClientIP)
+    if [ ! -z "${APP_DOCKER_SERVER_URL}" ]; then
+        DEFAULT_SERVER_PORT=${APP_DOCKER_SERVER_URL}:${APP_DOCKER_HTTPS_PORT}
     else
-        _replace_pattern "APP_DUMP_PATH=''" "APP_DUMP_PATH='${APP_DUMP_PATH}backups'" ${PROJECT_ROOT}.env
-        _replace_pattern "APP_CONFIG_PATH=''" "APP_CONFIG_PATH='${APP_DUMP_PATH}config'" ${PROJECT_ROOT}.env
+        DEFAULT_SERVER_PORT=${CLIENT_IP}:${APP_DOCKER_HTTPS_PORT}
     fi
 
+    read -rp " Enter the host name for the current Server ( default: ${DEFAULT_SERVER_PORT} ): " NEW_APP_DOCKER_SERVER_URL </dev/tty
+    if [ "${NEW_APP_DOCKER_SERVER_URL}" != "${DEFAULT_SERVER_PORT}" ]; then
+        if [ -z "${NEW_APP_DOCKER_SERVER_URL}" ]; then
+            NEW_APP_DOCKER_SERVER_URL="${DEFAULT_SERVER_PORT}"
+        fi
+        URL_PORT=($(echo "${NEW_APP_DOCKER_SERVER_URL}" | tr ":" "\n"))
+
+        _replace_pattern "APP_DOCKER_SERVER_URL=${APP_DOCKER_SERVER_URL}" "APP_DOCKER_SERVER_URL=${URL_PORT[0]:=${CLIENT_IP}}" ${PROJECT_ROOT}/.env
+        _replace_pattern "APP_DOCKER_HTTPS_PORT=${APP_DOCKER_HTTPS_PORT}" "APP_DOCKER_HTTPS_PORT=${URL_PORT[1]:=${APP_DOCKER_HTTPS_PORT}}" ${PROJECT_ROOT}/.env
+        _replace_pattern "APP_DOCKER_HTTP3_PORT=${APP_DOCKER_HTTPS_PORT}" "APP_DOCKER_HTTP3_PORT=${URL_PORT[1]:=${APP_DOCKER_HTTPS_PORT}}" ${PROJECT_ROOT}/.env
+    fi
+fi
+
+DEFAULT_APP_DUMP_PATH="${HOME}/${APP_NAME}-backups/"
+if [[ ! -z ${APP_DUMP_PATH} && ${USE_DOCKER} == 0 ]]; then
+    DEFAULT_APP_DUMP_PATH="${APP_DUMP_PATH%/backups}/"
+fi
+
+if [[ ! -z ${APP_DOCKER_PATH_DUMP} && ${USE_DOCKER} == 1 ]]; then
+    DEFAULT_APP_DUMP_PATH="${APP_DOCKER_PATH_DUMP%/backups}/"
+fi
+
+# Get path to dumps folder
+NEW_APP_DUMP_PATH=""
+while [[ ${NEW_APP_DUMP_PATH} == '' || "${NEW_APP_DUMP_PATH}" =~ "~" ]]; do
+    read -rp " Enter the full path to folder where processed dumps will be placed (default: ${DEFAULT_APP_DUMP_PATH} ): " NEW_APP_DUMP_PATH </dev/tty
+    NEW_APP_DUMP_PATH=${NEW_APP_DUMP_PATH:="${DEFAULT_APP_DUMP_PATH}"}
+    NEW_APP_DUMP_PATH=$(_fixDirectory "${NEW_APP_DUMP_PATH}")
+done
+
+if [ $USE_DOCKER == 1 ]; then
+    _replace_pattern "APP_DOCKER_PATH_DUMP='${APP_DOCKER_PATH_DUMP}'" "APP_DOCKER_PATH_DUMP='${NEW_APP_DUMP_PATH}backups'" ${PROJECT_ROOT}.env
+    _replace_pattern "APP_DOCKER_PATH_CONFIG='${APP_DOCKER_PATH_CONFIG}'" "APP_DOCKER_PATH_CONFIG='${NEW_APP_DUMP_PATH}configs'" ${PROJECT_ROOT}.env
+else
+    _replace_pattern "APP_DUMP_PATH='${APP_DUMP_PATH}'" "APP_DUMP_PATH='${NEW_APP_DUMP_PATH}backups'" ${PROJECT_ROOT}.env
+    _replace_pattern "APP_CONFIG_PATH='${APP_CONFIG_PATH}'" "APP_CONFIG_PATH='${NEW_APP_DUMP_PATH}configs'" ${PROJECT_ROOT}.env
+fi
+
+if [ $USE_DOCKER == 1 ]; then
+    DEFAULT_APP_DUMP_PATH="${HOME}/${APP_NAME}-backups/local_backups"
+    if [ ! -z "${APP_DOCKER_LOCAL_BACKUPS_PATH}" ]; then
+        DEFAULT_APP_DUMP_PATH=${APP_DOCKER_LOCAL_BACKUPS_PATH}
+    fi
+
+    read -r -p " Do you have locally placed backups, or do you plan to use manual backups in future? (Y/n) " yn </dev/tty
+    if [[ $yn =~ ^[Nn]$ ]]; then
+        NEW_APP_DOCKER_LOCAL_BACKUPS_PATH=${DEFAULT_APP_DUMP_PATH}
+    else
+        NEW_APP_DOCKER_LOCAL_BACKUPS_PATH=""
+        while [[ ${NEW_APP_DOCKER_LOCAL_BACKUPS_PATH} == '' || "${NEW_APP_DOCKER_LOCAL_BACKUPS_PATH}" =~ "~" ]]; do
+            read -rp " Enter the full path to folder with your local dumps (default: ${DEFAULT_APP_DUMP_PATH} ): " NEW_APP_DOCKER_LOCAL_BACKUPS_PATH </dev/tty
+            NEW_APP_DOCKER_LOCAL_BACKUPS_PATH=${NEW_APP_DOCKER_LOCAL_BACKUPS_PATH:="${DEFAULT_APP_DUMP_PATH}"}
+            NEW_APP_DOCKER_LOCAL_BACKUPS_PATH=$(_fixDirectory "${NEW_APP_DOCKER_LOCAL_BACKUPS_PATH}")
+        done
+    fi
+    _replace_pattern "APP_DOCKER_LOCAL_BACKUPS_PATH='${APP_DOCKER_LOCAL_BACKUPS_PATH}'" "APP_DOCKER_LOCAL_BACKUPS_PATH='${NEW_APP_DOCKER_LOCAL_BACKUPS_PATH}'" ${PROJECT_ROOT}.env
+fi
+
+if [ -z "${APP_SECRET}" ]; then
     # Generate APP secret
     _replace_pattern "APP_SECRET=" "APP_SECRET=$(_generateJwtKey)" ${PROJECT_ROOT}/.env
 fi
@@ -346,12 +366,12 @@ done </dev/tty
 export $(cat "${PROJECT_ROOT}.env" | grep -v ^# | grep -v ^alias | xargs)
 
 # Validate and create all folders and sub-folders
-if [ ! -d "${APP_DUMP_PATH}backups" ]; then
-    mkdir -p "${APP_DUMP_PATH}backups" "${APP_DUMP_PATH}backups/processed" "${APP_DUMP_PATH}backups/untouched"
+if [ ! -d "${NEW_APP_DUMP_PATH}backups" ]; then
+    mkdir -p "${NEW_APP_DUMP_PATH}backups" "${NEW_APP_DUMP_PATH}backups/processed" "${NEW_APP_DUMP_PATH}backups/untouched"
 fi
 
-if [ ! -d "${APP_DUMP_PATH}config" ]; then
-    mkdir -p "${APP_DUMP_PATH}config"
+if [ ! -d "${NEW_APP_DUMP_PATH}configs" ]; then
+    mkdir -p "${NEW_APP_DUMP_PATH}configs"
 fi
 
 if [ $USE_DOCKER == 1 ]; then
