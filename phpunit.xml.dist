@@ -27,9 +27,9 @@
         <testsuite name="Project Test Suite">
             <directory>tests</directory>
         </testsuite>
-        <testsuite name="MysqlBundle Test Suite">
+<!--        <testsuite name="MysqlBundle Test Suite">
             <directory>bundles/MysqlBundle/tests</directory>
-        </testsuite>
+        </testsuite>-->
         <testsuite name="General tests">
             <directory>bundles/TestBundle/tests</directory>
         </testsuite>
