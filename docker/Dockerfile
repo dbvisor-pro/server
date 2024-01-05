@@ -22,6 +22,7 @@ RUN apk add --no-cache \
     mariadb-client \
     mariadb-connector-c \
     postgresql-client \
+    openssh \
     sshpass
 
 RUN set -eux; \
