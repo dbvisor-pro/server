@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # -----------------------------------
 # Colors
@@ -8,6 +8,7 @@ BLUE=$'\e[0;34m'
 RED=$'\e[0;31m'
 NC=$'\e[0m'
 # -----------------------------------
+export CURRENT_SHELL=$(basename "$SHELL")
 
 # Init main directory
 if [ -z "${PROJECT_ROOT}" ]; then
@@ -39,6 +40,7 @@ ${YELLOW}Available Commands:${NC}
     ${GREEN}start${NC}      - start environment ( Docker only )
     ${GREEN}stop${NC}       - stop environment ( Docker only )
     ${GREEN}stopall${NC}    - stop all environment ( Docker only )
+    ${GREEN}re-build${NC}   - re-bild containers ( Docker only )
     ${GREEN}cli${NC}        - allows to run command line command inside of docker environment ( Docker only )
     ${GREEN}composer${NC}   - run composer commands ( Docker only )
     ${GREEN}mysql${NC}      - run mysql command ( Docker only )
@@ -115,13 +117,13 @@ _checkDocker() {
     fi
 }
 
-if [[ ${1} == '-l' || ${1} == '--list' ]]; then
+if [ ${1} = '-l' ] || [ ${1} = '--list' ]; then
     _help
     exit 1
-elif [ "${1}" == 'setup' ]; then
+elif [ "${1}" = 'setup' ]; then
     . "${PROJECT_ROOT}"/bin/setup
 else
-    if [ "${APP_DOCKER_USE}" == "1" ]; then
+    if [ "${APP_DOCKER_USE}" = "1" ]; then
         case "$1" in
             start)
                 . "${PROJECT_ROOT}"/bin/docker/start "${@:2}"
@@ -138,6 +140,9 @@ else
                 ;;
             stopall)
                 . "${PROJECT_ROOT}"/bin/docker/stopall
+                ;;
+            re-build)
+                . "${PROJECT_ROOT}"/bin/docker/re-build
                 ;;
             console)
                 _checkDocker

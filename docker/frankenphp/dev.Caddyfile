@@ -1,6 +1,8 @@
 {
     {$CADDY_GLOBAL_OPTIONS}
 
+    auto_https disable_redirects
+
     frankenphp {
         {$FRANKENPHP_CONFIG}
     }
@@ -11,10 +13,20 @@
 {$CADDY_EXTRA_CONFIG}
 
 http://{$SERVER_NAME:localhost} {
-    redir https://{host}:{$HTTPS_PORT}{uri} 301
+    log
+
+    root * /app/public
+    encode zstd gzip
+
+    {$CADDY_SERVER_EXTRA_DIRECTIVES}
+
+    # Disable Topics tracking if not enabled explicitly: https://github.com/jkarlin/topics
+    header ?Permissions-Policy "browsing-topics=()"
+
+    php_server
 }
 
-{$SERVER_NAME:localhost} {
+https://{$SERVER_NAME:localhost} {
     log
 
     root * /app/public

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ -z "${PROJECT_ROOT}" ]; then
+    export PROJECT_ROOT="$(dirname "$(realpath $0)")/../.."
+fi
+
+if [ ! -z "$(docker ps -q)" ]; then
+    "${PROJECT_ROOT}"/bin/docker/stopall
+fi
+
+docker volume rm docker_caddy_config
+docker volume rm docker_caddy_data
+
+"${PROJECT_ROOT}"/bin/docker/start -b

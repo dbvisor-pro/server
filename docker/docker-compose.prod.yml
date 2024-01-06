@@ -5,7 +5,7 @@ services:
     container_name: ${IMAGES_PREFIX:-}dbvisor-server
     build:
       context: .
-      target: frankenphp_dev
+      target: frankenphp_prod
     image: ${IMAGES_PREFIX:-}dbvisor-server
     environment:
       APP_ENV: ${APP_ENV}
@@ -40,13 +40,5 @@ services:
         protocol: udp
     extra_hosts:
       - host.docker.internal:host-gateway
-    networks:
-      - dbvisor-network
-
-  dbvisor-adminer:
-    image: adminer
-    container_name: ${IMAGES_PREFIX:-}dbvisor-adminer
-    ports:
-      - 8080:${APP_DOCKER_ADMINER_PORT:-8098}
     networks:
       - dbvisor-network
