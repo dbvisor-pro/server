@@ -719,6 +719,30 @@ do_install() {
 			echo_docker_as_nonroot
 			exit 0
 			;;
+        alpine)
+            pkgs='--update docker docker-cli-compose openrc'
+            $sh_c "apk add $pkgs"
+
+            $sh_c "addgroup username docker"
+            # $sh_c "rc-update add docker default"
+            # $sh_c "service docker start"
+
+            # Rootless
+            $sh_c 'add docker-rootless-extras'
+            $sh_c 'rc-update add cgroups'
+
+            (
+                $sh_c 'adduser -SDHs /sbin/nologin dockermap'
+                $sh_c 'addgroup -S dockermap'
+                $sh_c "echo dockremap:$(cat /etc/passwd|grep dockremap|cut -d: -f3):65536 >> /etc/subuid"
+                $sh_c "echo dockremap:$(cat /etc/passwd|grep dockremap|cut -d: -f4):65536 >> /etc/subgid"
+
+                $sh_c 'echo { "userns-remap": "dockremap" } >> /etc/docker/daemon.json'
+            )
+
+            echo_docker_as_nonroot
+            exit 0;
+            ;;
 		*)
 			if [ -z "$lsb_dist" ]; then
 				if is_darwin; then

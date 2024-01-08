@@ -1,12 +1,12 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # -----------------------------------
 # Colors
-GREEN=$'\e[0;32m'
-YELLOW=$'\e[1;33m'
-BLUE=$'\e[0;34m'
-RED=$'\e[0;31m'
-NC=$'\e[0m'
+GREEN='\e[0;32m'
+YELLOW='\e[1;33m'
+BLUE='\e[0;34m'
+RED='\e[0;31m'
+NC='\e[0m'
 # -----------------------------------
 export CURRENT_SHELL=$(basename "$SHELL")
 
@@ -18,7 +18,8 @@ fi
 # Help commands
 _help() {
     if [ ! -f "${PROJECT_ROOT}/.env" ]; then
-        echo "
+        # shellcheck disable=SC2059
+        printf "
 ${YELLOW}Usage:${NC}
     ${GREEN}dbvisor-agent [command]${NC}
 
@@ -26,10 +27,11 @@ ${YELLOW}Options:${NC}
     ${GREEN}-l | --list${NC}  - list of available commands
 
 ${YELLOW}Available Commands:${NC}
-    ${RED}setup${NC}          - initial setup
+    ${RED}setup${NC}        - initial setup
 "
     else
-        echo "
+        # shellcheck disable=SC2059
+        printf "
 ${YELLOW}Usage:${NC}
     ${GREEN}dbvisor-agent [command]${NC}
 
@@ -40,7 +42,7 @@ ${YELLOW}Available Commands:${NC}
     ${GREEN}start${NC}      - start environment ( Docker only )
     ${GREEN}stop${NC}       - stop environment ( Docker only )
     ${GREEN}stopall${NC}    - stop all environment ( Docker only )
-    ${GREEN}re-build${NC}   - re-bild containers ( Docker only )
+    ${GREEN}re-build${NC}   - re-build containers ( Docker only )
     ${GREEN}cli${NC}        - allows to run command line command inside of docker environment ( Docker only )
     ${GREEN}composer${NC}   - run composer commands ( Docker only )
     ${GREEN}mysql${NC}      - run mysql command ( Docker only )
@@ -48,7 +50,7 @@ ${YELLOW}Available Commands:${NC}
     ${GREEN}cron${NC}       - run con commands ( Docker only )
     ${GREEN}info${NC}       - basic information about tool
 
-    ${RED}setup${NC}        - initial setup
+    ${RED}setup${NC}      - initial setup
 
 ${YELLOW}Tool:${NC}
     ${GREEN}app:server:add${NC}         - Start adding the server to service
@@ -75,20 +77,24 @@ ${YELLOW}Tool:${NC}
 
 # Tool information
 _info() {
-    echo "
+    # shellcheck disable=SC2059
+    printf "${YELLOW}Tool Configurations:${NC}
     Tool is installed in dir:   ${GREEN}${PROJECT_ROOT}${NC}
-    Main config file is:        ${GREEN}${PROJECT_ROOT}/.env${NC}"
+    Main config file is:        ${GREEN}${PROJECT_ROOT}/.env${NC}
+"
 
     if [ -f "${PROJECT_ROOT}/.env.mysql" ]; then
-        echo "
+        # shellcheck disable=SC2059
+        printf "
     MySQL config file is:       ${GREEN}${PROJECT_ROOT}/.env.mysql${NC}
-    "
+"
     fi
 
     if [ -f "${PROJECT_ROOT}/.env.postgress" ]; then
-        echo "
+        # shellcheck disable=SC2059
+        printf "
     Postgress config file is:   ${GREEN}${PROJECT_ROOT}/.env.postgress${NC}
-    "
+"
     fi
 }
 
@@ -117,7 +123,7 @@ _checkDocker() {
     fi
 }
 
-if [ ${1} = '-l' ] || [ ${1} = '--list' ]; then
+if [ "${1}" = '-l' ] || [ "${1}" = '--list' ]; then
     _help
     exit 1
 elif [ "${1}" = 'setup' ]; then
