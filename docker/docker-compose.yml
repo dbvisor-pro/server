@@ -22,7 +22,9 @@ services:
 
 volumes:
   caddy_data:
+    name: dbvisor-caddy-data
   caddy_config:
+    name: dbvisor-caddy-config
 
 networks:
   dbvisor-network:
