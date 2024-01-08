@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 if [ -z "${PROJECT_ROOT}" ]; then
     export PROJECT_ROOT="$(dirname "$(realpath $0)")/../.."
@@ -18,7 +18,7 @@ if [ -z ${APP_DOCKER_PATH_CONFIG} ]; then
 fi
 
 # Get path to config
-if [ "$(uname)" == "Darwin" ]; then
+if [ "$(uname)" = "Darwin" ]; then
   export DOCKER_UID=1000
   export DOCKER_GID=1000
 else
@@ -35,8 +35,8 @@ else
 fi
 
 COMPOSE_FILE=${PROJECT_ROOT}/docker/docker-compose.yml
-# if [ "${APP_ENV}" == "dev" ]; then
-#    ${DOCKER_COMPOSE} -f "${COMPOSE_FILE}" -f "${PROJECT_ROOT}/docker/docker-compose.dev.yml" --env-file "${ENV_FILE}" "$@"
-# else
-    ${DOCKER_COMPOSE} -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" "$@"
-# fi
+if [ "${APP_ENV}" = "dev" ]; then
+    ${DOCKER_COMPOSE} -f "${COMPOSE_FILE}" -f "${PROJECT_ROOT}/docker/docker-compose.dev.yml" --env-file "${ENV_FILE}" "$@"
+else
+    ${DOCKER_COMPOSE} -f "${COMPOSE_FILE}" -f "${PROJECT_ROOT}/docker/docker-compose.prod.yml" --env-file "${ENV_FILE}" "$@"
+fi

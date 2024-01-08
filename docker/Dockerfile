@@ -70,6 +70,19 @@ CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--resume", "--en
 WORKDIR /app
 
 
+# Dev Dockerfile
+FROM frankenphp_base AS frankenphp_dev
+
+ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
+
+COPY --link frankenphp/dev.Caddyfile /etc/caddy/Caddyfile
+COPY --link frankenphp/worker.Caddyfile /etc/caddy/worker.Caddyfile
+
+CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--resume", "--environ"]
+
+WORKDIR /app
+
+
 # Cron Dockerfile
 FROM frankenphp_base AS frankenphp_cron
 
