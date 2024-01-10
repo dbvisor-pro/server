@@ -129,20 +129,22 @@ if [ "${1}" = '-l' ] || [ "${1}" = '--list' ]; then
 elif [ "${1}" = 'setup' ]; then
     . "${PROJECT_ROOT}"/bin/setup
 else
+    command=$1
+    shift 1
     if [ "${APP_DOCKER_USE}" = "1" ]; then
-        case "$1" in
+        case "$command" in
             start)
-                . "${PROJECT_ROOT}"/bin/docker/start "${@:2}"
+                . "${PROJECT_ROOT}"/bin/docker/start "${@}"
                 ;;
             stop)
                 _checkDocker
                 . "${PROJECT_ROOT}"/bin/docker/stop
                 ;;
             start-db)
-                . "${PROJECT_ROOT}"/bin/docker/start-db "${@:2}"
+                . "${PROJECT_ROOT}"/bin/docker/start-db "${@}"
                 ;;
             stop-db)
-                . "${PROJECT_ROOT}"/bin/docker/stop-db "${@:2}"
+                . "${PROJECT_ROOT}"/bin/docker/stop-db "${@}"
                 ;;
             stopall)
                 . "${PROJECT_ROOT}"/bin/docker/stopall
@@ -152,27 +154,27 @@ else
                 ;;
             console)
                 _checkDocker
-                . "${PROJECT_ROOT}"/bin/docker/console "${@:2}"
+                . "${PROJECT_ROOT}"/bin/docker/console "${@}"
                 ;;
             composer)
                 _checkDocker
-                . "${PROJECT_ROOT}"/bin/docker/composer "${@:2}"
+                . "${PROJECT_ROOT}"/bin/docker/composer "${@}"
                 ;;
             cli)
                 _checkDocker
-                . "${PROJECT_ROOT}"/bin/docker/cli "${@:2}"
+                . "${PROJECT_ROOT}"/bin/docker/cli "${@}"
                 ;;
             cron)
                 _checkDocker
-                . "${PROJECT_ROOT}"/bin/docker/cron "${@:2}"
+                . "${PROJECT_ROOT}"/bin/docker/cron "${@}"
                 ;;
             app:server:add)
                 _checkDocker
-                . "${PROJECT_ROOT}"/bin/docker/console "app:server:add" "${@:2}"
+                . "${PROJECT_ROOT}"/bin/docker/console "app:server:add" "${@}"
                 ;;
             app:server:update)
                 _checkDocker
-                . "${PROJECT_ROOT}"/bin/docker/console "app:server:update" "${@:2}"
+                . "${PROJECT_ROOT}"/bin/docker/console "app:server:update" "${@}"
                 ;;
             app:db:process)
                 _checkDocker
@@ -180,11 +182,11 @@ else
                 ;;
             app:db:add)
                 _checkDocker
-                . "${PROJECT_ROOT}"/bin/docker/console "app:db:add" "${@:2}"
+                . "${PROJECT_ROOT}"/bin/docker/console "app:db:add" "${@}"
                 ;;
             app:db:analyze)
                 _checkDocker
-                . "${PROJECT_ROOT}"/bin/docker/console "app:db:analyze" "${@:2}"
+                . "${PROJECT_ROOT}"/bin/docker/console "app:db:analyze" "${@}"
                 ;;
             app:cron:install)
                 _checkDocker
@@ -198,27 +200,29 @@ else
                 ;;
         esac
     else
-        case "$1" in
+        command=$1
+        shift 1
+        case "$command" in
             console)
-                php "${PROJECT_ROOT}"/bin/console "${@:2}"
+                php "${PROJECT_ROOT}"/bin/console "${@}"
                 ;;
             app:server:add)
-                php "${PROJECT_ROOT}"/bin/console "app:server:add" "${@:2}"
+                php "${PROJECT_ROOT}"/bin/console "app:server:add" "${@}"
                 ;;
             app:server:update)
-                php "${PROJECT_ROOT}"/bin/console "app:server:update" "${@:2}"
+                php "${PROJECT_ROOT}"/bin/console "app:server:update" "${@}"
                 ;;
             app:db:process)
                 php "${PROJECT_ROOT}"/bin/console "app:db:process"
                 ;;
             app:db:add)
-                php "${PROJECT_ROOT}"/bin/console "app:db:add" "${@:2}"
+                php "${PROJECT_ROOT}"/bin/console "app:db:add" "${@}"
                 ;;
             app:cron:install)
                 php "${PROJECT_ROOT}"/bin/console "app:cron:install"
                 ;;
             app:db:analyze)
-                php "${PROJECT_ROOT}"/bin/console "app:db:analyze" "${@:2}"
+                php "${PROJECT_ROOT}"/bin/console "app:db:analyze" "${@}"
                 ;;
             info)
                 _info

@@ -11,8 +11,8 @@ ARG APP_ENV
 ARG GID
 ARG UID
 
-RUN groupadd -f -g $GID app \
-    && useradd -g $GID -u $UID -s /bin/bash app
+RUN groupadd -f -g $GID app
+RUN if [ "$UID" != "0" ] ; then useradd -g $GID -u $UID -s /bin/bash app ; fi
 
 # persistent / runtime deps
 # hadolint ignore=DL3018
