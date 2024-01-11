@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 if [ -z "${PROJECT_ROOT}" ]; then
     export PROJECT_ROOT="$(dirname "$(realpath $0)")/../.."

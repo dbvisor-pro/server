@@ -1,9 +1,29 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 export PROJECT_ROOT
 PROJECT_ROOT="$(dirname "$(realpath $0)")/"
 USE_DOCKER=0
 MANAGER_CLI="${PROJECT_ROOT}dbvisor-agent"
+
+command_exists() {
+    command -v "$@" > /dev/null 2>&1
+}
+
+user="$(id -un 2>/dev/null || true)"
+sh_c='su -c'
+if [ "$user" != 'root' ]; then
+    if command_exists sudo; then
+        sh_c='sudo -E sh -c'
+    elif command_exists su; then
+        sh_c='su -c'
+    else
+        echo
+        echo "Error: this installer needs the ability to run commands as root."
+        echo "We are unable to find either 'sudo' or 'su' available to make this happen."
+        echo
+        exit 1
+    fi
+fi
 
 _output() {
     style_start=""
@@ -33,15 +53,15 @@ _output() {
     esac
     fi
 
-    builtin echo -e "${style_start}${1}${style_end}"
+    echo -e "${style_start}${1}${style_end}"
 }
 
 # Validate is docker installed
 # Install in case required
 _installDocker() {
-    if [ ! -x "$(command -v docker)" ]; then
+    if ! command_exists docker ; then
         read -r -p "Did Docker get installed! Do you want to proceed? (Y/n) " yn </dev/tty
-        if [[ $yn =~ ^[Nn]$ ]]; then
+        if [ $(expr match "${yn}" '[Nn]') != 0 ]; then
             echo "Installation process stopped...";
             exit
         else
@@ -51,18 +71,9 @@ _installDocker() {
 
     if [ ! -f /.dockerenv  ]; then
         if [ "${USER}" != 'root' ]; then
-            if command -v sudo; then
-                sudo -E sh -c "usermod -a -G docker ${USER}"
-                sudo -E sh -c "chown root:docker /var/run/docker.sock"
-                sudo -E sh -c "chmod -R 777 /var/run/docker.sock"
-            elif command -v su; then
-                su -c "usermod -aG docker ${USER}"
-                su -c "chown root:docker /var/run/docker.sock"
-                su -c "chmod -R 777 /var/run/docker.sock"
-            else
-                _output "  ERROR: This installer needs the ability to run commands as root. We are unable to find either 'sudo' or 'su' available to make this happen." "error"
-                exit 1
-            fi
+            $sh_c "usermod -aG docker ${USER}"
+            $sh_c "chown root:docker /var/run/docker.sock"
+            $sh_c "chmod -R 777 /var/run/docker.sock"
         fi
 
         if ! docker run --rm hello-world; then
@@ -157,10 +168,10 @@ _getClientIP() {
 }
 
 # Replace Function
-_replace_pattern () {
-    local FROM=$1
-    local TO=$2
-    local FILE=$3
+_replace_pattern() {
+    FROM=$1
+    TO=$2
+    FILE=$3
 
     if [ "$(uname)" != "Darwin" ]; then
         sed -i "s|${FROM}|${TO}|g" ${FILE}
@@ -171,7 +182,6 @@ _replace_pattern () {
 
 # Generate JWT secret key
 _generateJwtKey() {
-    local jwt_secret
     jwt_secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 43)
 
     echo "$jwt_secret"
@@ -182,8 +192,8 @@ _initAlias() {
     NAME="dbvisor-agent"
     DEFINITION="${MANAGER_CLI}"
 
-    if [[ -f ${HOME}/.bash_aliases && $(which bash) != "" ]]; then
-        if [ "$(cat < "${HOME}/.bash_aliases" | grep -c "${NAME}")" == "0" ] ; then
+    if [ -f ${HOME}/.bash_aliases ] && [ $(which bash) != "" ]; then
+        if [ "$(cat < "${HOME}/.bash_aliases" | grep -c "${NAME}")" = "0" ] ; then
             echo "alias $NAME='$DEFINITION'" >> ${HOME}/.bash_aliases
 
             source ${HOME}/.bash_aliases
@@ -193,8 +203,8 @@ _initAlias() {
         fi
     fi
 
-    if [[ -f ${HOME}/.zshrc && $(which zsh) != "" ]]; then
-        if [ "$(cat < "${HOME}/.zshrc" | grep -c "${NAME}")" == "0" ] ; then
+    if [ -f ${HOME}/.zshrc ] && [ $(which zsh) != "" ]; then
+        if [ "$(cat < "${HOME}/.zshrc" | grep -c "${NAME}")" = "0" ] ; then
             echo "alias $NAME='$DEFINITION'" >> ${HOME}/.zshrc
 
             source ${HOME}/.zshrc
@@ -203,13 +213,27 @@ _initAlias() {
         fi
     fi
 
-    if [[ -f ${HOME}/.bashrc && $(which bash) != "" ]]; then
-        if [ "$(cat < "${HOME}/.bashrc" | grep -c "${NAME}")" == "0" ] ; then
+    if [ -f ${HOME}/.bashrc ] && [ $(which bash) != "" ]; then
+        if [ "$(cat < "${HOME}/.bashrc" | grep -c "${NAME}")" = "0" ] ; then
             echo "alias $NAME='$DEFINITION'" >> ${HOME}/.bashrc
 
             source ${HOME}/.bashrc
 
             exec bash --login
+        fi
+    fi
+
+    if [ $(which sh) != "" ]; then
+        if [ ! -f ${HOME}/.profile ]; then
+            touch ${HOME}/.profile
+        fi
+
+        if [ "$(cat < "${HOME}/.profile" | grep -c "${NAME}")" = "0" ] ; then
+            echo "alias $NAME='$DEFINITION'" >> ${HOME}/.profile
+
+            source ${HOME}/.profile
+
+            exec sh --login
         fi
     fi
 }
@@ -233,7 +257,7 @@ _output " Started Project setting " "heading"
 
 # Validate environment.
 read -r -p " Do you want to use a docker? (Y/n) " yn </dev/tty
-if [[ $yn =~ ^[Nn]$ ]]; then
+if [ $(expr match "${yn}" '[Nn]') != 0 ]; then
     USE_DOCKER=0
     _checkRequiredLibs
     "${PROJECT_ROOT}"bin/docker/install_tools.sh
@@ -259,7 +283,7 @@ if [ "${APP_DOCKER_USE}" != "${USE_DOCKER}" ]; then
 fi
 
 # Get Server URL
-if [ $USE_DOCKER == 1 ]; then
+if [ ${USE_DOCKER} == 1 ]; then
     CLIENT_IP=$(_getClientIP)
     if [ ! -z "${APP_DOCKER_SERVER_URL}" ]; then
         DEFAULT_SERVER_PORT=${APP_DOCKER_SERVER_URL}:${APP_DOCKER_HTTPS_PORT}
@@ -272,32 +296,39 @@ if [ $USE_DOCKER == 1 ]; then
         if [ -z "${NEW_APP_DOCKER_SERVER_URL}" ]; then
             NEW_APP_DOCKER_SERVER_URL="${DEFAULT_SERVER_PORT}"
         fi
-        URL_PORT=($(echo "${NEW_APP_DOCKER_SERVER_URL}" | tr ":" "\n"))
 
-        _replace_pattern "APP_DOCKER_SERVER_URL=${APP_DOCKER_SERVER_URL}" "APP_DOCKER_SERVER_URL=${URL_PORT[0]:=${CLIENT_IP}}" ${PROJECT_ROOT}/.env
-        _replace_pattern "APP_DOCKER_HTTPS_PORT=${APP_DOCKER_HTTPS_PORT}" "APP_DOCKER_HTTPS_PORT=${URL_PORT[1]:=${APP_DOCKER_HTTPS_PORT}}" ${PROJECT_ROOT}/.env
-        _replace_pattern "APP_DOCKER_HTTP3_PORT=${APP_DOCKER_HTTPS_PORT}" "APP_DOCKER_HTTP3_PORT=${URL_PORT[1]:=${APP_DOCKER_HTTPS_PORT}}" ${PROJECT_ROOT}/.env
+        OLD_IFS=$IFS
+        IFS=':'
+        set -- ${NEW_APP_DOCKER_SERVER_URL}
+        IFS=$OLD_IFS
+
+        URL=${1}
+        PORT=${2}
+
+        _replace_pattern "APP_DOCKER_SERVER_URL=${APP_DOCKER_SERVER_URL}" "APP_DOCKER_SERVER_URL=${URL:=${CLIENT_IP}}" ${PROJECT_ROOT}/.env
+        _replace_pattern "APP_DOCKER_HTTPS_PORT=${APP_DOCKER_HTTPS_PORT}" "APP_DOCKER_HTTPS_PORT=${PORT:=${APP_DOCKER_HTTPS_PORT}}" ${PROJECT_ROOT}/.env
+        _replace_pattern "APP_DOCKER_HTTP3_PORT=${APP_DOCKER_HTTPS_PORT}" "APP_DOCKER_HTTP3_PORT=${PORT:=${APP_DOCKER_HTTPS_PORT}}" ${PROJECT_ROOT}/.env
     fi
 fi
 
 DEFAULT_APP_DUMP_PATH="${HOME}/${APP_NAME}-backups/"
-if [[ ! -z ${APP_DUMP_PATH} && ${USE_DOCKER} == 0 ]]; then
+if [ ! -z ${APP_DUMP_PATH} ] && [ "${USE_DOCKER}" == "0" ]; then
     DEFAULT_APP_DUMP_PATH="${APP_DUMP_PATH%/backups}/"
 fi
 
-if [[ ! -z ${APP_DOCKER_PATH_DUMP} && ${USE_DOCKER} == 1 ]]; then
+if [ ! -z ${APP_DOCKER_PATH_DUMP} ] && [ "${USE_DOCKER}" == "1" ]; then
     DEFAULT_APP_DUMP_PATH="${APP_DOCKER_PATH_DUMP%/backups}/"
 fi
 
 # Get path to dumps folder
 NEW_APP_DUMP_PATH=""
-while [[ ${NEW_APP_DUMP_PATH} == '' || "${NEW_APP_DUMP_PATH}" =~ "~" ]]; do
+while [ "${NEW_APP_DUMP_PATH}" == "" ] || [ $(expr match "${NEW_APP_DUMP_PATH}" '~') != 0 ]; do
     read -rp " Enter the full path to folder where processed dumps will be placed (default: ${DEFAULT_APP_DUMP_PATH} ): " NEW_APP_DUMP_PATH </dev/tty
     NEW_APP_DUMP_PATH=${NEW_APP_DUMP_PATH:="${DEFAULT_APP_DUMP_PATH}"}
     NEW_APP_DUMP_PATH=$(_fixDirectory "${NEW_APP_DUMP_PATH}")
 done
 
-if [ $USE_DOCKER == 1 ]; then
+if [ "${USE_DOCKER}" == "1" ]; then
     _replace_pattern "APP_DOCKER_PATH_DUMP='${APP_DOCKER_PATH_DUMP}'" "APP_DOCKER_PATH_DUMP='${NEW_APP_DUMP_PATH}backups'" ${PROJECT_ROOT}.env
     _replace_pattern "APP_DOCKER_PATH_CONFIG='${APP_DOCKER_PATH_CONFIG}'" "APP_DOCKER_PATH_CONFIG='${NEW_APP_DUMP_PATH}configs'" ${PROJECT_ROOT}.env
 else
@@ -312,11 +343,11 @@ if [ $USE_DOCKER == 1 ]; then
     fi
 
     read -r -p " Do you have locally placed backups, or do you plan to use manual backups in future? (Y/n) " yn </dev/tty
-    if [[ $yn =~ ^[Nn]$ ]]; then
+    if [ $(expr match "${yn}" '[Nn]') != 0 ]; then
         NEW_APP_DOCKER_LOCAL_BACKUPS_PATH=${DEFAULT_APP_DUMP_PATH}
     else
         NEW_APP_DOCKER_LOCAL_BACKUPS_PATH=""
-        while [[ ${NEW_APP_DOCKER_LOCAL_BACKUPS_PATH} == '' || "${NEW_APP_DOCKER_LOCAL_BACKUPS_PATH}" =~ "~" ]]; do
+        while [ "${NEW_APP_DOCKER_LOCAL_BACKUPS_PATH}" == "" ] || [ $(expr match "${NEW_APP_DOCKER_LOCAL_BACKUPS_PATH}" '~') != 0 ]; do
             read -rp " Enter the full path to folder with your local dumps (default: ${DEFAULT_APP_DUMP_PATH} ): " NEW_APP_DOCKER_LOCAL_BACKUPS_PATH </dev/tty
             NEW_APP_DOCKER_LOCAL_BACKUPS_PATH=${NEW_APP_DOCKER_LOCAL_BACKUPS_PATH:="${DEFAULT_APP_DUMP_PATH}"}
             NEW_APP_DOCKER_LOCAL_BACKUPS_PATH=$(_fixDirectory "${NEW_APP_DOCKER_LOCAL_BACKUPS_PATH}")
@@ -333,10 +364,13 @@ fi
 # Select engines:
 _output " Initializing supported DB engines " "heading"
 
-PS3="Choose DB engines which will be used: "
-options=(" MySQL" " Postgres" " Continue")
-select option in "${options[@]}"; do
-    case $REPLY in
+while true; do
+    echo "1. MySQL"
+    echo "2. Postgres"
+    echo "3. Continue"
+
+    read -p "Choose DB engines which will be used: " choice
+    case $choice in
         1)
             if [ ! -f ${PROJECT_ROOT}.env.mysql ]; then
                 cp ${PROJECT_ROOT}env.mysql-sample ${PROJECT_ROOT}.env.mysql
@@ -353,7 +387,7 @@ select option in "${options[@]}"; do
             break
             ;;
         *)
-            echo "Invalid option. Please select a valid option."
+            echo "Invalid option. Try again."
             ;;
     esac
 done </dev/tty
@@ -370,19 +404,20 @@ if [ ! -d "${NEW_APP_DUMP_PATH}configs" ]; then
     mkdir -p "${NEW_APP_DUMP_PATH}configs"
 fi
 
-if [ $USE_DOCKER == 1 ]; then
+if [ "${USE_DOCKER}" = "1" ]; then
     if [ ! -d "${APP_DOCKER_LOCAL_BACKUPS_PATH}" ]; then
         mkdir -p "${APP_DOCKER_LOCAL_BACKUPS_PATH}"
     fi
 fi
 
-if [[ ! -z ${APP_DOCKER_SERVER_URL} && -z $(grep ${APP_DOCKER_SERVER_URL} /etc/hosts) ]]; then
-    _output " Your system password has been requested to add an entry to /etc/hosts... " "info"
-    echo "127.0.0.1 ::1 ${APP_DOCKER_SERVER_URL}" | sudo tee -a /etc/hosts
+if [ ! -z "${APP_DOCKER_SERVER_URL}" ] && [ -z $(grep -c ${APP_DOCKER_SERVER_URL} /etc/hosts) ]; then
+    if [ "$user" != 'root' ]; then
+        _output " Your system password has been requested to add an entry to /etc/hosts... " "info"
+    fi
+    $sh_c echo "127.0.0.1 ::1 ${APP_DOCKER_SERVER_URL}" >> /etc/hosts
 fi
 
-if [ $USE_DOCKER == 1 ]; then
-    # Start docker with DB's
+if [ "${USE_DOCKER}" = "1" ]; then
     _output " Starting Docker containers " "heading"
 
     "${PROJECT_ROOT}"bin/docker/start -b

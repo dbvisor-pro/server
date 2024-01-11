@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 if [ -z "${PROJECT_ROOT}" ]; then
     export PROJECT_ROOT="$(dirname "$(realpath $0)")/../.."
@@ -8,7 +8,7 @@ if [ ! -d "${PROJECT_ROOT}/docker/server/certs" ]; then
     mkdir -p "${PROJECT_ROOT}/docker/server/certs"
 fi
 
-if [[ -n ${1} && ${1} == '-b' ]]; then
+if [ -n "${1}" ] && [ "${1}" = '-b' ]; then
     "${PROJECT_ROOT}"/bin/docker/docker-compose build --no-cache
 fi
 "${PROJECT_ROOT}"/bin/docker/docker-compose up -d

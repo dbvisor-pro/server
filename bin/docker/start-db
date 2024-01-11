@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 [ -z "$1" ] && echo "Please specify a Db engine (ex. --mysql|--postgres)" && exit
 

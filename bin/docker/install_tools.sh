@@ -17,6 +17,7 @@ command_exists() {
 }
 
 user="$(id -un 2>/dev/null || true)"
+sh_c='su -c'
 if [ "$user" != 'root' ]; then
     if command_exists sudo; then
         sh_c='sudo -E sh -c'
@@ -47,6 +48,9 @@ install_sshpass() {
         fedora)
             $sh_c 'dnf install sshpass'
         ;;
+        alpine)
+            $sh_c 'apk add sshpass'
+        ;;
         *)
             echo
             echo "ERROR: Unsupported distribution '$lsb_dist'"
@@ -58,4 +62,3 @@ install_sshpass() {
 if ! command_exists sshpass; then
     install_sshpass
 fi
-
