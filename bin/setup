@@ -259,7 +259,7 @@ _output " Started Project setting " "heading"
 read -r -p " Do you want to use a docker? (Y/n) " yn </dev/tty
 if [ $(expr match "${yn}" '[Nn]') != 0 ]; then
     USE_DOCKER=0
-    # _checkRequiredLibs
+    _checkRequiredLibs
     "${PROJECT_ROOT}"bin/docker/install_tools.sh
 else
     USE_DOCKER=1

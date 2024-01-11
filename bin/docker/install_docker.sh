@@ -730,7 +730,7 @@ do_install() {
             $sh_c "service docker start"
 
             # Rootless
-            $sh_c 'add docker-rootless-extras'
+            $sh_c 'apk add docker-rootless-extras'
             $sh_c 'rc-update add cgroups'
 
             (
