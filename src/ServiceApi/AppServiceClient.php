@@ -20,11 +20,15 @@ final class AppServiceClient
      * @param HttpClientInterface $httpClient
      * @param KernelInterface $kernel
      * @param string $serviceUrl
+     * @param bool $serviceSecure
+     * @param string $environment
      */
     public function __construct(
         protected HttpClientInterface $httpClient,
         protected KernelInterface $kernel,
-        protected string $serviceUrl = ''
+        protected string $serviceUrl = '',
+        private bool $serviceSecure = true,
+        private string $environment = 'prod'
     ) {
     }
 
@@ -53,8 +57,11 @@ final class AppServiceClient
      */
     protected function getUrl(string $action): string
     {
+        var_dump($this->serviceSecure);
+        var_dump($this->environment);
         $url = str_replace(['https://', 'http://'], '', $this->serviceUrl);
+        $protocol = !$this->serviceSecure && $this->environment === 'dev' ? 'http' : 'https';
 
-        return 'https://' . rtrim($url, '/') . '/api/' . $action;
+        return sprintf("%s://%s/api/%s", $protocol, rtrim($url, '/'), $action);
     }
 }

@@ -8,6 +8,7 @@ parameters:
     app.service_token: '%env(APP_SERVICE_TOKEN)%'
     app.service_uuid: '%env(APP_SERVER_UUID)%'
     app.service_url: '%env(APP_SERVICE_URL)%'
+    app.service_secure: '%env(APP_SERVICE_SECURE)%'
     app.dump_path: '%env(APP_DUMP_PATH)%'
     app.secret_key_private: '%env(SECRET_KEY_PRIVATE)%'
     env(SECRET_KEY_PRIVATE): '/app/config/keys/private'
@@ -33,6 +34,8 @@ services:
         arguments:
             $httpClient: "@Symfony\\Contracts\\HttpClient\\HttpClientInterface"
             $serviceUrl: '%app.service_url%'
+            $serviceSecure: '%app.service_secure%'
+            $environment: '%kernel.environment%'
 
     App\Service\Security\Encryption:
         arguments:
