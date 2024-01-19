@@ -57,10 +57,8 @@ final class AppServiceClient
      */
     protected function getUrl(string $action): string
     {
-        var_dump($this->serviceSecure);
-        var_dump($this->environment);
         $url = str_replace(['https://', 'http://'], '', $this->serviceUrl);
-        $protocol = !$this->serviceSecure && $this->environment === 'dev' ? 'http' : 'https';
+        $protocol = $this->environment === 'dev' ? 'http' : 'https';
 
         return sprintf("%s://%s/api/%s", $protocol, rtrim($url, '/'), $action);
     }
