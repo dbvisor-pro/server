@@ -33,6 +33,17 @@ abstract class AbstractDatabaseCommand extends AbstractCommand
     protected array $config = [];
 
     /**
+     * @var array|string[]
+     */
+    protected array $baseDbInfo = [
+        'db_uuid',
+        'name',
+        'engine',
+        'platform',
+        'method'
+    ];
+
+    /**
      * @param AppLogger $appLogger
      * @param AppConfig $appConfig
      * @param Server $serverApi
@@ -264,8 +275,11 @@ abstract class AbstractDatabaseCommand extends AbstractCommand
             $this->config['method'] ?? null
         );
 
-        $methodConfig = $methods[$this->config['method']]->askConfig($this->getInputOutput(), $this->config);
-        $this->config = array_merge($this->config, $methodConfig);
+        $mainConfigData   = array_intersect_key($this->config, array_flip($this->baseDbInfo));
+        $methodConfigData = array_diff($this->config, $mainConfigData);
+
+        $methodConfig = $methods[$this->config['method']]->askConfig($this->getInputOutput(), $methodConfigData);
+        $this->config = array_merge($mainConfigData, $methodConfig);
     }
 
     /**

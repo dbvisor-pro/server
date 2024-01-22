@@ -134,6 +134,7 @@ class MysqldumpOverSsh extends \App\Service\Methods\AbstractMethod
      */
     private function askSSHConfig(InputOutput $inputOutput, array $config = []): array
     {
+        $newConfig = [];
         $validateRequired = function ($value) {
             if (empty($value)) {
                 throw new \RuntimeException('Value is required.');
@@ -141,16 +142,13 @@ class MysqldumpOverSsh extends \App\Service\Methods\AbstractMethod
             return $value;
         };
 
-        $config['ssh_host'] = $inputOutput->ask(
-            'SSH Host:',
-            $config['db_host'] ?? '',
-            $validateRequired);
-        $config['ssh_user'] = $inputOutput->ask(
-            'SSH User:',
-            $config['db_host'] ?? '',
-            $validateRequired
+        $newConfig['ssh_host'] = $inputOutput->ask(
+            'SSH Host:', $config['ssh_host'] ?? '', $validateRequired
         );
-        $config['ssh_auth'] = $inputOutput->choice(
+        $newConfig['ssh_user'] = $inputOutput->ask(
+            'SSH User:', $config['ssh_user'] ?? '', $validateRequired
+        );
+        $newConfig['ssh_auth'] = $inputOutput->choice(
             "Select authentication method:",
             [
                 self::AUTH_TYPE_KEY => 'SSH Key',
@@ -159,26 +157,22 @@ class MysqldumpOverSsh extends \App\Service\Methods\AbstractMethod
             $config['ssh_auth'] ?? null,
         );
 
-        if ($config['ssh_auth'] === self::AUTH_TYPE_KEY) {
-            $config['ssh_key_path'] = $inputOutput->ask(
-                'Key path:',
-                $config['ssh_key_path'] ?? '~/.ssh/id_rsa',
-                $validateRequired
+        if ($newConfig['ssh_auth'] === self::AUTH_TYPE_KEY) {
+            $newConfig['ssh_key_path'] = $inputOutput->ask(
+                'Key path:', $config['ssh_key_path'] ?? '~/.ssh/id_rsa', $validateRequired
             );
-        } elseif ($config['ssh_auth'] === self::AUTH_TYPE_PASS) {
-            $config['ssh_password'] = $inputOutput->askHidden('SSH Password:', $validateRequired);
+        } elseif ($newConfig['ssh_auth'] === self::AUTH_TYPE_PASS) {
+            $newConfig['ssh_password'] = $inputOutput->askHidden('SSH Password', $validateRequired);
         } else {
             $inputOutput->error("Something went wrong. Method is not specified");
             exit;
         }
 
-        $config['ssh_port'] = $inputOutput->ask(
-            'SSH Port:',
-            $config['ssh_port'] ?? '22',
-            $validateRequired
+        $newConfig['ssh_port'] = $inputOutput->ask(
+            'SSH Port:', $config['ssh_port'] ?? '22', $validateRequired
         );
 
-        return $config;
+        return $newConfig;
     }
 
     /**
@@ -189,29 +183,21 @@ class MysqldumpOverSsh extends \App\Service\Methods\AbstractMethod
      */
     private function askDatabaseConfig(InputOutput $inputOutput, array $config = []): array
     {
-        $config['db_host'] = $inputOutput->ask(
-            'Database Host',
-            $config['db_host'] ?? 'localhost',
-            self::validateRequired(...)
+        $newConfig = [];
+        $newConfig['db_host'] = $inputOutput->ask(
+            'Database Host', $config['db_host'] ?? 'localhost', self::validateRequired(...)
         );
-        $config['db_user'] = $inputOutput->ask(
-            'Database User:',
-            $config['db_user'] ?? 'root',
-            self::validateRequired(...)
+        $newConfig['db_user'] = $inputOutput->ask(
+            'Database User:', $config['db_user'] ?? 'root', self::validateRequired(...)
         );
-        $config['db_password'] = $inputOutput->askHidden('Password');
-        $config['db_name'] = $inputOutput->ask(
-            'Database name:',
-            $config['db_name'] ?? null,
-            self::validateRequired(...)
+        $newConfig['db_password'] = $inputOutput->askHidden('Password');
+        $newConfig['db_name'] = $inputOutput->ask(
+            'Database name', $config['db_name'] ?? null, self::validateRequired(...)
         );
-        $config['db_port'] = $inputOutput->ask(
-            'Database Port: ',
-            $config['db_port'] ?? '3306',
-            self::validateRequired(...)
+        $newConfig['db_port'] = $inputOutput->ask(
+            'Database Port: ', $config['db_port'] ?? '3306', self::validateRequired(...)
         );
-
-        return $config;
+        return $newConfig;
     }
 
     /**

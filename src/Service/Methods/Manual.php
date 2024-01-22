@@ -62,7 +62,7 @@ class Manual extends AbstractMethod
                     "Enter path to DB dump file started from %s/?",
                     rtrim($this->appConfig->getLocalBackupsDir(), '/')
                 ),
-                    $config['dump_name'] ?? null,
+                $config['dump_name'] ?? null,
                 self::validateRequired(...)
             );
 

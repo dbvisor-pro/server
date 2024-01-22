@@ -83,22 +83,22 @@ class AwsS3 extends AbstractMethod
         return [
             'aws_s3_key' => $inputOutput->ask(
                 "AWS Key",
-                    $config['aws_s3_key'] ?? null,
+                $config['aws_s3_key'] ?? null,
                 self::validateRequired(...)
             ),
             'aws_s3_secret' => $inputOutput->ask(
                 "AWS Secret",
-                    $config['aws_s3_secret'] ?? null,
+                $config['aws_s3_secret'] ?? null,
                 self::validateRequired(...)
             ),
             'aws_s3_bucket' => $inputOutput->ask(
                 "Bucket name",
-                    $config['aws_s3_bucket'] ?? null,
+                $config['aws_s3_bucket'] ?? null,
                 self::validateRequired(...)
             ),
             'aws_s3_region' => $inputOutput->ask(
                 "Region",
-                    $config['aws_s3_region'] ?? null,
+                $config['aws_s3_region'] ?? null,
                 self::validateRequired(...)
             ),
             'aws_s3_version' => $inputOutput->ask(

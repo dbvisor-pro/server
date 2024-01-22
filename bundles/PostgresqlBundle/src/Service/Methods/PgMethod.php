@@ -27,29 +27,21 @@ abstract class PgMethod extends AbstractMethod
      */
     protected function askDatabaseConfig(InputOutput $inputOutput, array $config = []): array
     {
-        $config['db_host'] = $inputOutput->ask(
-            'Database Host',
-            $config['db_host'] ?? 'localhost',
-            self::validateRequired(...)
+        $newConfig = [];
+        $newConfig['db_host'] = $inputOutput->ask(
+            'Database Host', $config['db_host'] ?? 'localhost', self::validateRequired(...)
         );
-        $config['db_user'] = $inputOutput->ask(
-            'Database User',
-            $config['db_user'] ?? 'root',
-            self::validateRequired(...)
+        $newConfig['db_user'] = $inputOutput->ask(
+            'Database User', $config['db_user'] ?? 'root', self::validateRequired(...)
         );
-        $config['db_password'] = $inputOutput->askHidden('Password');
-        $config['db_name'] = $inputOutput->ask(
-            'Database Name',
-            $config['db_name'] ?? null,
-            self::validateRequired(...)
+        $newConfig['db_password'] = $inputOutput->askHidden('Password');
+        $newConfig['db_name'] = $inputOutput->ask(
+            'Database Name', $config['db_name'] ?? null, self::validateRequired(...)
         );
-        $config['db_port'] = $inputOutput->ask(
-            'Database Port ',
-            $config['db_port'] ?? '5432',
-            self::validateRequired(...)
+        $newConfig['db_port'] = $inputOutput->ask(
+            'Database Port ', $config['db_port'] ?? '5432', self::validateRequired(...)
         );
-
-        return $config;
+        return $newConfig;
     }
 
     /**
