@@ -78,23 +78,17 @@ class Mysqldump extends AbstractMethod
     public function askConfig(InputOutput $inputOutput, array $config = []): array
     {
         $config['db_host'] = $inputOutput->ask(
-            'Host',
-            $config['sftp_filepath'] ?? 'localhost',
-            self::validateRequired(...)
+            'Host', $config['db_host'] ?? 'localhost', self::validateRequired(...)
         );
         $config['db_user'] = $inputOutput->ask(
-            'User',
-            $config['sftp_filepath'] ?? 'root',
-            self::validateRequired(...));
+            'User', $config['db_user'] ?? 'root', self::validateRequired(...)
+        );
         $config['db_password'] = $inputOutput->askHidden('Password');
         $config['db_name'] = $inputOutput->ask(
-            'Database name',
-            $config['sftp_filepath'] ?? null,
-            self::validateRequired(...));
+            'Database name', $config['db_name'] ?? null, self::validateRequired(...)
+        );
         $config['db_port'] = $inputOutput->ask(
-            'Port ',
-            $config['sftp_filepath'] ?? '3306',
-            self::validateRequired(...)
+            'Port ', $config['db_port'] ?? '3306', self::validateRequired(...)
         );
 
         return $config;

@@ -82,34 +82,22 @@ class AwsS3 extends AbstractMethod
     {
         return [
             'aws_s3_key' => $inputOutput->ask(
-                "AWS Key",
-                $config['aws_s3_key'] ?? null,
-                self::validateRequired(...)
+                "AWS Key", $config['aws_s3_key'] ?? null, self::validateRequired(...)
             ),
             'aws_s3_secret' => $inputOutput->ask(
-                "AWS Secret",
-                $config['aws_s3_secret'] ?? null,
-                self::validateRequired(...)
+                "AWS Secret", $config['aws_s3_secret'] ?? null, self::validateRequired(...)
             ),
             'aws_s3_bucket' => $inputOutput->ask(
-                "Bucket name",
-                $config['aws_s3_bucket'] ?? null,
-                self::validateRequired(...)
+                "Bucket name", $config['aws_s3_bucket'] ?? null, self::validateRequired(...)
             ),
             'aws_s3_region' => $inputOutput->ask(
-                "Region",
-                $config['aws_s3_region'] ?? null,
-                self::validateRequired(...)
+                "Region", $config['aws_s3_region'] ?? null, self::validateRequired(...)
             ),
             'aws_s3_version' => $inputOutput->ask(
-                "Version",
-                $config['aws_s3_version'] ?? 'latest',
-                self::validateRequired(...)
+                "Version", $config['aws_s3_version'] ?? 'latest', self::validateRequired(...)
             ),
             'aws_s3_filename' => $inputOutput->ask(
-                "Filename",
-                $config['aws_s3_filename'] ?? 'backup.sql',
-                self::validateRequired(...)
+                "Filename", $config['aws_s3_filename'] ?? 'backup.sql', self::validateRequired(...)
             ),
         ];
     }
