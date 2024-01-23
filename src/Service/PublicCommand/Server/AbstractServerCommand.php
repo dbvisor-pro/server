@@ -6,7 +6,7 @@ namespace App\Service\PublicCommand\Server;
 
 use App\Service\AppConfig;
 use App\Service\PublicCommand\AbstractCommand;
-use App\Service\PublicCommand\AddDatabase;
+use App\Service\PublicCommand\Database\AddDatabase;
 use App\Service\ShellProcess;
 use App\ServiceApi\Actions\GetUserByEmail;
 use App\ServiceApi\Entity\Server;
@@ -14,12 +14,12 @@ use Exception;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 abstract class AbstractServerCommand extends AbstractCommand
 {

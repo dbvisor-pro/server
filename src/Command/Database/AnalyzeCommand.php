@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Command;
+namespace App\Command\Database;
 
 use App\Service\PublicCommand\Database\Analyzer;
 use DbManager\CoreBundle\Exception\EngineNotSupportedException;
@@ -25,7 +25,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
     name: 'app:db:analyze',
     description: 'Start analyzing db structure',
 )]
-final class AppDbAnalyzeCommand extends Command
+final class AnalyzeCommand extends Command
 {
     /**
      * @param Analyzer $databaseAnalyzer

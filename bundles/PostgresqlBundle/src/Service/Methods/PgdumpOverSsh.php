@@ -66,11 +66,11 @@ class PgdumpOverSsh extends PgMethod
     /**
      * @inheritDoc
      */
-    public function askConfig(InputOutput $inputOutput): array
+    public function askConfig(InputOutput $inputOutput, array $config = []): array
     {
         return [
-            ...$this->askDatabaseConfig($inputOutput),
-            ...$this->askSSHConfig($inputOutput)
+            ...$this->askDatabaseConfig($inputOutput, $config),
+            ...$this->askSSHConfig($inputOutput, $config)
         ];
     }
 
@@ -110,37 +110,50 @@ class PgdumpOverSsh extends PgMethod
      * Ask for SSH credentials
      *
      * @param InputOutput $inputOutput
+     * @param array $config
+     *
      * @return array
      */
-    private function askSSHConfig(InputOutput $inputOutput): array
+    private function askSSHConfig(InputOutput $inputOutput, array $config = []): array
     {
+        $newConfig = [];
         $validateRequired = function ($value) {
             if (empty($value)) {
                 throw new \RuntimeException('Value is required.');
             }
-
             return $value;
         };
-        $config = [];
 
-        $config['ssh_host'] = $inputOutput->ask('SSH Host:', '', $validateRequired);
-        $config['ssh_user'] = $inputOutput->ask('SSH User:', '', $validateRequired);
-        $config['ssh_auth'] = $inputOutput->choice("Select authentication method:", [
-            self::AUTH_TYPE_KEY => 'SSH Key',
-            self::AUTH_TYPE_PASS => 'Password'
-        ]);
+        $newConfig['ssh_host'] = $inputOutput->ask(
+            'SSH Host:', $config['ssh_host'] ?? null, $validateRequired
+        );
+        $newConfig['ssh_user'] = $inputOutput->ask(
+            'SSH User:', $config['ssh_user'] ?? null, $validateRequired
+        );
+        $newConfig['ssh_auth'] = $inputOutput->choice(
+            "Select authentication method:",
+            [
+                self::AUTH_TYPE_KEY => 'SSH Key',
+                self::AUTH_TYPE_PASS => 'Password'
+            ],
+            $config['ssh_auth'] ?? null,
+        );
 
-        if ($config['ssh_auth'] === self::AUTH_TYPE_KEY) {
-            $config['ssh_key_path'] = $inputOutput->ask('Key path:', '~/.ssh/id_rsa', $validateRequired);
-        } elseif ($config['ssh_auth'] === self::AUTH_TYPE_PASS) {
-            $config['ssh_password'] = $inputOutput->askHidden('SSH Password:', $validateRequired);
+        if ($newConfig['ssh_auth'] === self::AUTH_TYPE_KEY) {
+            $newConfig['ssh_key_path'] = $inputOutput->ask(
+                'Key path:', $config['ssh_key_path'] ?? '~/.ssh/id_rsa', $validateRequired
+            );
+        } elseif ($newConfig['ssh_auth'] === self::AUTH_TYPE_PASS) {
+            $newConfig['ssh_password'] = $inputOutput->askHidden('SSH Password:', $validateRequired);
         } else {
             $inputOutput->error("Something went wrong. Method is not specified");
             exit;
         }
 
-        $config['ssh_port'] = $inputOutput->ask('SSH Port:', '22', $validateRequired);
+        $newConfig['ssh_port'] = $inputOutput->ask(
+            'SSH Port:', $config['ssh_port'] ?? '22', $validateRequired
+        );
 
-        return $config;
+        return $newConfig;
     }
 }

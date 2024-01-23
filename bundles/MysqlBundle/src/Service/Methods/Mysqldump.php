@@ -75,15 +75,21 @@ class Mysqldump extends AbstractMethod
     /**
      * @inheritDoc
      */
-    public function askConfig(InputOutput $inputOutput): array
+    public function askConfig(InputOutput $inputOutput, array $config = []): array
     {
-        $config = [];
-
-        $config['db_host'] = $inputOutput->ask('Host', 'localhost', self::validateRequired(...));
-        $config['db_user'] = $inputOutput->ask('User', 'root', self::validateRequired(...));
+        $config['db_host'] = $inputOutput->ask(
+            'Host', $config['db_host'] ?? 'localhost', self::validateRequired(...)
+        );
+        $config['db_user'] = $inputOutput->ask(
+            'User', $config['db_user'] ?? 'root', self::validateRequired(...)
+        );
         $config['db_password'] = $inputOutput->askHidden('Password');
-        $config['db_name'] = $inputOutput->ask('Database name', null, self::validateRequired(...));
-        $config['db_port'] = $inputOutput->ask('Port ', '3306', self::validateRequired(...));
+        $config['db_name'] = $inputOutput->ask(
+            'Database name', $config['db_name'] ?? null, self::validateRequired(...)
+        );
+        $config['db_port'] = $inputOutput->ask(
+            'Port ', $config['db_port'] ?? '3306', self::validateRequired(...)
+        );
 
         return $config;
     }
