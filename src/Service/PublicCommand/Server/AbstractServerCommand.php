@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\PublicCommand\Server;
 
 use App\Service\AppConfig;
+use App\Service\InputOutput;
 use App\Service\PublicCommand\AbstractCommand;
 use App\Service\PublicCommand\Database\AddDatabase;
 use App\Service\ShellProcess;
@@ -66,6 +67,19 @@ abstract class AbstractServerCommand extends AbstractCommand
         if ($this->process() && !$input->getOption('current')) {
             $this->addDatabase->execute($input, $output);
         }
+    }
+
+    /**
+     * @param InputOutput $inputOutput
+     *
+     * @return string
+     */
+    protected function getServerUrl(InputOutput $inputOutput): string
+    {
+        if (!$this->appConfig->isDockerUsed()) {
+            return $inputOutput->ask("Enter server public Url", '');
+        }
+        return $this->appConfig->getDockerServerUrl();
     }
 
     /**

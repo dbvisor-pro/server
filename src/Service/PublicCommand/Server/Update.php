@@ -25,13 +25,13 @@ final class Update extends AbstractServerCommand
         $inputOutput = $this->getInputOutput();
 
         try {
-            $userEmail  = $this->input->getOption('email') ?? $inputOutput->ask("Enter your Email");
-            $password   = $this->input->getOption('password') ?? $inputOutput->askHidden("Enter your Password");
-            $workspace   = $this->input->getOption('workspace') ?? $inputOutput->ask("Enter your Workspace code");
+            $userEmail = $this->input->getOption('email') ?? $inputOutput->ask("Enter your Email");
+            $password = $this->input->getOption('password') ?? $inputOutput->askHidden("Enter your Password");
+            $workspace = $this->input->getOption('workspace') ?? $inputOutput->ask("Enter your Workspace code");
 
-            $user       = $this->getUserByEmail->setCredentials($userEmail, $password, $workspace)->execute($userEmail);
+            $user = $this->getUserByEmail->setCredentials($userEmail, $password, $workspace)->execute($userEmail);
 
-            $server     = $this->updateServer($inputOutput, $user, $userEmail, $password, $workspace);
+            $server = $this->updateServer($inputOutput, $user, $userEmail, $password, $workspace);
             $this->updateEnvFile($server['uuid'], $server['secret_key']);
 
             return true;
@@ -82,7 +82,7 @@ final class Update extends AbstractServerCommand
         $server = $this->serverApi->setCredentials($userEmail, $password)->get(htmlspecialchars($uuid));
 
         if (!$server['url']) {
-            $serverUrl = $inputOutput->ask("Enter server public Url", '');
+            $serverUrl  = $this->getServerUrl($inputOutput);
         }
 
         $server = $this->serverApi->setCredentials($userEmail, $password, $workspace)->update(
