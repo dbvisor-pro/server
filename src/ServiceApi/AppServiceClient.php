@@ -47,6 +47,7 @@ final class AppServiceClient
             $options['verify_peer'] = false;
             $options['verify_host'] = false;
         }
+
         return $this->httpClient->request($method, $this->getUrl($action), $options);
     }
 
@@ -58,7 +59,7 @@ final class AppServiceClient
     protected function getUrl(string $action): string
     {
         $url = str_replace(['https://', 'http://'], '', $this->serviceUrl);
-        $protocol = $this->environment === 'dev' ? 'http' : 'https';
+        $protocol = !$this->serviceSecure && $this->environment === 'dev' ? 'http' : 'https';
 
         return sprintf("%s://%s/api/%s", $protocol, rtrim($url, '/'), $action);
     }
