@@ -72,7 +72,7 @@ final class Update extends AbstractServerCommand
         $uuid = $this->getUuid($inputOutput);
         $server = $this->serverApi->setCredentials($email, $password)->get($uuid);
 
-        $serverUrl = $this->getServerUrl($inputOutput, $server['url']);
+        $serverUrl = $this->input->getOption('url') ?? $this->getServerUrl($inputOutput, $server['url']);
 
         $server = $this->serverApi->setCredentials($email, $password, $workspace)->update(
             $uuid,

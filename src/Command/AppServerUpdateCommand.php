@@ -67,6 +67,12 @@ final class AppServerUpdateCommand extends Command
             InputOption::VALUE_OPTIONAL,
             'Workspace code'
         );
+        $this->addOption(
+            'url',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'URL'
+        );
     }
 
     /**
