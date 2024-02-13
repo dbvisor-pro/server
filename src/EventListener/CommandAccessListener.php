@@ -26,7 +26,6 @@ readonly class CommandAccessListener implements EventSubscriberInterface
         $command = $event->getCommand();
 
         if ($command->getName() === 'app:server:update' && !$this->appConfig->getServerUuid()) {
-            $command->setHidden(true);
             $event->disableCommand();
 
             $output = $event->getOutput();
