@@ -35,6 +35,7 @@ services:
       - dbvisor-network
 
   dbvisor-cron-server:
+    container_name: ${IMAGES_PREFIX:-}dbvisor-cron-server
     build:
       context: .
       target: server_cron
