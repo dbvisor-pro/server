@@ -294,9 +294,9 @@ fi
 if [ "${USE_DOCKER}" = "1" ]; then
     CLIENT_IP=$(_getClientIP)
     if [ ! -z "${APP_DOCKER_SERVER_URL}" ]; then
-        DEFAULT_SERVER_PORT=${APP_DOCKER_SERVER_URL}:${APP_DOCKER_HTTPS_PORT}
+        DEFAULT_SERVER_PORT=${APP_DOCKER_SERVER_URL}:${APP_DOCKER_HTTP_PORT}
     else
-        DEFAULT_SERVER_PORT=${CLIENT_IP}:${APP_DOCKER_HTTPS_PORT}
+        DEFAULT_SERVER_PORT=${CLIENT_IP}:${APP_DOCKER_HTTP_PORT}
     fi
 
     read -rp " Enter the host name for the current Server ( default: ${DEFAULT_SERVER_PORT} ): " NEW_APP_DOCKER_SERVER_URL </dev/tty
