@@ -6,6 +6,7 @@ namespace DbManager\CoreBundle\Service;
 
 use App\Service\AppConfig;
 use DbManager\CoreBundle\DataProcessor\DataProcessorFactoryInterface;
+use DbManager\CoreBundle\Interfaces\DbDataManagerInterface;
 use DbManager\CoreBundle\DataProcessor\DataProcessorInterface;
 use DbManager\CoreBundle\Interfaces\EngineInterface;
 use DbManager\CoreBundle\Interfaces\ErrorInterface;
@@ -73,6 +74,34 @@ abstract class AbstractEngineProcessor implements EngineInterface
     {
         $error = new DbDataManager\Error($message, $severity);
         $this->errors[] = $error;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getDbStructure(DbDataManagerInterface $dbDataManager): array
+    {
+        $dbSchema = [];
+        $connection = $this->getDbConnection($dbDataManager->getName());
+
+        // Warning: don't use getDoctrineSchemaManager cause it creates issues with symfony / doctrine databases
+        $schemaBuilder = $connection->getSchemaBuilder();
+
+        $tables = $schemaBuilder->getTables();
+        foreach ($tables as $table) {
+            $columns = $schemaBuilder->getColumns($table['name']);
+            foreach ($columns as $column) {
+                $columnData = [
+                    'type' => $column['type_name'],
+                    'name' => $column['name']
+                ];
+                $dbSchema[$table['name']][$column['name']] = $columnData;
+            }
+        }
+
+        return [
+            'db_schema'       => $dbSchema
+        ];
     }
 
     /**

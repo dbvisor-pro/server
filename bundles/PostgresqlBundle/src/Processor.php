@@ -40,33 +40,6 @@ class Processor extends AbstractEngineProcessor implements EngineInterface
     }
 
     /**
-     * @inheritdoc
-     */
-    public function getDbStructure(DbDataManagerInterface $dbDataManager): array
-    {
-        $dbSchema = [];
-        $connection = $this->getDbConnection($dbDataManager->getName());
-
-        $tables = new \ArrayIterator($connection->getDoctrineSchemaManager()->listTables());
-        foreach ($tables as $table) {
-            /** @var \Doctrine\DBAL\Schema\Table $table */
-            /** @var \Doctrine\DBAL\Schema\Column $column */
-            foreach ($table->getColumns() as $column) {
-                $columnData = [
-                    'type' => $column->getType()->getName(),
-                    'length' => $column->getLength(),
-                    'name' => $column->getName()
-                ];
-                $dbSchema[$table->getName()][$column->getName()] = $columnData;
-            }
-        }
-
-        return [
-            'db_schema' => $dbSchema
-        ];
-    }
-
-    /**
      * Process table according to passed rules
      *
      * @param string $table
