@@ -1,7 +1,11 @@
 #!/bin/sh
 
 command_exists() {
-    command -v "$@" > /dev/null 2>&1
+    if [ "$@" = "docker compose" ] ; then
+        docker compose version > /dev/null 2>&1
+    else
+        command -v "$@" > /dev/null 2>&1
+    fi
 }
 
 if [ -z "${PROJECT_ROOT}" ]; then

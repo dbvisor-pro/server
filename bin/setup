@@ -6,7 +6,11 @@ USE_DOCKER=0
 MANAGER_CLI="${PROJECT_ROOT}dbvisor-agent"
 
 command_exists() {
-    command -v "$@" > /dev/null 2>&1
+    if [ "$@" = "docker compose" ] ; then
+        docker compose version > /dev/null 2>&1
+    else
+        command -v "$@" > /dev/null 2>&1
+    fi
 }
 
 user="$(id -un 2>/dev/null || true)"
@@ -60,7 +64,7 @@ _output() {
 # Install in case required
 _installDocker() {
     if ! command_exists docker ; then
-        read -r -p "Did Docker get installed! Do you want to proceed? (Y/n) " yn </dev/tty
+        read -r -p "The docker tool is not found. Do you want to install it? (Y/n) " yn </dev/tty
         if [ $(expr match "${yn}" '[Nn]') != 0 ]; then
             echo "Installation process stopped...";
             exit
@@ -69,8 +73,15 @@ _installDocker() {
         fi
     fi
 
-    if ! command_exists "docker compose" || ! command_exists "docker-compose" ; then
-        read -r -p "Did Docker Compose get installed! Do you want to proceed? (Y/n) " yn </dev/tty
+    DOCKER_COMPOSE_EXISTS="True"
+    if ! command_exists "docker compose" ; then
+        if ! command_exists "docker-compose" ; then
+            DOCKER_COMPOSE_EXISTS="False"
+        fi
+    fi
+
+    if [ $DOCKER_COMPOSE_EXISTS = "False" ] ; then
+        read -r -p "The docker compose plugin is not found. Do you want to install it? (Y/n) " yn </dev/tty
         if [ $(expr match "${yn}" '[Nn]') != 0 ]; then
             echo "Installation process stopped...";
             exit
@@ -337,11 +348,11 @@ if [ "${USE_DOCKER}" = "1" ]; then
 fi
 
 DEFAULT_APP_DUMP_PATH="${HOME}/${APP_NAME}-backups/"
-if [ ! -z ${APP_DUMP_PATH} ] && [ "${USE_DOCKER}" == "0" ]; then
+if [ ! -z ${APP_DUMP_PATH} ] && [ "${USE_DOCKER}" = "0" ]; then
     DEFAULT_APP_DUMP_PATH="${APP_DUMP_PATH%/backups}/"
 fi
 
-if [ ! -z ${APP_DOCKER_PATH_DUMP} ] && [ "${USE_DOCKER}" == "1" ]; then
+if [ ! -z ${APP_DOCKER_PATH_DUMP} ] && [ "${USE_DOCKER}" = "1" ]; then
     DEFAULT_APP_DUMP_PATH="${APP_DOCKER_PATH_DUMP%/backups}/"
 fi
 
