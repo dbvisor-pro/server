@@ -416,6 +416,81 @@ while true; do
     esac
 done </dev/tty
 
+# Select DB Version
+if [ -f ${PROJECT_ROOT}.env.mysql ]; then
+    PS3='Choose MySQL DB version: '
+    options=("10.4" "10.5" "10.6" "10.11" "11.0" "11.1" "11.3" "11.4")
+    select version in "${options[@]}";
+    do
+        case $version in
+            "10.4")
+                _replace_pattern "MARIA_DB_VERSION=*" "MARIA_DB_VERSION=10.4" ${PROJECT_ROOT}.env.mysql
+                break
+                ;;
+            "10.5")
+                _replace_pattern "MARIA_DB_VERSION=*" "MARIA_DB_VERSION=10.4" ${PROJECT_ROOT}.env.mysql
+                break
+                ;;
+            "10.6")
+                _replace_pattern "MARIA_DB_VERSION=*" "MARIA_DB_VERSION=10.6" ${PROJECT_ROOT}.env.mysql
+                break
+                ;;
+            "10.11")
+                _replace_pattern "MARIA_DB_VERSION=*" "MARIA_DB_VERSION=10.11" ${PROJECT_ROOT}.env.mysql
+                break
+                ;;
+            "11.0")
+                _replace_pattern "MARIA_DB_VERSION=*" "MARIA_DB_VERSION=11.0" ${PROJECT_ROOT}.env.mysql
+                break
+                ;;
+            "11.1")
+                _replace_pattern "MARIA_DB_VERSION=*" "MARIA_DB_VERSION=11.1" ${PROJECT_ROOT}.env.mysql
+                break
+                ;;
+            "11.3")
+                _replace_pattern "MARIA_DB_VERSION=*" "MARIA_DB_VERSION=11.3" ${PROJECT_ROOT}.env.mysql
+                break
+                ;;
+            "11.4")
+                _replace_pattern "MARIA_DB_VERSION=*" "MARIA_DB_VERSION=11.4" ${PROJECT_ROOT}.env.mysql
+                break
+                ;;
+            *) echo "invalid option $REPLY";;
+      esac
+    done
+fi
+
+if [ -f ${PROJECT_ROOT}.env.pgsql ]; then
+    PS3='Choose Postgres DB version: '
+    options=("12" "13" "14" "15" "16")
+    select version in "${options[@]}";
+    do
+        case $version in
+            "12")
+                _replace_pattern "POSTGRES_DB_VERSION=*" "POSTGRES_DB_VERSION=12" ${PROJECT_ROOT}.env.pgsql
+                break
+                ;;
+            "13")
+                _replace_pattern "POSTGRES_DB_VERSION=*" "POSTGRES_DB_VERSION=13" ${PROJECT_ROOT}.env.pgsql
+                break
+                ;;
+            "14")
+                _replace_pattern "POSTGRES_DB_VERSION=*" "POSTGRES_DB_VERSION=14" ${PROJECT_ROOT}.env.pgsql
+                break
+                ;;
+            "15")
+                _replace_pattern "POSTGRES_DB_VERSION=*" "POSTGRES_DB_VERSION=15" ${PROJECT_ROOT}.env.pgsql
+                break
+                ;;
+            "16")
+                _replace_pattern "POSTGRES_DB_VERSION=*" "POSTGRES_DB_VERSION=16" ${PROJECT_ROOT}.env.pgsql
+                break
+                ;;
+            *) echo "invalid option $REPLY";;
+      esac
+    done
+fi
+
 # Get project configurations
 export $(cat "${PROJECT_ROOT}.env" | grep -v ^# | grep -v ^alias | xargs)
 
