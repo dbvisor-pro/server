@@ -6,7 +6,7 @@ services:
   # -------------- #
   dbvisor-mariadb:
     image: mariadb:${MARIA_DB_VERSION:-latest}
-    container_name: ${IMAGES_PREFIX:-}dbvisor-mysql
+    container_name: ${IMAGES_PREFIX:-}dbvisor-mariadb
     command: --max_allowed_packet=64M
     environment:
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-root}

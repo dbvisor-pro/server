@@ -7,6 +7,7 @@ namespace DbManager\CoreBundle\Enums;
 enum DatabaseEngineEnum: string
 {
     case MYSQL = 'mysql';
+    case MARIADB = 'mariadb';
     case POSTGRES = 'pgsql';
     case SQL_LITE = 'sqllite';
 }

@@ -6,7 +6,7 @@ namespace DbManager\MariaDbBundle\DBManagement;
 
 use DbManager\CoreBundle\DBManagement\AbstractDBManagement;
 use DbManager\CoreBundle\DBManagement\DBManagementInterface;
-use DbManager\MariaDbBundle\Service\Engine\MariaDb;
+use DbManager\MariaDbBundle\Processor;
 
 /**
  * Mysql Dump Processor instance
@@ -16,7 +16,7 @@ final class Management extends AbstractDBManagement implements DBManagementInter
     /**
      * Engine const
      */
-    public const DRIVER_ENGINE = MariaDb::ENGINE_CODE;
+    public const DRIVER_ENGINE = Processor::DRIVER_ENGINE;
 
     protected function getDropLine(string $dbName): string
     {
