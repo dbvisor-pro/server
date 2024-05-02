@@ -10,8 +10,7 @@ use DbManager\MysqlBundle\Service\Methods\Mysqldump as MySQLEngineDump;
 class Mysqldump extends MySQLEngineDump
 {
     /**
-     * @param string $engine
-     * @return bool
+     * @inheritDoc
      */
     public function support(string $engine): bool
     {

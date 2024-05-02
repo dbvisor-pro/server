@@ -14,7 +14,6 @@ class Processor extends MySQLProcessor implements EngineInterface
 {
     /**
      * Engine const
-     * There must be MySQL as it is used in core PDO module for connection to DB
      */
-    public const DRIVER_ENGINE = 'mysql';
+    public const DRIVER_ENGINE = 'mariadb';
 }

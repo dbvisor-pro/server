@@ -37,10 +37,7 @@ class Mysqldump extends AbstractMethod
     }
 
     /**
-     * @param array $config
-     *
-     * @return bool
-     * @throws Exception
+     * @inheritDoc
      */
     public function validate(array $config): bool
     {
@@ -95,8 +92,7 @@ class Mysqldump extends AbstractMethod
     }
 
     /**
-     * @param string $engine
-     * @return bool
+     * @inheritDoc
      */
     public function support(string $engine): bool
     {

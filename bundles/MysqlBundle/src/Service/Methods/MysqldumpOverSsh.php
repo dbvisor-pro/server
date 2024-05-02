@@ -203,8 +203,7 @@ class MysqldumpOverSsh extends \App\Service\Methods\AbstractMethod
     }
 
     /**
-     * @param string $engine
-     * @return bool
+     * @inheritDoc
      */
     public function support(string $engine): bool
     {

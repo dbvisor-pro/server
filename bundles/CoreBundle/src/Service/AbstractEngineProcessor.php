@@ -116,7 +116,7 @@ abstract class AbstractEngineProcessor implements EngineInterface
     {
         $capsule = new Manager();
         $capsule->addConnection([
-            'driver'    => static::DRIVER_ENGINE,
+            'driver'    => (static::DRIVER_ENGINE == 'mariadb') ? 'mysql' : static::DRIVER_ENGINE,
             'host'      => $this->appConfig->getDbEngineConfig('database_host', static::DRIVER_ENGINE),
             'port'      => $this->appConfig->getDbEngineConfig('database_port', static::DRIVER_ENGINE),
             'database'  => $dbName,
