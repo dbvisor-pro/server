@@ -69,6 +69,10 @@ final class AnalyzeCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
+            if (null === ($input->getOption('uid'))) {
+                throw new Exception(sprintf('You must provide the "%s" option.', 'UUID'));
+            }
+
             $this->databaseAnalyzer->execute(
                 $input,
                 $output

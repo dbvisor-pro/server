@@ -13,6 +13,10 @@ else
         "${PROJECT_ROOT}"/bin/docker/stop-db -m
     fi
 
+    if [ -f "${PROJECT_ROOT}/.env.mariadb" ]; then
+        "${PROJECT_ROOT}"/bin/docker/stop-db --mariadb
+    fi
+
     if [ -f "${PROJECT_ROOT}/.env.pgsql" ]; then
         "${PROJECT_ROOT}"/bin/docker/stop-db -p
     fi
