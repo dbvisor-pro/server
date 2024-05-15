@@ -82,7 +82,7 @@ abstract class AbstractEngineProcessor implements EngineInterface
     public function getDbStructure(DbDataManagerInterface $dbDataManager): array
     {
         $dbSchema = [];
-        $connection = $this->getDbConnection($dbDataManager->getName());
+        $connection = $this->getDbConnection($dbDataManager);
 
         // Warning: don't use getDoctrineSchemaManager cause it creates issues with symfony / doctrine databases
         $schemaBuilder = $connection->getSchemaBuilder();
@@ -107,24 +107,29 @@ abstract class AbstractEngineProcessor implements EngineInterface
     /**
      * Get DB Connection
      *
-     * @param string $dbName
-     *
+     * @param DbDataManagerInterface $dbDataManager
      * @return Connection
      * @throws Exception
      */
-    protected function getDbConnection(string $dbName): Connection
+    protected function getDbConnection(DbDataManagerInterface $dbDataManager): Connection
     {
         $capsule = new Manager();
+        $driverEngine = $this->getDriverEngine($dbDataManager);
         $capsule->addConnection([
-            'driver'    => (static::DRIVER_ENGINE == 'mariadb') ? 'mysql' : static::DRIVER_ENGINE,
-            'host'      => $this->appConfig->getDbEngineConfig('database_host', static::DRIVER_ENGINE),
-            'port'      => $this->appConfig->getDbEngineConfig('database_port', static::DRIVER_ENGINE),
-            'database'  => $dbName,
-            'username'  => $this->appConfig->getDbEngineConfig('database_user', static::DRIVER_ENGINE),
-            'password'  => $this->appConfig->getPassword(static::DRIVER_ENGINE),
+            'driver'    => ($driverEngine == 'mariadb') ? 'mysql' : $driverEngine,
+            'host'      => $this->appConfig->getDbEngineConfig('database_host', $driverEngine),
+            'port'      => $this->appConfig->getDbEngineConfig('database_port', $driverEngine),
+            'database'  => $dbDataManager->getName(),
+            'username'  => $this->appConfig->getDbEngineConfig('database_user', $driverEngine),
+            'password'  => $this->appConfig->getPassword($driverEngine),
         ]);
 
         return $capsule->getConnection();
+    }
+
+    protected function getDriverEngine(DbDataManagerInterface $dbDataManager): string
+    {
+        return static::DRIVER_ENGINE;
     }
 
     /**

@@ -104,10 +104,17 @@ _info() {
 "
     fi
 
-    if [ -f "${PROJECT_ROOT}/.env.postgress" ]; then
+    if [ -f "${PROJECT_ROOT}/.env.mariadb" ]; then
         # shellcheck disable=SC2059
         printf "
-    Postgress config file is:   ${GREEN}${PROJECT_ROOT}.env.postgress${NC}
+    MariaDB config file is:       ${GREEN}${PROJECT_ROOT}.env.mariadb${NC}
+"
+    fi
+
+    if [ -f "${PROJECT_ROOT}/.env.pgsql" ]; then
+        # shellcheck disable=SC2059
+        printf "
+    PostgreSQL config file is:   ${GREEN}${PROJECT_ROOT}.env.pgsql${NC}
 "
     fi
 

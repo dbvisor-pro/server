@@ -417,7 +417,7 @@ _output " Initializing supported DB engines " "heading"
 while true; do
     echo "1. MySQL"
     echo "2. MariaDB"
-    echo "3. Postgres"
+    echo "3. PostgreSQL"
     echo "4. Continue"
 
     read -p "Choose DB engines which will be used: " choice
@@ -438,7 +438,7 @@ while true; do
             if [ ! -f {PROJECT_ROOT}.env.pgsql ]; then
                 cp ${PROJECT_ROOT}env.pgsql-sample ${PROJECT_ROOT}.env.pgsql
             fi
-            echo "Postgres Selected."
+            echo "PostgreSQL Selected."
             ;;
         4)
             break

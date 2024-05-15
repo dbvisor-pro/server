@@ -50,7 +50,7 @@ final class Processor extends MysqlProcessor implements EngineInterface
     public function getDbStructure(DbDataManagerInterface $dbDataManager): array
     {
         $structure = parent::getDbStructure($dbDataManager);
-        $connection = $this->getDbConnection($dbDataManager->getName());
+        $connection = $this->getDbConnection($dbDataManager);
         return [
             ... $structure,
             'additional_data' => $this->getAdditionalData($dbDataManager, $connection)
@@ -111,5 +111,10 @@ final class Processor extends MysqlProcessor implements EngineInterface
             default:
                 throw new \Exception(sprintf("No such method %s", $rule['method']));
         }
+    }
+
+    protected function getDriverEngine(DbDataManagerInterface $dbDataManager): string
+    {
+        return $dbDataManager->getEngine();
     }
 }

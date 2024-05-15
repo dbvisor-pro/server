@@ -96,7 +96,7 @@ abstract class AbstractServerCommand extends AbstractCommand
         if ($this->appConfig->isDockerUsed()) {
             $serverUrl ??= $this->appConfig->getDockerServerUrl();
         }
-        return $inputOutput->ask("Enter server public Url", $serverUrl);
+        return $inputOutput->ask("Enter server public URL", $serverUrl);
     }
 
     /**

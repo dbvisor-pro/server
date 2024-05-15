@@ -25,7 +25,7 @@ class Processor extends AbstractEngineProcessor implements EngineInterface
      */
     public function process(DbDataManagerInterface $dbDataManager): void
     {
-        $this->connection = $this->getDbConnection($dbDataManager->getName());
+        $this->connection = $this->getDbConnection($dbDataManager);
 
         foreach ($dbDataManager->getIterableRules() as $table => $rule) {
             $this->dataProcessor = $this->dataProcessorFactory->create(
