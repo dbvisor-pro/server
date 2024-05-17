@@ -38,7 +38,8 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     mariadb-client \
     postgresql-client \
-    sshpass
+    sshpass \
+    acl
 
 RUN a2enmod ssl && a2enmod rewrite && a2enmod proxy && a2enmod proxy_http
 RUN mkdir -p /etc/apache2/certs && mkdir -p /app && mkdir -p /home/app/.composer/cache

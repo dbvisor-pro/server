@@ -15,4 +15,9 @@ if [ ! -f "/etc/apache2/certs/ssl.crt" ] || [ ! -f "/etc/apache2/certs/ssl.key" 
                       -addext "certificatePolicies = 1.2.3.4"
 fi
 
+HTTPDUSER=$(ps axo user,comm | grep -E '[a]pache|[h]ttpd|[_]www|[w]ww-data|[n]ginx' | grep -v root | head -1 | cut -d\  -f1)
+setfacl -dR -m u:"$HTTPDUSER":rwX -m u:$(whoami):rwX var
+setfacl -R -m u:"$HTTPDUSER":rwX -m u:$(whoami):rwX var
+
+
 exec docker-php-entrypoint "$@"
