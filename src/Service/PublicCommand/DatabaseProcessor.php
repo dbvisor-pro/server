@@ -173,8 +173,10 @@ class DatabaseProcessor extends AbstractCommand
 
         $processor = $this->processorFactory->create($database->getEngine(), $database->getPlatform());
         $processor->process($database);
+        $errors = false;
 
         if ($processor->getErrors()) {
+            $errors = true;
             foreach ($processor->getErrors() as $error) {
                 $this->appLogger->logToService(
                     $dumpuuid,
@@ -211,6 +213,10 @@ class DatabaseProcessor extends AbstractCommand
             "Completed!"
         );
 
-        $this->databaseDump->updateByUuid($dumpuuid, DumpStatusEnum::READY->value, $destinationFile->getFilename());
+        $this->databaseDump->updateByUuid(
+            $dumpuuid,
+            $errors ? DumpStatusEnum::READY_WITH_ERROR->value : DumpStatusEnum::READY->value,
+            $destinationFile->getFilename()
+        );
     }
 }

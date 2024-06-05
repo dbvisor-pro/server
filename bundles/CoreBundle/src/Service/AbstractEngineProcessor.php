@@ -157,8 +157,8 @@ abstract class AbstractEngineProcessor implements EngineInterface
                     $this->fake($table, $rule, $column);
                     break;
             }
-        } catch (Exception $e) {
-            return;
+        } catch (Exception $exception) {
+            $this->addError($exception->getMessage(), ErrorSeverityEnum::ERROR->value);
         }
     }
 

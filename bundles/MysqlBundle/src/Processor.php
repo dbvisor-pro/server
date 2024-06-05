@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DbManager\MysqlBundle;
 
+use DbManager\CoreBundle\Enums\ErrorSeverityEnum;
 use DbManager\CoreBundle\Interfaces\DbDataManagerInterface;
 use DbManager\CoreBundle\Interfaces\EngineInterface;
 use DbManager\CoreBundle\Service\AbstractEngineProcessor;
@@ -111,23 +112,32 @@ class Processor extends AbstractEngineProcessor implements EngineInterface
 
         $primaryKey = $this->getPrimaryKey($table);
 
-        foreach ($rows as $row) {
-            $method = $rule['value'] ?? $column;
-            $this->dataProcessor->update(
-                $column,
-                sprintf("%s", $this->generateFake($method, $rule['options'] ?? [])),
-                sprintf("`%s` = '%s'", $primaryKey, $row->{$primaryKey})
-            );
+        if ($primaryKey === null) {
+            // TODO: Improve updating without primary key
+            $this->addError(sprintf("Can't allocate primary key for table \"%s\". Skipping this table", $table));
+        } else {
+            foreach ($rows as $row) {
+                $method = $rule['value'] ?? $column;
+                $this->dataProcessor->update(
+                    $column,
+                    sprintf("%s", $this->generateFake($method, $rule['options'] ?? [])),
+                    sprintf("`%s` = '%s'", $primaryKey, $row->{$primaryKey})
+                );
+            }
         }
     }
 
-    protected function getPrimaryKey(string $table): string
+    protected function getPrimaryKey(string $table): ?string
     {
-        $sql = "SELECT column_name FROM information_schema.KEY_COLUMN_USAGE"
+        /**
+         * Explanation of "column_name as column_name". For some versions COLUMN_NAME could be uppercase
+         * or lowercase. To avoid issue add "as" construction
+         */
+        $sql = "SELECT column_name as column_name FROM information_schema.KEY_COLUMN_USAGE"
             ." WHERE CONSTRAINT_NAME='PRIMARY' AND TABLE_NAME='%s';";
 
         $key = $this->connection->selectOne(sprintf($sql, $table));
 
-        return $key->column_name;
+        return $key?->column_name;
     }
 }

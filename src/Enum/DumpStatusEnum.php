@@ -10,4 +10,5 @@ enum DumpStatusEnum: string
     case PROCESSING = 'processing';
     case ERROR = 'error';
     case READY = 'ready';
+    case READY_WITH_ERROR = 'ready_with_error';
 }
