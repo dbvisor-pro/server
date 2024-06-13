@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Command;
+namespace App\Command\Server;
 
-use App\Service\PublicCommand\Server\Update;
+use App\Service\PublicCommand\Server\Add;
 use Exception;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -20,18 +20,18 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 #[AsCommand(
-    name: 'app:server:update',
-    description: 'Update server',
+    name: 'app:server:add',
+    description: 'Start adding the server to service',
 )]
-final class AppServerUpdateCommand extends Command
+final class AppServerAddCommand extends Command
 {
     /**
-     * @param Update $serverUpdate
+     * @param Add $serverAdd
      * @param LoggerInterface $logger
      * @param string|null $name
      */
     public function __construct(
-        protected readonly Update $serverUpdate,
+        protected readonly Add $serverAdd,
         protected readonly LoggerInterface $logger,
         string $name = null
     ) {
@@ -67,12 +67,6 @@ final class AppServerUpdateCommand extends Command
             InputOption::VALUE_OPTIONAL,
             'Workspace code'
         );
-        $this->addOption(
-            'url',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'URL'
-        );
     }
 
     /**
@@ -85,7 +79,7 @@ final class AppServerUpdateCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->serverUpdate->execute($input, $output);
+            $this->serverAdd->execute($input, $output);
         } catch (
             ClientExceptionInterface
             | InvalidArgumentException

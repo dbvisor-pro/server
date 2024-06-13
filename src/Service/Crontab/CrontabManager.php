@@ -31,6 +31,10 @@ class CrontabManager
         [
             'time'    => '* * * * *',
             'command' => '{rootDir}/bin/console app:db:backups:clear >> {logDir}/cron.log 2>&1'
+        ],
+        [
+            'time'    => '0 0 * * *',
+            'command' => '{rootDir}/bin/console app:server:ping >> {logDir}/cron.log 2>&1'
         ]
     ];
     /**#@-*/

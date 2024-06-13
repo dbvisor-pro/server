@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Command;
+namespace App\Command\Server;
 
-use App\Service\PublicCommand\Server\Add;
+use App\Service\PublicCommand\Server\Update;
 use Exception;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -20,18 +20,18 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 #[AsCommand(
-    name: 'app:server:add',
-    description: 'Start adding the server to service',
+    name: 'app:server:update',
+    description: 'Update server',
 )]
-final class AppServerAddCommand extends Command
+final class AppServerUpdateCommand extends Command
 {
     /**
-     * @param Add $serverAdd
+     * @param Update $serverUpdate
      * @param LoggerInterface $logger
      * @param string|null $name
      */
     public function __construct(
-        protected readonly Add $serverAdd,
+        protected readonly Update $serverUpdate,
         protected readonly LoggerInterface $logger,
         string $name = null
     ) {
@@ -67,6 +67,12 @@ final class AppServerAddCommand extends Command
             InputOption::VALUE_OPTIONAL,
             'Workspace code'
         );
+        $this->addOption(
+            'url',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'URL'
+        );
     }
 
     /**
@@ -79,7 +85,7 @@ final class AppServerAddCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->serverAdd->execute($input, $output);
+            $this->serverUpdate->execute($input, $output);
         } catch (
             ClientExceptionInterface
             | InvalidArgumentException
