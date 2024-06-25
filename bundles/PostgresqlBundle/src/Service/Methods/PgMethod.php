@@ -32,7 +32,7 @@ abstract class PgMethod extends AbstractMethod
             'Database Host', $config['db_host'] ?? 'localhost', self::validateRequired(...)
         );
         $newConfig['db_user'] = $inputOutput->ask(
-            'Database User', $config['db_user'] ?? 'root', self::validateRequired(...)
+            'Database User', $config['db_user'] ?? 'postgres', self::validateRequired(...)
         );
         $newConfig['db_password'] = $inputOutput->askHidden('Password');
         $newConfig['db_name'] = $inputOutput->ask(
