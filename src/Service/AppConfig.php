@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Enum\LogLevelEnum;
 use Dotenv\Dotenv;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -294,6 +295,14 @@ class AppConfig
     public function updateEnvConfigs(): void
     {
         (new \Symfony\Component\Dotenv\Dotenv())->usePutenv()->bootEnv($this->getProjectDir() . '/.env');
+    }
+
+    /**
+     * @return LogLevelEnum
+     */
+    public function getLogLevel(): LogLevelEnum
+    {
+        return LogLevelEnum::from(env('LOG_LEVEL'));
     }
 
     /**

@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace DbManager\CoreBundle\Service;
 
 use App\Service\AppConfig;
+use Symfony\Component\HttpKernel\Log\Logger;
 use DbManager\CoreBundle\DataProcessor\DataProcessorFactoryInterface;
 use DbManager\CoreBundle\Interfaces\DbDataManagerInterface;
 use DbManager\CoreBundle\DataProcessor\DataProcessorInterface;
 use DbManager\CoreBundle\Interfaces\EngineInterface;
 use DbManager\CoreBundle\Interfaces\ErrorInterface;
 use DbManager\CoreBundle\Enums\ErrorSeverityEnum;
+use DbManager\CoreBundle\Service\Processor\Faker;
 use Exception;
-use Faker\Factory;
-use Faker\Generator;
 use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Connection;
 
@@ -26,11 +26,6 @@ abstract class AbstractEngineProcessor implements EngineInterface
      * @var array
      */
     protected array $generated = [];
-
-    /**
-     * @var null|Generator
-     */
-    protected ?Generator $faker = null;
 
     /**
      * @var Connection
@@ -47,14 +42,19 @@ abstract class AbstractEngineProcessor implements EngineInterface
      */
     protected array $errors = [];
 
+    private Logger $logger;
+
     /**
      * @param AppConfig $appConfig
      * @param DataProcessorFactoryInterface $dataProcessorFactory
+     * @param Faker $faker
      */
     public function __construct(
         protected readonly AppConfig $appConfig,
-        protected readonly DataProcessorFactoryInterface $dataProcessorFactory
+        protected readonly DataProcessorFactoryInterface $dataProcessorFactory,
+        protected readonly Faker $faker
     ) {
+        $this->logger = new Logger($this->appConfig->getLogLevel()->value);
     }
 
     /**
@@ -100,7 +100,7 @@ abstract class AbstractEngineProcessor implements EngineInterface
         }
 
         return [
-            'db_schema'       => $dbSchema
+            'db_schema' => $dbSchema
         ];
     }
 
@@ -158,46 +158,18 @@ abstract class AbstractEngineProcessor implements EngineInterface
                     break;
             }
         } catch (Exception $exception) {
+            $this->logger->error($exception->getMessage());
             $this->addError($exception->getMessage(), ErrorSeverityEnum::ERROR->value);
         }
     }
 
     /**
-     * Generate fake data
-     *
-     * @param string $method
-     * @param array  $options
-     *
-     * @return string
+     * @param array $rule
+     * @return array
      */
-    protected function generateFake(string $method, array $options): string
+    protected function getRuleOptions(array $rule): array
     {
-        return (string)$this->getFakerInstance()->{$method}(...$options);
-        // TODO need to think about unique value. Currently it makes looping when there are a lot of records
-        $value = $this->getFakerInstance()->{$method}(...$options);
-        if (isset($this->generated[$method]) && in_array($value, $this->generated[$method])) {
-            return $this->generateFake($method, $options);
-        }
-
-        $this->generated[$method][] = $value;
-
-        return $value;
-    }
-
-    /**
-     * Get Faker generator
-     *
-     * @return Generator
-     */
-    protected function getFakerInstance(): Generator
-    {
-        if ($this->faker) {
-            return $this->faker;
-        }
-
-        $this->faker = Factory::create();
-
-        return $this->faker;
+        return $rule['options'] ?? [];
     }
 
     /**
@@ -229,5 +201,26 @@ abstract class AbstractEngineProcessor implements EngineInterface
                 throw new Exception('For method Update value is required');
             }
         }
+    }
+
+    /**
+     * TODO: remove this method when "unique" option will be added on service side
+     *
+     * @param string $fakeMethod
+     * @return bool
+     */
+    protected function isUniqueMethod(string $fakeMethod): bool
+    {
+        return in_array($fakeMethod, ['email', 'safeEmail']);
+    }
+
+    /**
+     * @param string $message
+     * @return void
+     * @throws Exception
+     */
+    protected function logDebug(string $message): void
+    {
+        $this->logger->log('debug', $message);
     }
 }

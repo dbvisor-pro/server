@@ -58,6 +58,14 @@ class DatabaseDebugProcessor extends AbstractCommand
         );
 
         $dbManager = $this->processorFactory->create($database->getEngine(), $database->getPlatform());
+
+        try {
         $dbManager->process($database);
+
+        } catch (\Exception $exception) {
+            var_dump($exception->getMessage());
+        }
+
+//        var_dump($dbManager->getErrors());
     }
 }

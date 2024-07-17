@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DbManager\MysqlBundle;
 
-use DbManager\CoreBundle\Enums\ErrorSeverityEnum;
 use DbManager\CoreBundle\Interfaces\DbDataManagerInterface;
 use DbManager\CoreBundle\Interfaces\EngineInterface;
 use DbManager\CoreBundle\Service\AbstractEngineProcessor;
@@ -102,29 +101,62 @@ class Processor extends AbstractEngineProcessor implements EngineInterface
      */
     protected function fake(string $table, array $rule, string $column): void
     {
+        $this->logDebug("Start processing fake: {$table}::{$column}");
+        $primaryKey = $this->getPrimaryKey($table);
+        $columnMaxLength = $this->getColumnMaxLength($table, $column);
         if (!empty($rule['where'])) {
             $rows = $this->connection->select(
-                sprintf('SELECT * FROM `%s` WHERE %s', $table, $rule['where'])
+                sprintf('SELECT %s, %s FROM `%s` WHERE %s', $primaryKey, $column, $table, $rule['where'])
             );
         } else {
-            $rows = $this->connection->select(sprintf('SELECT * FROM `%s`', $table));
+            $rows = $this->connection->select(sprintf('SELECT %s, %s FROM `%s`', $primaryKey, $column, $table));
         }
-
-        $primaryKey = $this->getPrimaryKey($table);
 
         if ($primaryKey === null) {
             // TODO: Improve updating without primary key
             $this->addError(sprintf("Can't allocate primary key for table \"%s\". Skipping this table", $table));
         } else {
+            $processedData = [];
+            $method = $rule['value'] ?? $column;
+            $fakeCollection = $this->faker->generateFakeCollection(
+                $method,
+                $this->getRuleOptions($rule),
+                count($rows),
+                $this->isUniqueMethod($method),
+                $columnMaxLength
+            );
+
             foreach ($rows as $row) {
-                $method = $rule['value'] ?? $column;
-                $this->dataProcessor->update(
-                    $column,
-                    sprintf("%s", $this->generateFake($method, $rule['options'] ?? [])),
-                    sprintf("`%s` = '%s'", $primaryKey, $row->{$primaryKey})
-                );
+                $fakeValue = array_shift($fakeCollection);
+                $processedData[] = [
+                    $primaryKey => $row->{$primaryKey},
+                    $column => $fakeValue
+                ];
+            }
+
+            if (count($processedData) > 1000) {
+                $this->connection->beginTransaction();
+                foreach (array_chunk($processedData, 1000) as $chunk) {
+                    foreach ($chunk as $row) {
+                        $this->dataProcessor->update(
+                            $column,
+                            sprintf("%s", $row[$column]),
+                            sprintf("`%s` = '%s'", $primaryKey, $row[$primaryKey])
+                        );
+                    }
+                }
+                $this->connection->commit();
+            } else {
+                foreach ($processedData as $row) {
+                    $this->dataProcessor->update(
+                        $column,
+                        sprintf("%s", $row[$column]),
+                        sprintf("`%s` = '%s'", $primaryKey, $row[$primaryKey])
+                    );
+                }
             }
         }
+        $this->logDebug("Finish processing fake: {$table}::{$column}");
     }
 
     protected function getPrimaryKey(string $table): ?string
@@ -139,5 +171,21 @@ class Processor extends AbstractEngineProcessor implements EngineInterface
         $key = $this->connection->selectOne(sprintf($sql, $table));
 
         return $key?->column_name;
+    }
+
+    /**
+     * @param string $table
+     * @param string $column
+     * @return int|null
+     */
+    protected function getColumnMaxLength(string $table, string $column): ?int
+    {
+        $sql = "SELECT CHARACTER_MAXIMUM_LENGTH as character_maximum_length
+                FROM information_schema.COLUMNS
+                WHERE COLUMN_NAME='%s' AND TABLE_NAME='%s';";
+
+        $key = $this->connection->selectOne(sprintf($sql, $column, $table));
+
+        return $key?->character_maximum_length;
     }
 }

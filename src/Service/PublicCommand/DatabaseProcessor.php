@@ -62,7 +62,6 @@ class DatabaseProcessor extends AbstractCommand
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws InvalidArgumentException
-     * @throws LockException
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
@@ -70,40 +69,43 @@ class DatabaseProcessor extends AbstractCommand
      */
     public function execute(InputInterface $input, OutputInterface $output): void
     {
-        if ($this->lockService->isLocked()) {
-            throw new LockException("There is another process running. Aborting...");
-        }
-        $this->lockService->lock();
+        if (!$this->lockService->isLocked()) {
+            $this->lockService->lock();
 
-        $this->appLogger->initAppLogger($output);
-        try {
-            $scheduledData = $this->databaseDump->getScheduled();
-        } catch (\Exception $exception) {
-            if ($output->isVerbose()) {
-                $output->writeln($exception->getMessage());
-            }
-        }
-
-        if (!empty($scheduledData)) {
-            $dbUuid = $scheduledData['db']['uid'];
-            $dumpUuid = $scheduledData['uuid'];
-            if (empty($dumpUuid) || empty($dbUuid)) {
-                throw new \Exception("Something went wrong. Scheduled uuid and database uuid is required");
-            }
-
+            $this->appLogger->initAppLogger($output);
             try {
-                $this->process($dbUuid, $dumpUuid, $scheduledData);
+                $scheduledData = $this->databaseDump->getScheduled();
             } catch (\Exception $exception) {
-                $this->appLogger->logToService(
-                    $dumpUuid,
-                    LogStatusEnum::ERROR->value,
-                    sprintf("Something went wrong during update. Msg: %s", $exception->getMessage())
-                );
-                $this->databaseDump->updateByUuid($dumpUuid, DumpStatusEnum::ERROR->value);
+                if ($output->isVerbose()) {
+                    $output->writeln($exception->getMessage());
+                }
+            }
+
+            if (!empty($scheduledData)) {
+                $dbUuid = $scheduledData['db']['uid'];
+                $dumpUuid = $scheduledData['uuid'];
+                if (empty($dumpUuid) || empty($dbUuid)) {
+                    throw new \Exception("Something went wrong. Scheduled uuid and database uuid is required");
+                }
+
+                try {
+                    $this->process($dbUuid, $dumpUuid, $scheduledData);
+                } catch (\Exception $exception) {
+                    $this->appLogger->logToService(
+                        $dumpUuid,
+                        LogStatusEnum::ERROR->value,
+                        sprintf("Something went wrong during update. Msg: %s", $exception->getMessage())
+                    );
+                    $this->databaseDump->updateByUuid($dumpUuid, DumpStatusEnum::ERROR->value);
+                }
+            }
+
+            $this->lockService->unlock();
+        } else {
+            if ($output->isVerbose()) {
+                $output->writeln('<error>There is another process running. Aborting...</error>');
             }
         }
-
-        $this->lockService->unlock();
     }
 
     /**

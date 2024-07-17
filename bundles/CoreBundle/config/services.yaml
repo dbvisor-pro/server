@@ -9,3 +9,6 @@ services:
   DbManager\CoreBundle\Interfaces\DbDataManagerInterface: '@DbManager\CoreBundle\Service\DbDataManager'
   DbManager\CoreBundle\DataProcessor\DataProcessorFactory:
   DbManager\CoreBundle\DataProcessor\DataProcessorFactoryInterface: '@DbManager\CoreBundle\DataProcessor\DataProcessorFactory'
+  DbManager\CoreBundle\Service\Processor\FakerUnique:
+  DbManager\CoreBundle\Service\Processor\Faker:
+    autowire: true
