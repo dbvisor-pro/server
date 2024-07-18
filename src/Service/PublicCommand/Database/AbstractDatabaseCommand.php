@@ -245,7 +245,7 @@ abstract class AbstractDatabaseCommand extends AbstractCommand
                 $this->config['platform'] ?? Custom::CODE
             );
         } else {
-            $this->config['platform'] = array_shift($platforms);
+            $this->config['platform'] = (array_shift($platforms))->getName();
         }
     }
 

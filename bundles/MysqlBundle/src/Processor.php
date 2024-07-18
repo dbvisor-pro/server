@@ -9,6 +9,7 @@ use DbManager\CoreBundle\Interfaces\EngineInterface;
 use DbManager\CoreBundle\Service\AbstractEngineProcessor;
 use DbManager\MysqlBundle\Service\Engine\Mysql;
 use Exception;
+use Throwable;
 
 /**
  * Mysql Processor instance
@@ -98,24 +99,26 @@ class Processor extends AbstractEngineProcessor implements EngineInterface
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     protected function fake(string $table, array $rule, string $column): void
     {
         $this->logDebug("Start processing fake: {$table}::{$column}");
         $primaryKey = $this->getPrimaryKey($table);
-        $columnMaxLength = $this->getColumnMaxLength($table, $column);
-        if (!empty($rule['where'])) {
-            $rows = $this->connection->select(
-                sprintf('SELECT %s, %s FROM `%s` WHERE %s', $primaryKey, $column, $table, $rule['where'])
-            );
-        } else {
-            $rows = $this->connection->select(sprintf('SELECT %s, %s FROM `%s`', $primaryKey, $column, $table));
-        }
 
         if ($primaryKey === null) {
             // TODO: Improve updating without primary key
             $this->addError(sprintf("Can't allocate primary key for table \"%s\". Skipping this table", $table));
         } else {
+            $columnMaxLength = $this->getColumnMaxLength($table, $column);
+            if (!empty($rule['where'])) {
+                $rows = $this->connection->select(
+                    sprintf('SELECT %s, %s FROM `%s` WHERE %s', $primaryKey, $column, $table, $rule['where'])
+                );
+            } else {
+                $rows = $this->connection->select(sprintf('SELECT %s, %s FROM `%s`', $primaryKey, $column, $table));
+            }
+
             $processedData = [];
             $method = $rule['value'] ?? $column;
             $fakeCollection = $this->faker->generateFakeCollection(
@@ -159,6 +162,12 @@ class Processor extends AbstractEngineProcessor implements EngineInterface
         $this->logDebug("Finish processing fake: {$table}::{$column}");
     }
 
+    /**
+     * Retrieve primary key for table
+     *
+     * @param string $table
+     * @return string|null
+     */
     protected function getPrimaryKey(string $table): ?string
     {
         /**

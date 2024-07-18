@@ -62,8 +62,11 @@ final class Management extends AbstractDBManagement implements DBManagementInter
     protected function getDumpLine(string $dbName, string $outputPath): string
     {
         $credentials = $this->getCredentials($dbName);
+        $dumpString = $this->appConfig->isGzipEnabled()
+            ? 'mysqldump -u%s -p%s -h%s -P%s %s | gzip > %s'
+            : 'mysqldump -u%s -p%s -h%s -P%s %s > %s';
         return sprintf(
-            'mysqldump -u%s -p%s -h%s -P%s %s > %s',
+            $dumpString,
             ...[
                 ...$credentials,
                 escapeshellarg($outputPath)

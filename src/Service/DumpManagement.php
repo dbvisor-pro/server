@@ -107,7 +107,7 @@ class DumpManagement
     public function getDestinationFilePath(string $dbUuid, string $engine = 'mysql'): File
     {
         // Should be depended on engine;
-        $extension = '.sql';
+        $extension = $this->appConfig->isGzipEnabled() ? '.sql.gz' : '.sql';
         $filepath = $this->appConfig->getDumpProcessedDirectory() . '/' . $dbUuid . '/' . time() . $extension;
         return new File($filepath, false);
     }

@@ -98,32 +98,72 @@ class Processor extends AbstractEngineProcessor implements EngineInterface
      */
     protected function fake(string $table, array $rule, string $column): void
     {
-        if (!empty($rule['where'])) {
-            $rows = $this->connection->select(
-                sprintf('SELECT * FROM %s WHERE %s', $table, $rule['where'])
-            );
-        } else {
-            $rows = $this->connection->select(sprintf('SELECT * FROM %s', $table));
-        }
-
+        $this->logDebug("Start processing fake: {$table}::{$column}");
         $primaryKey = $this->getPrimaryKey($table);
-        foreach ($rows as $row) {
+
+        if ($primaryKey === null) {
+            // TODO: Improve updating without primary key
+            $this->addError(sprintf("Can't allocate primary key for table \"%s\". Skipping this table", $table));
+        } else {
+            $columnMaxLength = $this->getColumnMaxLength($table, $column);
+            if (!empty($rule['where'])) {
+                $rows = $this->connection->select(
+                    sprintf('SELECT %s, %s FROM %s WHERE %s', $primaryKey, $column, $table, $rule['where'])
+                );
+            } else {
+                $rows = $this->connection->select(sprintf('SELECT %s, %s FROM %s', $primaryKey, $column, $table));
+            }
+
+            $processedData = [];
             $method = $rule['value'] ?? $column;
-            $this->dataProcessor->update(
-                $column,
-                sprintf("%s", $this->generateFake($method, $rule['options'] ?? [])),
-                sprintf("%s = '%s'", $primaryKey, $row->{$primaryKey})
+            $fakeCollection = $this->faker->generateFakeCollection(
+                $method,
+                $this->getRuleOptions($rule),
+                count($rows),
+                $this->isUniqueMethod($method),
+                $columnMaxLength
             );
+
+            foreach ($rows as $row) {
+                $fakeValue = array_shift($fakeCollection);
+                $processedData[] = [
+                    $primaryKey => $row->{$primaryKey},
+                    $column => $fakeValue
+                ];
+            }
+
+            if (count($processedData) > 1000) {
+                $this->connection->beginTransaction();
+                foreach (array_chunk($processedData, 1000) as $chunk) {
+                    foreach ($chunk as $row) {
+                        $this->dataProcessor->update(
+                            $column,
+                            sprintf("%s", $row[$column]),
+                            sprintf("%s = %s", $primaryKey, $row[$primaryKey])
+                        );
+                    }
+                }
+                $this->connection->commit();
+            } else {
+                foreach ($processedData as $row) {
+                    $this->dataProcessor->update(
+                        $column,
+                        sprintf("%s", $row[$column]),
+                        sprintf("%s = %s", $primaryKey, $row[$primaryKey])
+                    );
+                }
+            }
         }
+        $this->logDebug("Finish processing fake: {$table}::{$column}");
     }
 
     /**
      * Retrieve primary key
      * @see https://wiki.postgresql.org/wiki/Retrieve_primary_key_columns
      * @param string $table
-     * @return string
+     * @return string|null
      */
-    protected function getPrimaryKey(string $table): string
+    protected function getPrimaryKey(string $table): ?string
     {
         $sql = "SELECT a.attname, format_type(a.atttypid, a.atttypmod) AS data_type
             FROM   pg_index i
@@ -132,6 +172,22 @@ class Processor extends AbstractEngineProcessor implements EngineInterface
 
         $key = $this->connection->selectOne(sprintf($sql, $table));
 
-        return $key->attname;
+        return $key?->attname;
+    }
+
+    /**
+     * @param string $table
+     * @param string $column
+     * @return int|null
+     */
+    protected function getColumnMaxLength(string $table, string $column): ?int
+    {
+        $sql = "SELECT character_maximum_length
+                FROM information_schema.COLUMNS
+                WHERE COLUMN_NAME='%s' AND TABLE_NAME='%s';";
+
+        $key = $this->connection->selectOne(sprintf($sql, $column, $table));
+
+        return $key?->character_maximum_length;
     }
 }

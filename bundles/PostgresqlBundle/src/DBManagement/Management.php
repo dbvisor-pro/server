@@ -63,8 +63,11 @@ final class Management extends AbstractDBManagement implements DBManagementInter
     protected function getDumpLine(string $dbName, string $outputPath): string
     {
         $credentials = $this->getCredentials($dbName);
+        $pgDumpString = $this->appConfig->isGzipEnabled()
+            ? 'pg_dump postgresql://%s:%s@%s:%s/%s | gzip > %s'
+            : 'pg_dump postgresql://%s:%s@%s:%s > %s';
         return sprintf(
-            'pg_dump postgresql://%s:%s@%s:%s/%s > %s',
+            $pgDumpString,
             ...[
                 ...$credentials,
                 escapeshellarg($outputPath)

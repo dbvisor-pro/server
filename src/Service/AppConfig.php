@@ -306,6 +306,14 @@ class AppConfig
     }
 
     /**
+     * @return bool
+     */
+    public function isGzipEnabled(): bool
+    {
+        return env('GZIP_ENABLED') === '1';
+    }
+
+    /**
      * @param string $directory
      * @param string $file
      *
