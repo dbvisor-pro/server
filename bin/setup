@@ -316,6 +316,20 @@ if [ "${APP_DOCKER_USE}" != "${USE_DOCKER}" ]; then
     _replace_pattern "APP_DOCKER_USE=${APP_DOCKER_USE}" "APP_DOCKER_USE=${USE_DOCKER}" ${PROJECT_ROOT}/.env
 fi
 
+# Get Service URL
+DEFAULT_APP_SERVICE_URL="${APP_SERVICE_URL:-app.dbvisor.pro}"
+read -rp " Enter the service URL ( default: ${DEFAULT_APP_SERVICE_URL} ): " NEW_APP_SERVICE_URL </dev/tty
+if [ -z "${NEW_APP_SERVICE_URL}" ]; then
+    NEW_APP_SERVICE_URL="${DEFAULT_APP_SERVICE_URL}"
+fi
+if [ "${NEW_APP_SERVICE_URL}" != "${APP_SERVICE_URL}" ]; then
+    if [ -z "${APP_SERVICE_URL}" ]; then
+        _replace_pattern "APP_SERVICE_URL=" "APP_SERVICE_URL=${NEW_APP_SERVICE_URL}" ${PROJECT_ROOT}/.env
+    else
+        _replace_pattern "APP_SERVICE_URL=${APP_SERVICE_URL}" "APP_SERVICE_URL=${NEW_APP_SERVICE_URL}" ${PROJECT_ROOT}/.env
+    fi
+fi
+
 # Get Server URL
 if [ "${USE_DOCKER}" = "1" ]; then
     CLIENT_IP=$(_getClientIP)
