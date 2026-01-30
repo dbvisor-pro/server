@@ -231,8 +231,8 @@ _initAlias() {
         if [ "$(cat < "${HOME}/.bash_aliases" | grep -c "${NAME}")" = "0" ] ; then
             echo "alias $NAME='$DEFINITION'" >> ${HOME}/.bash_aliases
 
-            source ${HOME}/.bash_aliases
-            source ${HOME}/.bashrc
+            . ${HOME}/.bash_aliases
+            . ${HOME}/.bashrc
 
             exec bash --login
         fi
@@ -242,7 +242,7 @@ _initAlias() {
         if [ "$(cat < "${HOME}/.zshrc" | grep -c "${NAME}")" = "0" ] ; then
             echo "alias $NAME='$DEFINITION'" >> ${HOME}/.zshrc
 
-            source ${HOME}/.zshrc
+            . ${HOME}/.zshrc
         fi
     fi
 
@@ -250,7 +250,7 @@ _initAlias() {
         if [ "$(cat < "${HOME}/.bashrc" | grep -c "${NAME}")" = "0" ] ; then
             echo "alias $NAME='$DEFINITION'" >> ${HOME}/.bashrc
 
-            source ${HOME}/.bashrc
+            . ${HOME}/.bashrc
 
             exec bash --login
         fi
@@ -264,7 +264,7 @@ _initAlias() {
         if [ "$(cat < "${HOME}/.profile" | grep -c "${NAME}")" = "0" ] ; then
             echo "alias $NAME='$DEFINITION'" >> ${HOME}/.profile
 
-            source ${HOME}/.profile
+            . ${HOME}/.profile
 
             exec sh --login
         fi
