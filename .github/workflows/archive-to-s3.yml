@@ -1,8 +1,6 @@
 name: Archive code and upload to S3
 
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch: {}
 
 permissions:
