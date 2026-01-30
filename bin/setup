@@ -222,53 +222,11 @@ _generateJwtKey() {
     echo "$jwt_secret"
 }
 
-# Init global command alias
+# Print instructions for running dbvisor-agent
 _initAlias() {
-    NAME="dbvisor-agent"
-    DEFINITION="${MANAGER_CLI}"
-    ALIAS_ADDED=0
-
-    # Add alias to bash_aliases if it exists
-    if [ -f "${HOME}/.bash_aliases" ] && command -v bash >/dev/null 2>&1; then
-        if ! grep -q "${NAME}" "${HOME}/.bash_aliases" 2>/dev/null; then
-            echo "alias $NAME='$DEFINITION'" >> "${HOME}/.bash_aliases"
-            ALIAS_ADDED=1
-        fi
-    fi
-
-    # Add alias to zshrc if zsh is available
-    if [ -f "${HOME}/.zshrc" ] && command -v zsh >/dev/null 2>&1; then
-        if ! grep -q "${NAME}" "${HOME}/.zshrc" 2>/dev/null; then
-            echo "alias $NAME='$DEFINITION'" >> "${HOME}/.zshrc"
-            ALIAS_ADDED=1
-        fi
-    fi
-
-    # Add alias to bashrc if it exists and bash_aliases wasn't used
-    if [ -f "${HOME}/.bashrc" ] && command -v bash >/dev/null 2>&1; then
-        if ! grep -q "${NAME}" "${HOME}/.bashrc" 2>/dev/null; then
-            # Only add if not already in bash_aliases (which bashrc typically sources)
-            if [ ! -f "${HOME}/.bash_aliases" ] || ! grep -q "${NAME}" "${HOME}/.bash_aliases" 2>/dev/null; then
-                echo "alias $NAME='$DEFINITION'" >> "${HOME}/.bashrc"
-                ALIAS_ADDED=1
-            fi
-        fi
-    fi
-
-    # Add alias to profile as fallback
-    if [ -f "${HOME}/.profile" ] || [ "${ALIAS_ADDED}" = "0" ]; then
-        if [ ! -f "${HOME}/.profile" ]; then
-            touch "${HOME}/.profile"
-        fi
-        if ! grep -q "${NAME}" "${HOME}/.profile" 2>/dev/null; then
-            echo "alias $NAME='$DEFINITION'" >> "${HOME}/.profile"
-            ALIAS_ADDED=1
-        fi
-    fi
-
-    if [ "${ALIAS_ADDED}" = "1" ]; then
-        _output " Alias '${NAME}' added. Please open a new terminal or run: source ~/.bashrc (or ~/.zshrc)" "info"
-    fi
+    _output " To run the dbvisor-agent from anywhere, add this line to your shell config (~/.bashrc, ~/.zshrc, or ~/.profile):" "info"
+    _output "   alias dbvisor-agent='${MANAGER_CLI}'" "comment"
+    _output " Then open a new terminal or run: . ~/.bashrc (or . ~/.zshrc)" "info"
 }
 
 # Fix possible issues with directory
