@@ -45,29 +45,11 @@ jobs:
 
           echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
 
-      - name: Debug identity + Upload to S3
+      - name: Upload to S3
         run: |
           set -euo pipefail
+          KEY="${S3_PREFIX:+$S3_PREFIX/}${ARCHIVE}"
+          aws s3 cp "$ARCHIVE" "s3://${S3_BUCKET}/${KEY}" \
+            --only-show-errors
 
-          echo "Raw S3_BUCKET='${S3_BUCKET}'"
-          echo "Raw S3_PREFIX='${S3_PREFIX}'"
-          echo "ARCHIVE='${ARCHIVE}'"
-
-          aws sts get-caller-identity
-
-          BUCKET="${S3_BUCKET#s3://}"
-          BUCKET="${BUCKET%/}"
-
-          PREFIX="${S3_PREFIX%/}"
-          PREFIX="${PREFIX#/}"
-
-          if [ -n "$PREFIX" ]; then
-            KEY="${PREFIX}/${ARCHIVE}"
-          else
-            KEY="${ARCHIVE}"
-          fi
-
-          echo "Final upload target: s3://${BUCKET}/${KEY}"
-          echo "Expected IAM resource: arn:aws:s3:::${BUCKET}/${PREFIX}/*"
-
-          aws s3 cp "$ARCHIVE" "s3://${BUCKET}/${KEY}" --only-show-errors
+          echo "Uploaded: s3://${S3_BUCKET}/${KEY}"
